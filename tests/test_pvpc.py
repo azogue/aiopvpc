@@ -50,11 +50,6 @@ async def test_price_extract(
     )
     assert len(pvpc_data._current_prices) == num_prices_8h
     assert has_prices == available_8h
-    # prices_str = json.dumps(
-    #     {ts.isoformat(): price for ts, price in prices.items()}, indent=2,
-    # )
-    # _LOGGER = logging.getLogger(__file__)
-    # _LOGGER.critical(prices_str)
 
 
 @pytest.mark.parametrize(
