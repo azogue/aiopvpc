@@ -16,10 +16,10 @@ _TZ_TEST = pytz.timezone("Atlantic/Canary")
 @pytest.mark.parametrize(
     "day_str, num_prices, num_calls, num_prices_8h, available_8h",
     (
-        ("2019-10-26", 24, 1, 24, True),
-        ("2019-10-27", 25, 1, 25, True),
-        ("2019-03-31 23:00:00", 23, 2, 23, False),
-        ("2019-10-26 23:00:00", 49, 2, 24, True),
+        ("2019-10-26 00:00:00+00:00", 24, 1, 24, True),
+        ("2019-10-27 00:00:00+00:00", 25, 1, 25, True),
+        ("2019-03-31 20:00:00+00:00", 23, 2, 23, False),
+        ("2019-10-26 21:00:00+00:00", 49, 2, 24, True),
     ),
 )
 async def test_price_extract(
@@ -60,12 +60,12 @@ async def test_price_extract(
 @pytest.mark.parametrize(
     "available, day_str, num_log_msgs, status, exception",
     (
-        (False, "2032-10-26", 0, 200, None),
-        (False, "2032-10-26", 0, 500, None),
-        (True, "2032-10-26", 1, 200, TimeoutError),
-        (False, "2032-10-26", 0, 200, TimeoutError),
-        (True, "2032-10-26", 1, 200, ClientError),
-        (False, "2032-10-26", 0, 200, ClientError),
+        (False, "2032-10-26 00:00:00+00:00", 0, 200, None),
+        (False, "2032-10-26 00:00:00+00:00", 0, 500, None),
+        (True, "2032-10-26 00:00:00+00:00", 1, 200, TimeoutError),
+        (False, "2032-10-26 00:00:00+00:00", 0, 200, TimeoutError),
+        (True, "2032-10-26 00:00:00+00:00", 1, 200, ClientError),
+        (False, "2032-10-26 00:00:00+00:00", 0, 200, ClientError),
     ),
 )
 async def test_bad_downloads(
