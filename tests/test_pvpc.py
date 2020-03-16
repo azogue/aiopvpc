@@ -26,7 +26,7 @@ async def test_price_extract(
     day_str, num_prices, num_calls, num_prices_8h, available_8h
 ):
     """Test data parsing of official API files."""
-    day = datetime.fromisoformat(day_str).astimezone(pytz.UTC)
+    day = datetime.fromisoformat(day_str)
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
@@ -36,17 +36,16 @@ async def test_price_extract(
     )
 
     pvpc_data.source_available = True
-    has_prices = pvpc_data.process_state_and_attributes(day)
-    assert not has_prices
+    assert not pvpc_data.process_state_and_attributes(day)
 
-    prices = await pvpc_data.async_update_prices(day)
+    await pvpc_data.async_update_prices(day)
     has_prices = pvpc_data.process_state_and_attributes(day)
-    assert len(prices) == num_prices
+    assert len(pvpc_data._current_prices) == num_prices
     assert mock_session.call_count == num_calls
     assert has_prices
 
     has_prices = pvpc_data.process_state_and_attributes(
-        day + timedelta(hours=8)
+        day + timedelta(hours=10)
     )
     assert len(pvpc_data._current_prices) == num_prices_8h
     assert has_prices == available_8h
@@ -67,21 +66,19 @@ async def test_bad_downloads(
     available, day_str, num_log_msgs, status, exception, caplog,
 ):
     """Test data parsing of official API files."""
-    day = datetime.fromisoformat(day_str).astimezone(pytz.UTC)
+    day = datetime.fromisoformat(day_str)
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.DEBUG):
         pvpc_data = PVPCData(
             local_timezone=REFERENCE_TZ,
-            tariff="discrimination",
+            tariff="normal",
             websession=mock_session,
         )
         pvpc_data.source_available = available
-        has_prices = pvpc_data.process_state_and_attributes(day)
-        assert not has_prices
-
+        assert not pvpc_data.process_state_and_attributes(day)
         prices = await pvpc_data.async_update_prices(day)
-        has_prices = pvpc_data.process_state_and_attributes(day)
-        assert not has_prices
+        assert not prices
+        assert not pvpc_data.process_state_and_attributes(day)
         assert len(caplog.messages) == num_log_msgs
     assert mock_session.call_count == 1
     assert len(prices) == 0
