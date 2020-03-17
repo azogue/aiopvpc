@@ -2,21 +2,34 @@ language: python
 python:
 - 3.7
 stages:
-  - lint
-  - test
+- lint
+- test
+- deploy
 jobs:
   include:
-    - stage: lint
-      install:
-        - pip install pre-commit
-        - pre-commit install-hooks
-      script:
-        - pre-commit run --all-files
-    - stage: test
-      install:
-        - pip install poetry
-        - poetry install -v
-        - pip install codecov
-      script:
-        - poetry run pytest
-        - codecov
+  - stage: lint
+    install:
+    - pip install pre-commit
+    - pre-commit install-hooks
+    script:
+    - pre-commit run --all-files
+  - stage: test
+    install:
+    - pip install poetry
+    - poetry install -v
+    - pip install codecov
+    script:
+    - poetry run pytest
+    - codecov
+  - stage: deploy
+    install:
+    - pip install poetry
+    script:
+    - poetry publish --username $PYPI_USER --password $PYPI_PASSWORD --build
+    on:
+      branch: master
+      tags: true
+env:
+  global:
+  - secure: lsc3tqXIaxYvWE7z3C73YET/2ibSBQ0v/YJjZL3JRxx8bxtojT2c9baZTxmjEpWtNRCZaRAr4MKTJ0Qe4/wrffePNuCJ0XjypP12sAa8lO5sExt8Zp/mYeLmrjOifsutgqI7Y+MBZfX35ha3xTEaNXtbcDbXrL2+mev+P9OQWHA0GtL2E+no1PWGc9gaHxmHg0QofIm4TZKi55EBbdzodBBbQwRmOk37j+n6EyqhjfciCHwepBLRGNTcWvjQ9jwauJwo2ySdt7eWejr8LEeCiSu4XpzC84eRjaF86B87QNi05y5tfRZihEm0GiuGsrgc7AhhfBM+vFtLXh6y0980gCs6dhFILwQg+JGhhnRhlaj5JRHmsMKW9fWBTHJulE0g+E3Arxsc1uvCmFowlpvJPJXvb0P27IQ6kD8eTFT6KVs/aVkg41hALdWakAGeh9NkIvilVrNUxkz/8RAqJCYHOcInmcd785Pt6XQBJHzzXpVuMimwGWllhbzbZQklQAlM6c6C2rAmHcXXCCOF+ZJqTHIoYRjk3FlzdX3keQ2CuW3GF5Rb5OUq/gwAPrpX821+k4YgmGia24sAxJI9bFBJpSvRl/oN7crM8zI53xG91tARHbKk2SVYzxV2DR/CHARb+lorebQ2flNcZ/BKLfYgOakuUMSpDpAoP4ifL3utuYI=
+  - secure: WLiLzwkxePPOpeWD6Q9WmvvxRsnJXDc1ar9n0JtWavLhB4dQ3DCpl8r+JU89oFx5RI9KqaXcyj57AKeEOLJ1zEpSZPEli2dqoQfJ40GsC6SPvGjSJDvMA+vPN2/+Os9cE0WWbKbrPuTVZsGzaIxPKeeteVH1su99uiYsu1w8X04H0l8FGr1mKFZBHl+f91ssXT7mRUDugZLU7BrDx5xjoz6HZnFTAFwIaNbkgJmlEAnqQ3wUHwhYA8DmwAjTe2tBsMaSBv4hkFuWeCkggNkVxChW5J1fot1+XE84kZynV7WE/hXjdZZvTkD097BKAzDE+KcrY+/n/XxmyXauj97rGnSen7vOdLYitK4Dw4LvIUdlP+y0BmfrP+KBiSyTd3UEaOqVE1uai38BpwLSUBMdVCMnBwHs4pvU4+cLN6SGyTrZ8o9sPegM10p/AzwWHAj9qBkLYtJSgM6JIyPqOPxbYu6P3okzgBM4WrQp0g0k6/iZkMCqVyk/F4jXerMf5BXQwyfRMKHWnGXCXxGXuBPUQonCfT7IG2Y3CNq/ZbGpVIo/YOjO/6Y+qecp4g1lWVCgVzEcyfeWouwZp0jVImtzSXzHkZwvluGIUbZ6MIMWYpKXxe94aLzdVnjC2Eo1QV4BOKdKQooLX4t0b0PDvGzR+jQfIudgIEMOh/q3szqbliU=
