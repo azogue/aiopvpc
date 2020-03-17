@@ -78,11 +78,10 @@ class PVPCData:
                 resp = await self._websession.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    ts_init = (
-                        datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y")
-                        .astimezone(REFERENCE_TZ)
-                        .astimezone(pytz.UTC)
-                    )
+                    ts_init = REFERENCE_TZ.localize(
+                        datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y"),
+                        is_dst=False,  # dst change is never at 00:00
+                    ).astimezone(pytz.UTC)
                     return {
                         ts_init
                         + timedelta(hours=i): round(
