@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.1] - Fix timezone support outside Europe/Madrid zone.
+## [1.0.2] - Fix timezone support outside Europe/Madrid zone.
 
 ## [1.0.0] - Initial
 

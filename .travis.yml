@@ -22,6 +22,7 @@ jobs:
     - poetry run pytest
     - codecov
   - stage: deploy
+    if: branch = master
     install:
     - pip install poetry
     script:
