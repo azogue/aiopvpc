@@ -47,9 +47,7 @@ async def test_price_extract(
     has_prices = pvpc_data.process_state_and_attributes(
         day + timedelta(hours=10)
     )
-    if len(pvpc_data._current_prices) != num_prices_8h:
-        logging.error("PRICES: %s", pvpc_data._current_prices)
-    # assert len(pvpc_data._current_prices) == num_prices_8h
+    assert len(pvpc_data._current_prices) == num_prices_8h
     assert has_prices == available_8h
 
 
