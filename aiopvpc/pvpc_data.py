@@ -14,19 +14,15 @@ import aiohttp
 import async_timeout
 import pytz
 
-DEFAULT_TIMEOUT = 5
-TARIFFS = ["normal", "discrimination", "electric_car"]
-
-# Prices are given in 0 to 24h sets, adjusted to the main timezone in Spain
-REFERENCE_TZ = pytz.timezone("Europe/Madrid")
+from .pvpc_download import (
+    DEFAULT_TIMEOUT,
+    extract_pvpc_data,
+    get_url_for_daily_json,
+    REFERENCE_TZ,
+    TARIFF_KEYS,
+)
 
 _ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
-_PRECISION = 5
-_RESOURCE = (
-    "https://api.esios.ree.es/archives/70/download_json"
-    "?locale=es&date={day:%Y-%m-%d}"
-)
-_TARIFF_KEYS = dict(zip(TARIFFS, ["GEN", "NOC", "VHC"]))
 
 
 class PVPCData:
@@ -71,25 +67,14 @@ class PVPCData:
 
         Prices are referenced with datetimes in UTC.
         """
-        url = _RESOURCE.format(day=day)
-        key = _TARIFF_KEYS[self.tariff]
+        url = get_url_for_daily_json(day)
         try:
             with async_timeout.timeout(self.timeout):
                 resp = await self._websession.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    ts_init = REFERENCE_TZ.localize(
-                        datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y"),
-                        is_dst=False,  # dst change is never at 00:00
-                    ).astimezone(pytz.UTC)
-                    return {
-                        ts_init
-                        + timedelta(hours=i): round(
-                            float(values_hour[key].replace(",", ".")) / 1000.0,
-                            _PRECISION,
-                        )
-                        for i, values_hour in enumerate(data["PVPC"])
-                    }
+                    pvpc_data = extract_pvpc_data(data, TARIFF_KEYS.get(self.tariff))
+                    return pvpc_data
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
