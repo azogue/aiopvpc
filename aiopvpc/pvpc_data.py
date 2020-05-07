@@ -94,9 +94,7 @@ class PVPCData:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
             if self.source_available:
-                self._logger.warning(
-                    "Timeout error requesting data from '%s'", url
-                )
+                self._logger.warning("Timeout error requesting data from '%s'", url)
         except aiohttp.ClientError:
             if self.source_available:
                 self._logger.warning("Client error in '%s'", url)
@@ -144,9 +142,7 @@ class PVPCData:
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
-                utc_time.astimezone(REFERENCE_TZ)
-                .replace(hour=0)
-                .astimezone(pytz.UTC)
+                utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(pytz.UTC)
             )
             self._current_prices = {
                 key_ts: price
@@ -164,9 +160,7 @@ class PVPCData:
             return False
 
         # generate sensor attributes
-        prices_sorted = dict(
-            sorted(self._current_prices.items(), key=lambda x: x[1])
-        )
+        prices_sorted = dict(sorted(self._current_prices.items(), key=lambda x: x[1]))
         attributes["min_price"] = min(self._current_prices.values())
         attributes["min_price_at"] = _local(next(iter(prices_sorted))).hour
         attributes["next_best_at"] = list(

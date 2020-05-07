@@ -30,9 +30,7 @@ async def test_price_extract(
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
-        local_timezone=_TZ_TEST,
-        tariff="discrimination",
-        websession=mock_session,
+        local_timezone=_TZ_TEST, tariff="discrimination", websession=mock_session,
     )
 
     pvpc_data.source_available = True
@@ -44,9 +42,7 @@ async def test_price_extract(
     assert mock_session.call_count == num_calls
     assert has_prices
 
-    has_prices = pvpc_data.process_state_and_attributes(
-        day + timedelta(hours=10)
-    )
+    has_prices = pvpc_data.process_state_and_attributes(day + timedelta(hours=10))
     assert len(pvpc_data._current_prices) == num_prices_8h
     assert has_prices == available_8h
 
@@ -70,9 +66,7 @@ async def test_bad_downloads(
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.DEBUG):
         pvpc_data = PVPCData(
-            local_timezone=REFERENCE_TZ,
-            tariff="normal",
-            websession=mock_session,
+            local_timezone=REFERENCE_TZ, tariff="normal", websession=mock_session,
         )
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
