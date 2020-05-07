@@ -28,6 +28,6 @@ end = datetime(2020, 4, 30, 16)
 prices_range: dict = await pvpc_handler.async_download_prices_for_range(start, end)
 ```
 
-Check [this example on a jupyter notebook](Notebooks/Download%20PVPC%20prices.ipynb), where the downloader is combined with pandas and matplotlib to plot the electricity prices:
+Check [this example on a jupyter notebook](https://github.com/azogue/aiopvpc/blob/master/Notebooks/Download%20PVPC%20prices.ipynb), where the downloader is combined with pandas and matplotlib to plot the electricity prices:
 
-![sample_pvpc_plot.png](Notebooks/sample_pvpc_plot.png)
+![sample_pvpc_plot.png](https://github.com/azogue/aiopvpc/blob/master/Notebooks/sample_pvpc_plot.png)
