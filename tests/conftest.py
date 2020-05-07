@@ -19,6 +19,19 @@ class MockAsyncSession:
     _counter: int = 0
     _raw_response = None
 
+    def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def __await__(self):
+        yield
+        return self
+
+    async def close(self, *_args):
+        pass
+
     def __init__(self, status=200, exc=None):
         """Set up desired mock response"""
         self._raw_response = _DEFAULT_EMPTY_VALUE
