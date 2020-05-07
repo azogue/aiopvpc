@@ -2,7 +2,7 @@
 
 ## [v2.0.1](https://github.com/azogue/aiopvpc/tree/v2.0.1) - Add methods to download a range of days (2020-05-07)
 
-[Full Changelog](https://github.com/azogue/eventsensor/compare/v2.0.1...v1.0.2)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v1.0.2...v2.0.1)
 
 **Implemented enhancements:**
 
