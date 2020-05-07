@@ -21,7 +21,7 @@ exclude_lines = [
 
 [tool.poetry]
 name = "aiopvpc"
-version = "1.0.2"
+version = "2.0.0"
 description = "Retrieval of Spanish Electricity hourly prices (PVPC)"
 authors = ["Eugenio Panadero <eugenio.panadero@gmail.com>"]
 license = "MIT"
