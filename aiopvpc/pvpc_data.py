@@ -8,25 +8,22 @@ https://www.home-assistant.io/integrations/pvpc_hourly_pricing/
 import asyncio
 import logging
 from datetime import date, datetime, timedelta
-from typing import Dict, Optional
+from time import monotonic
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import aiohttp
 import async_timeout
 import pytz
 
-DEFAULT_TIMEOUT = 5
-TARIFFS = ["normal", "discrimination", "electric_car"]
-
-# Prices are given in 0 to 24h sets, adjusted to the main timezone in Spain
-REFERENCE_TZ = pytz.timezone("Europe/Madrid")
+from .pvpc_download import (
+    DEFAULT_TIMEOUT,
+    extract_pvpc_data,
+    get_url_for_daily_json,
+    REFERENCE_TZ,
+    TARIFF_KEYS,
+)
 
 _ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
-_PRECISION = 5
-_RESOURCE = (
-    "https://api.esios.ree.es/archives/70/download_json"
-    "?locale=es&date={day:%Y-%m-%d}"
-)
-_TARIFF_KEYS = dict(zip(TARIFFS, ["GEN", "NOC", "VHC"]))
 
 
 class PVPCData:
@@ -35,13 +32,21 @@ class PVPCData:
 
     * Async download of prices for each day
     * Generate state attributes for HA integration.
+    * Async download of prices for a range of days
+
+    - Prices are returned in a `Dict[datetime, float]`,
+    with timestamps in UTC and prices in €/kWh.
+
+    - Without a specific `tariff`, it would return the entire collection
+    of PVPC data, without any unit conversion,
+    and type `Dict[datetime, Dict[str, float]`.
     """
 
     def __init__(
         self,
-        tariff: str,
-        websession: aiohttp.ClientSession,
-        local_timezone: pytz.BaseTzInfo,
+        tariff: Optional[str] = None,
+        websession: Optional[aiohttp.ClientSession] = None,
+        local_timezone: pytz.tzinfo.DstTzInfo = REFERENCE_TZ,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -53,13 +58,17 @@ class PVPCData:
         self.tariff = tariff
         self.timeout = timeout
 
+        self._session = websession
+        self._with_initial_session = websession is not None
         self._local_timezone = local_timezone
-        self._websession = websession
         self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
 
-    async def _download_pvpc_prices(self, day: date) -> Dict[datetime, float]:
+        if tariff is None or tariff not in TARIFF_KEYS:
+            self._logger.warning("Collecting detailed PVPC data for all tariffs")
+
+    async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
         """
         PVPC data extractor.
 
@@ -71,38 +80,25 @@ class PVPCData:
 
         Prices are referenced with datetimes in UTC.
         """
-        url = _RESOURCE.format(day=day)
-        key = _TARIFF_KEYS[self.tariff]
+        url = get_url_for_daily_json(day)
         try:
             with async_timeout.timeout(self.timeout):
-                resp = await self._websession.get(url)
+                resp = await self._session.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    ts_init = REFERENCE_TZ.localize(
-                        datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y"),
-                        is_dst=False,  # dst change is never at 00:00
-                    ).astimezone(pytz.UTC)
-                    return {
-                        ts_init
-                        + timedelta(hours=i): round(
-                            float(values_hour[key].replace(",", ".")) / 1000.0,
-                            _PRECISION,
-                        )
-                        for i, values_hour in enumerate(data["PVPC"])
-                    }
+                    pvpc_data = extract_pvpc_data(data, TARIFF_KEYS.get(self.tariff))
+                    return pvpc_data
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
             if self.source_available:
-                self._logger.warning(
-                    "Timeout error requesting data from '%s'", url
-                )
+                self._logger.warning("Timeout error requesting data from '%s'", url)
         except aiohttp.ClientError:
             if self.source_available:
                 self._logger.warning("Client error in '%s'", url)
         return {}
 
-    async def async_update_prices(self, now: datetime):
+    async def async_update_prices(self, now: datetime) -> Dict[datetime, float]:
         """Update electricity prices from the ESIOS API."""
         localized_now = now.astimezone(pytz.UTC).astimezone(REFERENCE_TZ)
         prices = await self._download_pvpc_prices(localized_now.date())
@@ -144,9 +140,7 @@ class PVPCData:
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
-                utc_time.astimezone(REFERENCE_TZ)
-                .replace(hour=0)
-                .astimezone(pytz.UTC)
+                utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(pytz.UTC)
             )
             self._current_prices = {
                 key_ts: price
@@ -164,9 +158,7 @@ class PVPCData:
             return False
 
         # generate sensor attributes
-        prices_sorted = dict(
-            sorted(self._current_prices.items(), key=lambda x: x[1])
-        )
+        prices_sorted = dict(sorted(self._current_prices.items(), key=lambda x: x[1]))
         attributes["min_price"] = min(self._current_prices.values())
         attributes["min_price_at"] = _local(next(iter(prices_sorted))).hour
         attributes["next_best_at"] = list(
@@ -189,3 +181,120 @@ class PVPCData:
 
         self.attributes = attributes
         return True
+
+    async def _download_worker(self, wk_name: str, queue: asyncio.Queue):
+        downloaded_prices = []
+        try:
+            while True:
+                day: date = await queue.get()
+                tic = monotonic()
+                prices = await self._download_pvpc_prices(day)
+                took = monotonic() - tic
+                queue.task_done()
+                if not prices:
+                    self._logger.warning(
+                        "[%s]: Bad download for day: %s in %.3f s", wk_name, day, took
+                    )
+                    continue
+
+                downloaded_prices.append((day, prices))
+                self._logger.debug(
+                    "[%s]: Task done for day: %s in %.3f s", wk_name, day, took
+                )
+        except asyncio.CancelledError:
+            return downloaded_prices
+
+    async def _multi_download(
+        self, days_to_download: List[date], max_calls: int
+    ) -> Iterable[Tuple[date, Dict[datetime, Any]]]:
+        """Multiple requests using an asyncio.Queue for concurrency."""
+        queue = asyncio.Queue()
+        # setup `max_calls` queue workers
+        worker_tasks = [
+            asyncio.create_task(self._download_worker(f"worker-{i+1}", queue))
+            for i in range(max_calls)
+        ]
+        # fill queue
+        for day in days_to_download:
+            queue.put_nowait(day)
+
+        # wait for the queue to process all
+        await queue.join()
+
+        for task in worker_tasks:
+            task.cancel()
+        # Wait until all worker tasks are cancelled.
+        wk_tasks_results = await asyncio.gather(*worker_tasks, return_exceptions=True)
+
+        return sorted(
+            (day_data for wk_results in wk_tasks_results for day_data in wk_results),
+            key=lambda x: x[0],
+        )
+
+    async def _ensure_session(self):
+        if self._session is None:
+            assert not self._with_initial_session
+            self._session = aiohttp.ClientSession()
+
+    async def _close_temporal_session(self):
+        if not self._with_initial_session and self._session is not None:
+            await self._session.close()
+            self._session = None
+
+    async def async_download_prices_for_range(
+        self, start: datetime, end: datetime, concurrency_calls: int = 20
+    ) -> Dict[datetime, Any]:
+        """Download a time range burst of electricity prices from the ESIOS API."""
+
+        def _adjust_dates(ts: datetime) -> Tuple[datetime, datetime]:
+            # adjust dates and tz from inputs
+            if ts.tzinfo is None:
+                ts = self._local_timezone.localize(ts)
+            ts_utc = ts.astimezone(pytz.UTC)
+            ts_ref = ts_utc.astimezone(REFERENCE_TZ)
+            return ts_utc, ts_ref
+
+        start_utc, start_local = _adjust_dates(start)
+        end_utc, end_local = _adjust_dates(end)
+        delta: timedelta = end_local.date() - start_local.date()
+        days_to_download = [
+            start_local.date() + timedelta(days=i) for i in range(delta.days + 1)
+        ]
+
+        tic = monotonic()
+        max_calls = concurrency_calls
+        await self._ensure_session()
+        data_days = await self._multi_download(days_to_download, max_calls)
+        await self._close_temporal_session()
+
+        prices = {
+            hour: hourly_data[hour]
+            for (day, hourly_data) in data_days
+            for hour in hourly_data
+            if start_utc <= hour <= end_utc
+        }
+        if prices:
+            self._logger.warning(
+                "Download of %d prices from %s to %s in %.2f sec",
+                len(prices),
+                min(prices),
+                max(prices),
+                monotonic() - tic,
+            )
+        else:
+            self._logger.error(
+                "BAD Download of PVPC prices from %s to %s in %.2f sec",
+                start,
+                end,
+                monotonic() - tic,
+            )
+
+        return prices
+
+    def download_prices_for_range(
+        self, start: datetime, end: datetime, concurrency_calls: int = 20
+    ) -> Dict[datetime, Any]:
+        """Blocking method to download a time range burst of elec prices."""
+        return asyncio.run(
+            self.async_download_prices_for_range(start, end, concurrency_calls)
+        )
