@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.0.2](https://github.com/azogue/aiopvpc/tree/v2.0.2) - Unpinned requirements (2020-08-04)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.0.1...v2.0.2)
+
+**Changes:**
+
+- Fix outdated pinned requirements by setting just a minimal version, and syncing those with HomeAssistant
+
 ## [v2.0.1](https://github.com/azogue/aiopvpc/tree/v2.0.1) - Add methods to download a range of days (2020-05-07)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v1.0.2...v2.0.1)
