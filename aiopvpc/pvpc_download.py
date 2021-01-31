@@ -8,6 +8,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
 import pytz
+from pytz.tzinfo import DstTzInfo
 
 # Tariffs as internal keys in esios API data
 ESIOS_TARIFFS = ["GEN", "NOC", "VHC"]
@@ -33,13 +34,15 @@ def get_url_for_daily_json(day: Union[date, datetime]) -> str:
 
 
 def extract_pvpc_data(
-    data: Dict[str, Any], key: Optional[str] = None
+    data: Dict[str, Any],
+    key: Optional[str] = None,
+    tz: DstTzInfo = REFERENCE_TZ,
 ) -> Union[Dict[datetime, float], Dict[datetime, Dict[str, float]]]:
     """Parse the contents of a daily PVPC json file."""
-    ts_init = REFERENCE_TZ.localize(
+    ts_init = tz.localize(
         datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y"),
         is_dst=False,  # dst change is never at 00:00
-    ).astimezone(pytz.UTC)
+    )
 
     def _parse_tariff_val(value, prec=_PRECISION) -> float:
         return round(float(value.replace(",", ".")) / 1000.0, prec)
@@ -47,15 +50,17 @@ def extract_pvpc_data(
     def _parse_val(value) -> float:
         return float(value.replace(",", "."))
 
+    def _norm_ts(init: datetime, hours: int) -> datetime:
+        return tz.normalize(init + timedelta(hours=hours))
+
     if key is not None:
         return {
-            ts_init + timedelta(hours=i): _parse_tariff_val(values_hour[key])
+            _norm_ts(ts_init, i): _parse_tariff_val(values_hour[key])
             for i, values_hour in enumerate(data["PVPC"])
         }
 
     return {
-        ts_init
-        + timedelta(hours=i): {
+        _norm_ts(ts_init, i): {
             k: _parse_val(v) for k, v in values_hour.items() if k not in ("Dia", "Hora")
         }
         for i, values_hour in enumerate(data["PVPC"])
