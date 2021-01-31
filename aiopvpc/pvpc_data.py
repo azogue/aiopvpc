@@ -171,12 +171,15 @@ class PVPCData:
                 filter(lambda x: x >= utc_time, prices_sorted.keys()),
             )
         )
-        for ts_utc, price_h in self._current_prices.items():
-            ts_local = _local(ts_utc)
-            if ts_local.day > actual_time.day:
+
+        def _is_tomorrow_price(ts, ref):
+            return any(
+                map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar()))
+            )
+
+        for ts_local, price_h in self._current_prices.items():
+            if _is_tomorrow_price(ts_local, actual_time):
                 attr_key = f"price_next_day_{ts_local.hour:02d}h"
-            elif ts_local.day < actual_time.day:
-                attr_key = f"price_last_day_{ts_local.hour:02d}h"
             else:
                 attr_key = f"price_{ts_local.hour:02d}h"
             if attr_key in attributes:  # DST change with duplicated hour :)
