@@ -50,5 +50,5 @@ async def test_real_download_today_async():
 
     # Check error without session
     pvpc_handler_bad = PVPCData("discriminacion")
-    with pytest.raises(AttributeError):
+    with pytest.raises(AssertionError):
         await pvpc_handler_bad.async_update_prices(datetime.utcnow())
