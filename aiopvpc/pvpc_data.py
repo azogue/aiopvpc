@@ -168,8 +168,14 @@ class PVPCData:
                 filter(lambda x: x >= actual_time, prices_sorted.keys()),
             )
         )
+
+        def _is_tomorrow_price(ts, ref):
+            return any(
+                map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar()))
+            )
+
         for ts_local, price_h in self._current_prices.items():
-            if ts_local.day > actual_time.day:
+            if _is_tomorrow_price(ts_local, actual_time):
                 attr_key = f"price_next_day_{ts_local.hour:02d}h"
             else:
                 attr_key = f"price_{ts_local.hour:02d}h"
