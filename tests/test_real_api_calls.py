@@ -44,7 +44,7 @@ async def test_real_download_range_async():
 @pytest.mark.skip("Real call to ESIOS API")
 async def test_real_download_today_async():
     async with ClientSession() as session:
-        pvpc_handler = PVPCData("discriminacion", websession=session)
+        pvpc_handler = PVPCData("discrimination", websession=session)
         prices = await pvpc_handler.async_update_prices(datetime.utcnow())
     assert 22 < len(prices) < 49
 

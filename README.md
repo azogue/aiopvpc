@@ -19,6 +19,7 @@ Install with `pip install aiopvpc` or clone it to run tests or anything else.
 ## Usage
 
 ```
+from datetime import datetime
 from aiopvpc import PVPCData
 
 pvpc_handler = PVPCData(tariff="discrimination")
