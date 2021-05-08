@@ -32,7 +32,9 @@ async def test_price_extract(
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
-        local_timezone=_TZ_TEST, tariff="discrimination", websession=mock_session,
+        local_timezone=_TZ_TEST,
+        tariff="discrimination",
+        websession=mock_session,
     )
 
     pvpc_data.source_available = True
@@ -62,14 +64,21 @@ async def test_price_extract(
 )
 @pytest.mark.asyncio
 async def test_bad_downloads(
-    available, day_str, num_log_msgs, status, exception, caplog,
+    available,
+    day_str,
+    num_log_msgs,
+    status,
+    exception,
+    caplog,
 ):
     """Test data parsing of official API files."""
     day = datetime.fromisoformat(day_str)
     mock_session = MockAsyncSession(status=status, exc=exception)
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(logging.INFO):
         pvpc_data = PVPCData(
-            local_timezone=REFERENCE_TZ, tariff="normal", websession=mock_session,
+            local_timezone=REFERENCE_TZ,
+            tariff="normal",
+            websession=mock_session,
         )
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
