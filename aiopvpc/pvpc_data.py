@@ -89,8 +89,7 @@ class PVPCData:
                 resp = await self._session.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    pvpc_data = extract_pvpc_data(data, tariff)
-                    return pvpc_data
+                    return extract_pvpc_data(data, tariff)
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
