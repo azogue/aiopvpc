@@ -23,6 +23,7 @@ _TZ_TEST = pytz.timezone("Atlantic/Canary")
         ("2019-10-26 21:00:00+00:00", 49, 2, 24, True),
     ),
 )
+@pytest.mark.asyncio
 async def test_price_extract(
     day_str, num_prices, num_calls, num_prices_8h, available_8h
 ):
@@ -59,6 +60,7 @@ async def test_price_extract(
         (False, "2032-10-26 00:00:00+00:00", 0, 200, ClientError),
     ),
 )
+@pytest.mark.asyncio
 async def test_bad_downloads(
     available, day_str, num_log_msgs, status, exception, caplog,
 ):
@@ -103,6 +105,7 @@ def test_full_data_download_range():
     assert all(data_first_hour[tag] > 1 for tag in ESIOS_TARIFFS)
 
 
+@pytest.mark.asyncio
 async def test_download_range(caplog):
     """Test retrieval of full PVPC data in a day range."""
     start = datetime(2019, 10, 26, 15)
