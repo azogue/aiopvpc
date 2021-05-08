@@ -14,6 +14,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import aiohttp
 import async_timeout
 import pytz
+from pytz.tzinfo import DstTzInfo
 
 from .pvpc_download import (
     DEFAULT_TIMEOUT,
@@ -46,14 +47,14 @@ class PVPCData:
         self,
         tariff: Optional[str] = None,
         websession: Optional[aiohttp.ClientSession] = None,
-        local_timezone: pytz.tzinfo.DstTzInfo = REFERENCE_TZ,
+        local_timezone: DstTzInfo = REFERENCE_TZ,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         self.source_available = True
-        self.state = None
+        self.state: Optional[float] = None
         self.state_available = False
-        self.attributes = None
+        self.attributes: Dict[str, Any] = {}
 
         self.tariff = tariff
         self.timeout = timeout
@@ -81,12 +82,14 @@ class PVPCData:
         Prices are referenced with datetimes in UTC.
         """
         url = get_url_for_daily_json(day)
+        assert self._session is not None
+        tariff = TARIFF_KEYS.get(self.tariff) if self.tariff else None
         try:
             with async_timeout.timeout(self.timeout):
                 resp = await self._session.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    pvpc_data = extract_pvpc_data(data, TARIFF_KEYS.get(self.tariff))
+                    pvpc_data = extract_pvpc_data(data, tariff)
                     return pvpc_data
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
@@ -128,11 +131,14 @@ class PVPCData:
         The data source provides prices in 0 to 24h sets, with correspondence
         with the main timezone in Spain. They are stored with UTC datetimes.
         """
+        attributes: Dict[str, Any] = {
+            "attribution": _ATTRIBUTION,
+            "tariff": self.tariff,
+        }
 
         def _local(dt_utc: datetime) -> datetime:
             return dt_utc.astimezone(self._local_timezone)
 
-        attributes = {"attribution": _ATTRIBUTION, "tariff": self.tariff}
         utc_time = utc_now.astimezone(pytz.UTC).replace(
             minute=0, second=0, microsecond=0
         )
@@ -208,7 +214,7 @@ class PVPCData:
         self, days_to_download: List[date], max_calls: int
     ) -> Iterable[Tuple[date, Dict[datetime, Any]]]:
         """Multiple requests using an asyncio.Queue for concurrency."""
-        queue = asyncio.Queue()
+        queue: asyncio.Queue = asyncio.Queue()
         # setup `max_calls` queue workers
         worker_tasks = [
             asyncio.create_task(self._download_worker(f"worker-{i+1}", queue))
