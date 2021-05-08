@@ -33,7 +33,7 @@ log_cli_date_format = "%H:%M:%S"
 
 [tool.poetry]
 name = "aiopvpc"
-version = "2.1.0"
+version = "2.0.3"
 description = "Retrieval of Spanish Electricity hourly prices (PVPC)"
 authors = ["Eugenio Panadero <eugenio.panadero@gmail.com>"]
 license = "MIT"
