@@ -4,10 +4,14 @@ Simple aio library to download Spanish electricity hourly prices.
 * URL for JSON daily files
 * Parser for the contents of the JSON files
 """
+import sys
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-import pytz
+if sys.version_info[:2] >= (3, 9):
+    import zoneinfo  # pylint: disable=import-error
+else:  # pragma: no cover
+    from backports import zoneinfo  # pylint: disable=import-error
 
 # Tariffs as internal keys in esios API data
 ESIOS_TARIFFS = ["GEN", "NOC", "VHC"]
@@ -17,7 +21,8 @@ TARIFFS = ["normal", "discrimination", "electric_car"]
 TARIFF_KEYS = dict(zip(TARIFFS, ESIOS_TARIFFS))
 
 # Prices are given in 0 to 24h sets, adjusted to the main timezone in Spain
-REFERENCE_TZ = pytz.timezone("Europe/Madrid")
+REFERENCE_TZ = zoneinfo.ZoneInfo("Europe/Madrid")
+UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
 DEFAULT_TIMEOUT = 5
 _PRECISION = 5
@@ -33,13 +38,15 @@ def get_url_for_daily_json(day: Union[date, datetime]) -> str:
 
 
 def extract_pvpc_data(
-    data: Dict[str, Any], key: Optional[str] = None
+    data: Dict[str, Any],
+    key: Optional[str] = None,
+    tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
 ) -> Union[Dict[datetime, float], Dict[datetime, Dict[str, float]]]:
     """Parse the contents of a daily PVPC json file."""
-    ts_init = REFERENCE_TZ.localize(
-        datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y"),
-        is_dst=False,  # dst change is never at 00:00
-    ).astimezone(pytz.UTC)
+    ts_init = datetime(
+        *datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y").timetuple()[:3],
+        tzinfo=tz,
+    ).astimezone(UTC_TZ)
 
     def _parse_tariff_val(value, prec=_PRECISION) -> float:
         return round(float(value.replace(",", ".")) / 1000.0, prec)

@@ -9,19 +9,19 @@ import asyncio
 import logging
 from datetime import date, datetime, timedelta
 from time import monotonic
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import aiohttp
 import async_timeout
-import pytz
-from pytz.tzinfo import DstTzInfo
 
-from .pvpc_download import (
+from aiopvpc.pvpc_download import (
     DEFAULT_TIMEOUT,
     extract_pvpc_data,
     get_url_for_daily_json,
     REFERENCE_TZ,
     TARIFF_KEYS,
+    UTC_TZ,
+    zoneinfo,
 )
 
 _ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
@@ -47,7 +47,7 @@ class PVPCData:
         self,
         tariff: Optional[str] = None,
         websession: Optional[aiohttp.ClientSession] = None,
-        local_timezone: DstTzInfo = REFERENCE_TZ,
+        local_timezone: Union[str, zoneinfo.ZoneInfo] = REFERENCE_TZ,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -61,7 +61,7 @@ class PVPCData:
 
         self._session = websession
         self._with_initial_session = websession is not None
-        self._local_timezone = local_timezone
+        self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
         self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
@@ -89,7 +89,7 @@ class PVPCData:
                 resp = await self._session.get(url)
                 if resp.status < 400:
                     data = await resp.json()
-                    return extract_pvpc_data(data, tariff)
+                    return extract_pvpc_data(data, tariff, tz=self._local_timezone)
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
@@ -102,7 +102,8 @@ class PVPCData:
 
     async def async_update_prices(self, now: datetime) -> Dict[datetime, float]:
         """Update electricity prices from the ESIOS API."""
-        localized_now = now.astimezone(pytz.UTC).astimezone(REFERENCE_TZ)
+        utc_now = now.astimezone(UTC_TZ)
+        localized_now = utc_now.astimezone(REFERENCE_TZ)
         prices = await self._download_pvpc_prices(localized_now.date())
         if not prices:
             return prices
@@ -138,14 +139,12 @@ class PVPCData:
         def _local(dt_utc: datetime) -> datetime:
             return dt_utc.astimezone(self._local_timezone)
 
-        utc_time = utc_now.astimezone(pytz.UTC).replace(
-            minute=0, second=0, microsecond=0
-        )
+        utc_time = datetime(*utc_now.timetuple()[:3], tzinfo=UTC_TZ)
         actual_time = _local(utc_time)
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
-                utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(pytz.UTC)
+                utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(UTC_TZ)
             )
             self._current_prices = {
                 key_ts: price
@@ -252,11 +251,12 @@ class PVPCData:
         """Download a time range burst of electricity prices from the ESIOS API."""
 
         def _adjust_dates(ts: datetime) -> Tuple[datetime, datetime]:
-            # adjust dates and tz from inputs
-            if ts.tzinfo is None:
-                ts = self._local_timezone.localize(ts)
-            ts_utc = ts.astimezone(pytz.UTC)
-            ts_ref = ts_utc.astimezone(REFERENCE_TZ)
+            # adjust dates and tz from inputs to retrieve prices as it was in
+            #  Spain mainland, so tz-independent!!
+            ts_ref = datetime(
+                *ts.timetuple()[:6], tzinfo=self._local_timezone
+            ).astimezone(REFERENCE_TZ)
+            ts_utc = ts_ref.astimezone(UTC_TZ)
             return ts_utc, ts_ref
 
         start_utc, start_local = _adjust_dates(start)
