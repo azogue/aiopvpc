@@ -9,14 +9,14 @@ import asyncio
 import logging
 from datetime import date, datetime, timedelta
 from time import monotonic
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import aiohttp
 import async_timeout
 import pytz
 from pytz.tzinfo import DstTzInfo
 
-from .pvpc_download import (
+from aiopvpc.pvpc_download import (
     DEFAULT_TIMEOUT,
     extract_pvpc_data,
     get_url_for_daily_json,
@@ -47,7 +47,7 @@ class PVPCData:
         self,
         tariff: Optional[str] = None,
         websession: Optional[aiohttp.ClientSession] = None,
-        local_timezone: DstTzInfo = REFERENCE_TZ,
+        local_timezone: Union[str, DstTzInfo] = REFERENCE_TZ,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -61,7 +61,7 @@ class PVPCData:
 
         self._session = websession
         self._with_initial_session = websession is not None
-        self._local_timezone = local_timezone
+        self._local_timezone = pytz.timezone(str(local_timezone))
         self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
