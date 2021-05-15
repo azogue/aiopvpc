@@ -2,15 +2,12 @@
 from datetime import datetime
 
 import pytest
-import pytz
 from aiohttp import ClientSession
 
 from aiopvpc import PVPCData
 
-_TZ_TEST = pytz.timezone("Atlantic/Canary")
 
-
-@pytest.mark.skip("Real call to ESIOS API")
+@pytest.mark.real_api_call
 def test_real_download_range():
     # No async
     pvpc_handler = PVPCData("normal")
@@ -25,7 +22,8 @@ def test_real_download_range():
     assert len(no_prices) == 0
 
 
-@pytest.mark.skip("Real call to ESIOS API")
+@pytest.mark.real_api_call
+@pytest.mark.asyncio
 async def test_real_download_range_async():
     start = datetime(2019, 10, 26, 15)
     end = datetime(2019, 10, 28, 13)
@@ -41,14 +39,15 @@ async def test_real_download_range_async():
     assert prices == prices2
 
 
-@pytest.mark.skip("Real call to ESIOS API")
+@pytest.mark.real_api_call
+@pytest.mark.asyncio
 async def test_real_download_today_async():
     async with ClientSession() as session:
-        pvpc_handler = PVPCData("discriminacion", websession=session)
+        pvpc_handler = PVPCData("discrimination", websession=session)
         prices = await pvpc_handler.async_update_prices(datetime.utcnow())
     assert 22 < len(prices) < 49
 
     # Check error without session
     pvpc_handler_bad = PVPCData("discriminacion")
-    with pytest.raises(AttributeError):
+    with pytest.raises(AssertionError):
         await pvpc_handler_bad.async_update_prices(datetime.utcnow())
