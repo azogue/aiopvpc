@@ -8,7 +8,7 @@ import sys
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-if sys.version_info[:2] >= (3, 9):
+if sys.version_info[:2] >= (3, 9):  # pragma: no cover
     import zoneinfo  # pylint: disable=import-error
 else:  # pragma: no cover
     from backports import zoneinfo  # pylint: disable=import-error
