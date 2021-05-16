@@ -27,6 +27,14 @@ from aiopvpc.pvpc_download import (
 _ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
 
 
+def _ensure_utc_time(ts: datetime):
+    if ts.tzinfo is None:
+        return datetime(*ts.timetuple()[:6], tzinfo=UTC_TZ)
+    elif str(ts.tzinfo) != str(UTC_TZ):
+        return ts.astimezone(UTC_TZ)
+    return ts
+
+
 class PVPCData:
     """
     Data handler for PVPC hourly prices.
@@ -101,16 +109,22 @@ class PVPCData:
         return {}
 
     async def async_update_prices(self, now: datetime) -> Dict[datetime, float]:
-        """Update electricity prices from the ESIOS API."""
-        utc_now = now.astimezone(UTC_TZ)
-        localized_now = utc_now.astimezone(REFERENCE_TZ)
-        prices = await self._download_pvpc_prices(localized_now.date())
+        """
+        Update electricity prices from the ESIOS API.
+
+        Input `now: datetime` is assumed tz-aware in UTC.
+        If not, it is converted to UTC from the original timezone,
+        or set as UTC-time if it is a naive datetime.
+        """
+        utc_now = _ensure_utc_time(now)
+        local_ref_now = utc_now.astimezone(REFERENCE_TZ)
+        prices = await self._download_pvpc_prices(local_ref_now.date())
         if not prices:
             return prices
 
         # At evening, it is possible to retrieve next day prices
-        if localized_now.hour >= 20:
-            next_day = (localized_now + timedelta(days=1)).date()
+        if local_ref_now.hour >= 20:
+            next_day = (local_ref_now + timedelta(days=1)).date()
             prices_fut = await self._download_pvpc_prices(next_day)
             if prices_fut:
                 prices.update(prices_fut)
@@ -130,6 +144,10 @@ class PVPCData:
 
         The data source provides prices in 0 to 24h sets, with correspondence
         with the main timezone in Spain. They are stored with UTC datetimes.
+
+        Input `now: datetime` is assumed tz-aware in UTC.
+        If not, it is converted to UTC from the original timezone,
+        or set as UTC-time if it is a naive datetime.
         """
         attributes: Dict[str, Any] = {
             "attribution": _ATTRIBUTION,
@@ -139,7 +157,7 @@ class PVPCData:
         def _local(dt_utc: datetime) -> datetime:
             return dt_utc.astimezone(self._local_timezone)
 
-        utc_time = datetime(*utc_now.timetuple()[:4], tzinfo=UTC_TZ)
+        utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = _local(utc_time)
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired

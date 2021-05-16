@@ -14,9 +14,11 @@ from .conftest import MockAsyncSession, TZ_TEST
 @pytest.mark.parametrize(
     "day_str, timezone, num_prices, num_calls, num_prices_8h, available_8h, last_hour",
     (
+        ("2019-10-26 00:00:00+08:00", TZ_TEST, 0, 1, 0, False, None),
         ("2019-10-26 00:00:00", TZ_TEST, 24, 1, 24, True, 23),
         ("2019-10-27 00:00:00", TZ_TEST, 25, 1, 25, True, 23),
         ("2019-03-31 20:00:00", TZ_TEST, 23, 2, 23, False, 23),
+        ("2019-03-31 20:00:00+04:00", TZ_TEST, 23, 1, 23, False, 23),
         ("2019-10-26 21:00:00", TZ_TEST, 49, 2, 26, True, 23),
         ("2019-10-26 21:00:00+01:00", TZ_TEST, 49, 2, 26, True, 23),
         ("2019-10-26 00:00:00", REFERENCE_TZ, 24, 1, 24, True, 23),
@@ -47,13 +49,13 @@ async def test_price_extract(
     has_prices = pvpc_data.process_state_and_attributes(day)
     assert len(pvpc_data._current_prices) == num_prices
     assert mock_session.call_count == num_calls
-    assert has_prices
 
     has_prices = pvpc_data.process_state_and_attributes(day + timedelta(hours=10))
     assert len(pvpc_data._current_prices) == num_prices_8h
     assert has_prices == available_8h
-    last_dt, last_p = list(pvpc_data._current_prices.items())[-1]
-    assert last_dt.astimezone(timezone).hour == last_hour
+    if has_prices:
+        last_dt, last_p = list(pvpc_data._current_prices.items())[-1]
+        assert last_dt.astimezone(timezone).hour == last_hour
 
 
 @pytest.mark.parametrize(
