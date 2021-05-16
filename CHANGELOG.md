@@ -1,5 +1,21 @@
 # Changelog
 
+## [v2.1.0](https://github.com/azogue/aiopvpc/tree/v2.1.0) - Fix prices badly assigned outside default timezone (2021-05-16)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.0...v2.0.2)
+
+**Changes:**
+
+- Remove `pytz` dependency and handle timezones with `zoneinfo` (related to [this article](https://developers.home-assistant.io/blog/2021/05/07/switch-pytz-to-python-dateutil)),
+  and adapt to use input timezone as a time zone object or a string identifier.
+- **Fix prices being badly assigned in Canary Islands timezone**.
+  Before, prices where **assumed absolute in time**, and marked with tz-aware UTC datetimes,
+  but that behavior was incorrect 😔, as prices are applicable _by-hour_, independently of the timezone.
+  So now the produced prices are **shifted**, to apply the correct ones for each local hour, so given the price at 10AM,
+  it will be the same across all timezones. THIS IS A **BREAKING CHANGE** over the old behavior, if you live in the Canary Islands (because before the prices were incorrect!)
+- Fix sensor attributes in month changes (there were badly tagged as "price last day" instead of "price next day" 🤪).
+- Update tests suite to use `pytest-asyncio` instead of `pytest-aiohttp`, add `mypy` to pre-commit, and a general dependency update.
+
 ## [v2.0.2](https://github.com/azogue/aiopvpc/tree/v2.0.2) - Unpinned requirements (2020-08-04)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.0.1...v2.0.2)
