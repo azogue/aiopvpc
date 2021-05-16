@@ -139,7 +139,7 @@ class PVPCData:
         def _local(dt_utc: datetime) -> datetime:
             return dt_utc.astimezone(self._local_timezone)
 
-        utc_time = datetime(*utc_now.timetuple()[:6], tzinfo=UTC_TZ)
+        utc_time = datetime(*utc_now.timetuple()[:4], tzinfo=UTC_TZ)
         actual_time = _local(utc_time)
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
@@ -177,7 +177,8 @@ class PVPCData:
                 map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar()))
             )
 
-        for ts_local, price_h in self._current_prices.items():
+        for ts_utc, price_h in self._current_prices.items():
+            ts_local = _local(ts_utc)
             if _is_tomorrow_price(ts_local, actual_time):
                 attr_key = f"price_next_day_{ts_local.hour:02d}h"
             else:
