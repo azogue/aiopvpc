@@ -1,8 +1,8 @@
 # Changelog
 
-## [v2.1.0](https://github.com/azogue/aiopvpc/tree/v2.1.0) - Fix prices badly assigned outside default timezone (2021-05-16)
+## [v2.1.1](https://github.com/azogue/aiopvpc/tree/v2.1.1) - Fix prices badly assigned outside default timezone (2021-05-16)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.0...v2.0.2)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.1...v2.0.2)
 
 **Changes:**
 
