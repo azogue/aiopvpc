@@ -1,9 +1,16 @@
 """Tests for aiopvpc."""
 import json
 import pathlib
+import sys
 from datetime import date, datetime
 
+if sys.version_info[:2] >= (3, 9):
+    import zoneinfo  # pylint: disable=import-error
+else:
+    from backports import zoneinfo  # pylint: disable=import-error
+
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
+TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
 
 FIXTURE_JSON_DATA_2019_10_26 = "PVPC_CURV_DD_2019_10_26.json"
 FIXTURE_JSON_DATA_2019_10_27 = "PVPC_CURV_DD_2019_10_27.json"
