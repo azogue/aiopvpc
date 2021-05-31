@@ -15,11 +15,14 @@ import aiohttp
 import async_timeout
 
 from aiopvpc.pvpc_download import (
+    DATE_CHANGE_TO_20TD,
     DEFAULT_TIMEOUT,
     extract_pvpc_data,
     get_url_for_daily_json,
     REFERENCE_TZ,
     TARIFF_KEYS,
+    TARIFF_KEYS_NEW,
+    TARIFFS_NEW,
     UTC_TZ,
     zoneinfo,
 )
@@ -56,6 +59,7 @@ class PVPCData:
         tariff: Optional[str] = None,
         websession: Optional[aiohttp.ClientSession] = None,
         local_timezone: Union[str, zoneinfo.ZoneInfo] = REFERENCE_TZ,
+        zone_ceuta_melilla: bool = False,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -64,7 +68,11 @@ class PVPCData:
         self.state_available = False
         self.attributes: Dict[str, Any] = {}
 
-        self.tariff = tariff
+        self.tariff_old = tariff
+        if tariff is None:
+            self.tariff = None
+        else:
+            self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
         self.timeout = timeout
 
         self._session = websession
@@ -74,7 +82,9 @@ class PVPCData:
 
         self._current_prices: Dict[datetime, float] = {}
 
-        if tariff is None or tariff not in TARIFF_KEYS:
+        if tariff is None or (
+            tariff not in TARIFF_KEYS_NEW and tariff not in TARIFF_KEYS
+        ):
             self._logger.warning("Collecting detailed PVPC data for all tariffs")
 
     async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
@@ -91,7 +101,11 @@ class PVPCData:
         """
         url = get_url_for_daily_json(day)
         assert self._session is not None
-        tariff = TARIFF_KEYS.get(self.tariff) if self.tariff else None
+        if day < DATE_CHANGE_TO_20TD:
+            tariff = TARIFF_KEYS.get(self.tariff_old) if self.tariff_old else None
+        else:
+            tariff = TARIFF_KEYS_NEW.get(self.tariff) if self.tariff else None
+
         try:
             with async_timeout.timeout(self.timeout):
                 resp = await self._session.get(url)
@@ -149,16 +163,18 @@ class PVPCData:
         If not, it is converted to UTC from the original timezone,
         or set as UTC-time if it is a naive datetime.
         """
-        attributes: Dict[str, Any] = {
-            "attribution": _ATTRIBUTION,
-            "tariff": self.tariff,
-        }
+        tariff = self.tariff
+        if utc_now.isoformat() < DATE_CHANGE_TO_20TD.isoformat():
+            tariff = self.tariff_old
+        attributes: Dict[str, Any] = {"attribution": _ATTRIBUTION, "tariff": tariff}
 
         def _local(dt_utc: datetime) -> datetime:
             return dt_utc.astimezone(self._local_timezone)
 
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = _local(utc_time)
+        # todo current_period, next_period [P1/P2/P3], next_period_in (hours)
+        # todo power_period/power_price €/kW*año
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
