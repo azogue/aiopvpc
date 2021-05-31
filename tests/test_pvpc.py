@@ -25,6 +25,7 @@ from .conftest import MockAsyncSession, TZ_TEST
         ("2019-10-27 00:00:00", REFERENCE_TZ, 25, 1, 25, True, 23),
         ("2019-03-31 20:00:00", REFERENCE_TZ, 23, 2, 23, False, 23),
         ("2019-10-26 21:00:00", REFERENCE_TZ, 49, 2, 25, True, 23),
+        ("2021-06-01 06:00:00", REFERENCE_TZ, 24, 1, 24, True, 23),
     ),
 )
 @pytest.mark.asyncio
