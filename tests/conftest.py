@@ -15,6 +15,7 @@ TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
 FIXTURE_JSON_DATA_2019_10_26 = "PVPC_CURV_DD_2019_10_26.json"
 FIXTURE_JSON_DATA_2019_10_27 = "PVPC_CURV_DD_2019_10_27.json"
 FIXTURE_JSON_DATA_2019_03_31 = "PVPC_CURV_DD_2019_03_31.json"
+FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
 
@@ -49,6 +50,7 @@ class MockAsyncSession:
             date(2019, 3, 31): load_fixture(FIXTURE_JSON_DATA_2019_03_31),
             date(2019, 10, 26): load_fixture(FIXTURE_JSON_DATA_2019_10_26),
             date(2019, 10, 27): load_fixture(FIXTURE_JSON_DATA_2019_10_27),
+            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_2021_06_01),
         }
 
     async def json(self, *_args, **_kwargs):
