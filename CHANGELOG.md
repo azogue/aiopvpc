@@ -1,5 +1,14 @@
 # Changelog
 
+## [v2.1.2](https://github.com/azogue/aiopvpc/tree/v2.1.2) - Quick adapt to new tariff 2.0TD (2021-05-31)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.2...v2.1.1)
+
+**Changes:**
+
+- Use "PCB" and "CYM" keys to retrieve prices for dates > 2021-06-01 to match new JSON from Esios API for new '2.0 TD' tariff.
+- Add new flag to set prices for Ceuta & Melilla (to use "CYM" identifier instead of "PCB")
+
 ## [v2.1.1](https://github.com/azogue/aiopvpc/tree/v2.1.1) - Fix prices badly assigned outside default timezone (2021-05-16)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.1...v2.0.2)
