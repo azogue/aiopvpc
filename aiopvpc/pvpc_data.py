@@ -152,6 +152,49 @@ class PVPCData:
 
         return prices
 
+   def is_festive(self, actual_time: datetime) -> bool:
+
+        format_date = "%d-%m"
+        format_full_date = "%d-%m-%Y"
+
+        return actual_time.strftime(format_date) in FESTIVES or actual_time.strftime(format_full_date) in FESTIVES_SS
+
+    def get_period(self, actual_time: datetime, current_is_festive: bool) -> str:
+
+        day_of_week = actual_time.weekday()
+        period = "error"
+
+        if actual_time.hour < 8:
+            period = "valley"
+        elif day_of_week == 6 or day_of_week == 0 or current_is_festive:
+            period = "valley"
+        elif (actual_time.hour >= 10 and actual_time.hour < 14) or (actual_time.hour >= 18 and actual_time.hour < 22):
+            period = "peak"
+        else:
+            period = "normal"
+
+        return period
+
+    def get_next_period(self, actual_time: datetime, current_is_festive: bool, current_period: str) -> Tuple[str, int]:
+
+        day_of_week = actual_time.weekday()
+        next_hour = 0
+
+        for i in range(8):
+            next_hour = i + 1
+            actual_time += timedelta(hours = next_hour)
+            new_day_of_week = actual_time.weekday()
+            # Only check festives if day of week is different
+            if day_of_week != new_day_of_week:
+                current_is_festive = self.is_festive(actual_time)
+            # Check if new period is different and exit loop
+            new_period = self.get_period(actual_time, current_is_festive)
+            if new_period != current_period:
+                current_period = new_period
+                break
+
+        return current_period, next_hour
+    
     def process_state_and_attributes(self, utc_now: datetime) -> bool:
         """
         Generate the current state and sensor attributes.
@@ -173,36 +216,14 @@ class PVPCData:
 
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = _local(utc_time)
-        # todo current_period, next_period [P1/P2/P3], next_period_in (hours)
-        # get period for current time and add sensor attribute
-        def _is_festive():
-            festives = ["01-01", "06-01", "01-05", "12-10", "01-11", "06-12", "08-12", "25-12"]
-
-            ss = ["01-04-2018", "21-04-2019", "12-04-2020", "04-04-2021", "17-04-2022", "09-04-2023",
-                "31-03-2024", "20-04-2025", "05-04-2026", "28-03-2027", "16-04-2028", "01-04-2029",
-                "21-04-2030", "13-04-2031", "28-03-2032", "17-04-2033", "09-04-2034", "25-03-2035",
-                "13-04-2036", "05-04-2037", "25-04-2038", "10-04-2039", "01-04-2040", "21-04-2041",
-                "06-04-2042", "29-03-2043", "17-04-2044", "09-04-2045", "25-03-2046", "14-04-2047",
-                "05-04-2048", "18-04-2049", "10-04-2050", "02-04-2051", "21-04-2052", "06-04-2053",
-                "29-03-2054", "18-04-2055", "02-04-2056", "22-04-2057"]
-
-            format_date = "%d-%m"
-            format_full_date = "%d-%m-%Y"
-
-            return actual_time.strftime(format_date) in festives or actual_time.strftime(format_full_date) in ss
-
-        day_of_week = actual_time.weekday()
-        period = "error"
-        if actual_time.hour < 8:
-            period = "valley"
-        elif day_of_week == 6 or day_of_week == 0 or _is_festive():
-            period = "valley"
-        elif (actual_time.hour >= 10 and actual_time.hour < 14) or (actual_time.hour >= 18 and actual_time.hour < 22):
-            period = "peak"
-        else:
-            period = "normal"
-        
-        attributes["period"] = period
+        # current_period, next_period [valley/normal/peak], next_period_in (hours)
+        # avoid calling needlessly is_festive function
+        current_is_festive = self.is_festive(actual_time)
+        current_period = self.get_period(actual_time, current_is_festive)
+        next_period, next_period_in = self.get_next_period(actual_time, current_is_festive, current_period)
+        attributes["current_period"] = current_period
+        attributes["next_period"] = next_period
+        attributes["next_period_in"] = next_period_in
         
         # todo power_period/power_price €/kW*año
         if len(self._current_prices) > 25 and actual_time.hour < 20:
