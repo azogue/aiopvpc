@@ -164,14 +164,12 @@ class PVPCData:
         day_of_week = actual_time.weekday()
         period = "error"
 
-        if actual_time.hour < 8:
-            period = "valley"
-        elif day_of_week == 6 or day_of_week == 0 or current_is_festive:
+        if actual_time.hour < 8 or day_of_week == 6 or day_of_week == 0 or current_is_festive:
             period = "valley"
         elif (actual_time.hour >= 10 and actual_time.hour < 14) or (actual_time.hour >= 18 and actual_time.hour < 22):
             period = "peak"
         else:
-            period = "normal"
+            period = "plain"
 
         return period
 
@@ -216,7 +214,7 @@ class PVPCData:
 
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = _local(utc_time)
-        # current_period, next_period [valley/normal/peak], next_period_in (hours)
+        # current_period, next_period [valley/plain/peak], next_period_in (hours)
         current_is_festive = self.is_festive(actual_time)
         current_period = self.get_period(actual_time, current_is_festive)
         next_period, next_period_in = self.get_next_period(actual_time, current_is_festive, current_period)
