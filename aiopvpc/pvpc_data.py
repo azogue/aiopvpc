@@ -29,6 +29,8 @@ from aiopvpc.pvpc_download import (
 
 _ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
 
+# National holidays
+FESTIVES = ["01-01", "06-01", "01-05", "12-10", "01-11", "06-12", "08-12", "25-12"]
 
 def _ensure_utc_time(ts: datetime):
     if ts.tzinfo is None:
@@ -155,9 +157,7 @@ class PVPCData:
    def is_festive(self, actual_time: datetime) -> bool:
 
         format_date = "%d-%m"
-        format_full_date = "%d-%m-%Y"
-
-        return actual_time.strftime(format_date) in FESTIVES or actual_time.strftime(format_full_date) in FESTIVES_SS
+        return actual_time.strftime(format_date) in FESTIVES
 
     def get_period(self, actual_time: datetime, current_is_festive: bool) -> str:
 
@@ -217,7 +217,6 @@ class PVPCData:
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = _local(utc_time)
         # current_period, next_period [valley/normal/peak], next_period_in (hours)
-        # avoid calling needlessly is_festive function
         current_is_festive = self.is_festive(actual_time)
         current_period = self.get_period(actual_time, current_is_festive)
         next_period, next_period_in = self.get_next_period(actual_time, current_is_festive, current_period)
