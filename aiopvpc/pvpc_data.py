@@ -154,7 +154,7 @@ class PVPCData:
 
         return prices
 
-   def is_festive(self, actual_time: datetime) -> bool:
+    def is_festive(self, actual_time: datetime) -> bool:
 
         format_date = "%d-%m"
         return actual_time.strftime(format_date) in FESTIVES
