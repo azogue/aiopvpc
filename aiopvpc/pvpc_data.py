@@ -155,16 +155,14 @@ class PVPCData:
         return prices
 
     def is_festive(self, actual_time: datetime) -> bool:
-
         format_date = "%d-%m"
         return actual_time.strftime(format_date) in FESTIVES
 
     def get_period(self, actual_time: datetime, current_is_festive: bool) -> str:
-
         day_of_week = actual_time.weekday()
         period = "error"
 
-        if actual_time.hour < 8 or day_of_week == 6 or day_of_week == 0 or current_is_festive:
+        if actual_time.hour < 8 or day_of_week == 5 or day_of_week == 6 or current_is_festive:
             period = "valley"
         elif (actual_time.hour >= 10 and actual_time.hour < 14) or (actual_time.hour >= 18 and actual_time.hour < 22):
             period = "peak"
@@ -174,13 +172,13 @@ class PVPCData:
         return period
 
     def get_next_period(self, actual_time: datetime, current_is_festive: bool, current_period: str) -> Tuple[str, int]:
-
         day_of_week = actual_time.weekday()
         next_hour = 0
 
-        for i in range(8):
+        # max time between two periods is weekends (48h) + first 8h of monday
+        for i in range(56):
             next_hour = i + 1
-            actual_time += timedelta(hours = next_hour)
+            actual_time += timedelta(hours = 1)
             new_day_of_week = actual_time.weekday()
             # Only check festives if day of week is different
             if day_of_week != new_day_of_week:
