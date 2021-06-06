@@ -23,6 +23,7 @@ from aiopvpc.pvpc_download import (
     REFERENCE_TZ,
     TARIFF_KEYS,
     TARIFF_KEYS_NEW,
+    TARIFFS,
     TARIFFS_NEW,
     UTC_TZ,
     zoneinfo,
@@ -91,7 +92,7 @@ def _make_sensor_attributes(
         attributes["price_ratio"] = round(
             (current_prices[utc_time] - min_price) / (max_price - min_price), 2
         )
-    except ZeroDivisionError:
+    except ZeroDivisionError:  # pragma: no cover
         pass
     attributes["max_price"] = max_price
     attributes["max_price_at"] = (
@@ -152,25 +153,33 @@ class PVPCData:
         self.state_available = False
         self.attributes: Dict[str, Any] = {}
 
-        self.zone_ceuta_melilla = zone_ceuta_melilla
-        self.tariff_old = tariff
-        if tariff is None:
-            self.tariff = None
-        else:
-            self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
         self.timeout = timeout
-
         self._session = websession
         self._with_initial_session = websession is not None
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
         self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
-
-        if tariff is None or (
-            tariff not in TARIFF_KEYS_NEW and tariff not in TARIFF_KEYS
-        ):
+        self.tariff_old = tariff
+        self.zone_ceuta_melilla = zone_ceuta_melilla
+        if tariff is None:
+            self.tariff = self.tariff_old = None
             self._logger.warning("Collecting detailed PVPC data for all tariffs")
+        elif tariff in TARIFFS:
+            self.tariff_old = tariff
+            self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
+        else:
+            self.tariff_old = "discrimination"
+            self.tariff = tariff
+            if tariff not in TARIFFS_NEW:  # pragma: no cover
+                self._logger.error(
+                    "Unknown tariff '%s'. Should be one of %s, or, "
+                    "if using it to retrieve old prices, one of %s",
+                    tariff,
+                    TARIFFS_NEW,
+                    TARIFFS,
+                )
+                self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
 
     async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
         """
