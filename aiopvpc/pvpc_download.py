@@ -4,7 +4,6 @@ Simple aio library to download Spanish electricity hourly prices.
 * URL for JSON daily files
 * Parser for the contents of the JSON files
 """
-import logging
 import sys
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional, Union
@@ -46,21 +45,12 @@ def extract_pvpc_data(
     data: Dict[str, Any],
     key: Optional[str] = None,
     tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
-    zone_ceuta_melilla: bool = False,
 ) -> Union[Dict[datetime, float], Dict[datetime, Dict[str, float]]]:
     """Parse the contents of a daily PVPC json file."""
     ts_init = datetime(
         *datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y").timetuple()[:3],
         tzinfo=tz,
     ).astimezone(UTC_TZ)
-
-    if ts_init.date() >= date(2021, 6, 1) and key not in ESIOS_TARIFFS_NEW:
-        logging.warning(
-            "Bad call for prices with new 2.0TD tariff, "
-            "'%s' is not valid anymore :(",
-            key,
-        )
-        key = "CYM" if zone_ceuta_melilla else "PCB"
 
     def _parse_tariff_val(value, prec=_PRECISION) -> float:
         return round(float(value.replace(",", ".")) / 1000.0, prec)
