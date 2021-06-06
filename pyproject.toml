@@ -36,7 +36,7 @@ markers = [
 
 [tool.poetry]
 name = "aiopvpc"
-version = "2.1.2"
+version = "2.2.0"
 description = "Retrieval of Spanish Electricity hourly prices (PVPC)"
 authors = ["Eugenio Panadero <eugenio.panadero@gmail.com>"]
 license = "MIT"
@@ -47,6 +47,7 @@ repository = "https://github.com/azogue/aiopvpc"
 python = ">=3.8,<4.0"
 aiohttp = ">=3.6.2"
 async_timeout = ">=3.0.1"
+holidays = "*"
 "backports.zoneinfo" = {version = "^0.2.1", python = "<3.9"}
 # just for example notebooks
 jupyter = {version = "*", optional = true}
