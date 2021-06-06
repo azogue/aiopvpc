@@ -13,6 +13,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import aiohttp
 import async_timeout
+import holidays
 
 from aiopvpc.pvpc_download import (
     DATE_CHANGE_TO_20TD,
@@ -36,6 +37,89 @@ def _ensure_utc_time(ts: datetime):
     elif str(ts.tzinfo) != str(UTC_TZ):
         return ts.astimezone(UTC_TZ)
     return ts
+
+
+def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
+    """Return period key (P1/P2/P3) for current hour."""
+    day = local_ts.date()
+    # TODO review 'festivos nacionales no sustituibles de fecha fija', + 6/1
+    # national_holiday = (
+    #     day in holidays.Spain(years=day.year).values()
+    #     and "(Trasladado)" not in holidays.Spain(years=day.year)[day]
+    # )
+    national_holiday = day in holidays.Spain(years=day.year).values()
+    if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
+        return "P3"
+    elif zone_ceuta_melilla and local_ts.hour in (8, 9, 10, 15, 16, 17, 18, 23):
+        return "P2"
+    elif not zone_ceuta_melilla and local_ts.hour in (8, 9, 14, 15, 16, 17, 22, 23):
+        return "P2"
+    return "P1"
+
+
+def _get_current_and_next_tariff_periods(
+    local_ts: datetime, zone_ceuta_melilla: bool
+) -> Tuple[str, str, timedelta]:
+    current_period = _tariff_period_key(local_ts, zone_ceuta_melilla)
+    delta = timedelta(hours=1)
+    while (
+        next_period := _tariff_period_key(local_ts + delta, zone_ceuta_melilla)
+    ) == current_period:
+        delta += timedelta(hours=1)
+    return current_period, next_period, delta
+
+
+def _make_sensor_attributes(
+    current_prices: Dict[datetime, float],
+    utc_time: datetime,
+    timezone: zoneinfo.ZoneInfo,
+    zone_ceuta_melilla: bool,
+) -> Dict[str, Any]:
+    attributes: Dict[str, Any] = {}
+    actual_time = utc_time.astimezone(timezone)
+    current_period, next_period, delta = _get_current_and_next_tariff_periods(
+        actual_time, zone_ceuta_melilla
+    )
+    attributes["period"] = current_period
+    attributes["next_period"] = next_period
+    attributes["hours_to_next_period"] = delta.total_seconds() // 3600
+
+    prices_sorted = dict(sorted(current_prices.items(), key=lambda x: x[1]))
+    max_price = max(current_prices.values())
+    min_price = min(current_prices.values())
+    try:
+        attributes["price_ratio"] = round(
+            (current_prices[utc_time] - min_price) / (max_price - min_price), 2
+        )
+    except ZeroDivisionError:
+        pass
+    attributes["max_price"] = max_price
+    attributes["max_price_at"] = (
+        next(iter(reversed(prices_sorted))).astimezone(timezone).hour
+    )
+    attributes["min_price"] = min_price
+    attributes["min_price_at"] = next(iter(prices_sorted)).astimezone(timezone).hour
+    attributes["next_best_at"] = list(
+        map(
+            lambda x: x.astimezone(timezone).hour,
+            filter(lambda x: x >= utc_time, prices_sorted.keys()),
+        )
+    )
+
+    def _is_tomorrow_price(ts, ref):
+        return any(map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar())))
+
+    for ts_utc, price_h in current_prices.items():
+        ts_local = ts_utc.astimezone(timezone)
+        if _is_tomorrow_price(ts_local, actual_time):
+            attr_key = f"price_next_day_{ts_local.hour:02d}h"
+        else:
+            attr_key = f"price_{ts_local.hour:02d}h"
+        if attr_key in attributes:  # DST change with duplicated hour :)
+            attr_key += "_d"
+        attributes[attr_key] = price_h
+
+    return attributes
 
 
 class PVPCData:
@@ -68,6 +152,7 @@ class PVPCData:
         self.state_available = False
         self.attributes: Dict[str, Any] = {}
 
+        self.zone_ceuta_melilla = zone_ceuta_melilla
         self.tariff_old = tariff
         if tariff is None:
             self.tariff = None
@@ -167,13 +252,8 @@ class PVPCData:
         if utc_now.isoformat() < DATE_CHANGE_TO_20TD.isoformat():
             tariff = self.tariff_old
         attributes: Dict[str, Any] = {"attribution": _ATTRIBUTION, "tariff": tariff}
-
-        def _local(dt_utc: datetime) -> datetime:
-            return dt_utc.astimezone(self._local_timezone)
-
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
-        actual_time = _local(utc_time)
-        # todo current_period, next_period [P1/P2/P3], next_period_in (hours)
+        actual_time = utc_time.astimezone(self._local_timezone)
         # todo power_period/power_price €/kW*año
         if len(self._current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
@@ -196,32 +276,13 @@ class PVPCData:
             return False
 
         # generate sensor attributes
-        prices_sorted = dict(sorted(self._current_prices.items(), key=lambda x: x[1]))
-        attributes["min_price"] = min(self._current_prices.values())
-        attributes["min_price_at"] = _local(next(iter(prices_sorted))).hour
-        attributes["next_best_at"] = list(
-            map(
-                lambda x: _local(x).hour,
-                filter(lambda x: x >= utc_time, prices_sorted.keys()),
-            )
+        current_hour_attrs = _make_sensor_attributes(
+            self._current_prices,
+            utc_time,
+            self._local_timezone,
+            self.zone_ceuta_melilla,
         )
-
-        def _is_tomorrow_price(ts, ref):
-            return any(
-                map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar()))
-            )
-
-        for ts_utc, price_h in self._current_prices.items():
-            ts_local = _local(ts_utc)
-            if _is_tomorrow_price(ts_local, actual_time):
-                attr_key = f"price_next_day_{ts_local.hour:02d}h"
-            else:
-                attr_key = f"price_{ts_local.hour:02d}h"
-            if attr_key in attributes:  # DST change with duplicated hour :)
-                attr_key += "_d"
-            attributes[attr_key] = price_h
-
-        self.attributes = attributes
+        self.attributes = {**attributes, **current_hour_attrs}
         return True
 
     async def _download_worker(self, wk_name: str, queue: asyncio.Queue):
