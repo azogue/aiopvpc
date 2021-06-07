@@ -15,11 +15,10 @@ import aiohttp
 import async_timeout
 import holidays
 
-from aiopvpc.pvpc_download import (
+from aiopvpc.const import (
+    ATTRIBUTION,
     DATE_CHANGE_TO_20TD,
     DEFAULT_TIMEOUT,
-    extract_pvpc_data,
-    get_url_for_daily_json,
     REFERENCE_TZ,
     TARIFF_KEYS,
     TARIFF_KEYS_NEW,
@@ -28,8 +27,7 @@ from aiopvpc.pvpc_download import (
     UTC_TZ,
     zoneinfo,
 )
-
-_ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
+from aiopvpc.pvpc_download import extract_pvpc_data, get_url_for_daily_json
 
 
 def _ensure_utc_time(ts: datetime):
@@ -260,7 +258,7 @@ class PVPCData:
         tariff = self.tariff
         if utc_now.isoformat() < DATE_CHANGE_TO_20TD.isoformat():
             tariff = self.tariff_old
-        attributes: Dict[str, Any] = {"attribution": _ATTRIBUTION, "tariff": tariff}
+        attributes: Dict[str, Any] = {"attribution": ATTRIBUTION, "tariff": tariff}
         utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
         # todo power_period/power_price €/kW*año
