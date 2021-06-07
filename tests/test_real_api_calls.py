@@ -48,6 +48,6 @@ async def test_real_download_today_async():
     assert 22 < len(prices) < 49
 
     # Check error without session
-    pvpc_handler_bad = PVPCData("discriminacion")
+    pvpc_handler_bad = PVPCData("2.0TD")
     with pytest.raises(AssertionError):
         await pvpc_handler_bad.async_update_prices(datetime.utcnow())

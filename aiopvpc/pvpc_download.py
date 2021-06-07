@@ -4,41 +4,21 @@ Simple aio library to download Spanish electricity hourly prices.
 * URL for JSON daily files
 * Parser for the contents of the JSON files
 """
-import sys
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-if sys.version_info[:2] >= (3, 9):  # pragma: no cover
-    import zoneinfo  # pylint: disable=import-error
-else:  # pragma: no cover
-    from backports import zoneinfo  # pylint: disable=import-error
-
-# Tariffs as internal keys in esios API data
-ESIOS_TARIFFS = ["GEN", "NOC", "VHC"]
-ESIOS_TARIFFS_NEW = ["PCB", "CYM"]
-
-# Tariffs used in HomeAssistant integration
-TARIFFS = ["normal", "discrimination", "electric_car"]
-TARIFF_KEYS = dict(zip(TARIFFS, ESIOS_TARIFFS))
-TARIFFS_NEW = ["2.0TD", "2.0TD (Ceuta/Melilla)"]
-TARIFF_KEYS_NEW = dict(zip(TARIFFS_NEW, ESIOS_TARIFFS_NEW))
-
-# Prices are given in 0 to 24h sets, adjusted to the main timezone in Spain
-REFERENCE_TZ = zoneinfo.ZoneInfo("Europe/Madrid")
-UTC_TZ = zoneinfo.ZoneInfo("UTC")
-
-DEFAULT_TIMEOUT = 5
-DATE_CHANGE_TO_20TD = date(2021, 6, 1)
-_PRECISION = 5
-_RESOURCE = (
-    "https://api.esios.ree.es/archives/70/download_json"
-    "?locale=es&date={day:%Y-%m-%d}"
+from aiopvpc.const import (
+    PRICE_PRECISION,
+    REFERENCE_TZ,
+    URL_PVPC_RESOURCE,
+    UTC_TZ,
+    zoneinfo,
 )
 
 
 def get_url_for_daily_json(day: Union[date, datetime]) -> str:
     """Get URL for JSON file with PVPC data for a specific day (in Europe/Madrid TZ)."""
-    return _RESOURCE.format(day=day)
+    return URL_PVPC_RESOURCE.format(day=day)
 
 
 def extract_pvpc_data(
@@ -52,7 +32,7 @@ def extract_pvpc_data(
         tzinfo=tz,
     ).astimezone(UTC_TZ)
 
-    def _parse_tariff_val(value, prec=_PRECISION) -> float:
+    def _parse_tariff_val(value, prec=PRICE_PRECISION) -> float:
         return round(float(value.replace(",", ".")) / 1000.0, prec)
 
     def _parse_val(value) -> float:
