@@ -18,6 +18,7 @@ import holidays
 from aiopvpc.const import (
     ATTRIBUTION,
     DATE_CHANGE_TO_20TD,
+    DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
     REFERENCE_TZ,
     TARIFF_KEYS,
@@ -73,6 +74,8 @@ def _make_sensor_attributes(
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
     zone_ceuta_melilla: bool,
+    power: float,
+    power_valley: float,
 ) -> Dict[str, Any]:
     attributes: Dict[str, Any] = {}
     actual_time = utc_time.astimezone(timezone)
@@ -80,6 +83,7 @@ def _make_sensor_attributes(
         actual_time, zone_ceuta_melilla
     )
     attributes["period"] = current_period
+    attributes["available_power"] = power_valley if current_period == "P3" else power
     attributes["next_period"] = next_period
     attributes["hours_to_next_period"] = delta.total_seconds() // 3600
 
@@ -143,6 +147,8 @@ class PVPCData:
         websession: Optional[aiohttp.ClientSession] = None,
         local_timezone: Union[str, zoneinfo.ZoneInfo] = REFERENCE_TZ,
         zone_ceuta_melilla: bool = False,
+        power: float = DEFAULT_POWER_KW,
+        power_valley: float = DEFAULT_POWER_KW,
         logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
@@ -158,6 +164,8 @@ class PVPCData:
         self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
+        self._power = power
+        self._power_valley = power_valley
         self.tariff_old = tariff
         self.zone_ceuta_melilla = zone_ceuta_melilla
         if tariff is None:
@@ -288,6 +296,8 @@ class PVPCData:
             utc_time,
             self._local_timezone,
             self.zone_ceuta_melilla,
+            1000.0 * self._power,
+            1000.0 * self._power_valley,
         )
         self.attributes = {**attributes, **current_hour_attrs}
         return True
