@@ -166,8 +166,7 @@ class PVPCData:
         self._current_prices: Dict[datetime, float] = {}
         self._power = power
         self._power_valley = power_valley
-        self.tariff_old = tariff
-        self.zone_ceuta_melilla = zone_ceuta_melilla
+        self._zone_ceuta_melilla = zone_ceuta_melilla
         if tariff is None:
             self.tariff = self.tariff_old = None
             self._logger.warning("Collecting detailed PVPC data for all tariffs")
@@ -295,7 +294,7 @@ class PVPCData:
             self._current_prices,
             utc_time,
             self._local_timezone,
-            self.zone_ceuta_melilla,
+            self._zone_ceuta_melilla,
             1000.0 * self._power,
             1000.0 * self._power_valley,
         )
