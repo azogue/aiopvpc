@@ -18,13 +18,14 @@ Install with `pip install aiopvpc` or clone it to run tests or anything else.
 
 ## Usage
 
-```
+```python
+from datetime import datetime
 from aiopvpc import PVPCData
 
-pvpc_handler = PVPCData(tariff="discrimination")
+pvpc_handler = PVPCData(tariff="discrimination", zone_ceuta_melilla=False)
 
-start = datetime(2020, 3, 20, 22)
-end = datetime(2020, 4, 30, 16)
+start = datetime(2021, 5, 20, 22)
+end = datetime(2021, 6, 7, 16)
 prices_range: dict = await pvpc_handler.async_download_prices_for_range(start, end)
 ```
 
