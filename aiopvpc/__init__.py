@@ -1,5 +1,4 @@
 """Simple aio library to download Spanish electricity hourly prices."""
-from .const import ESIOS_TARIFFS, TARIFF_KEYS, TARIFFS
-from .pvpc_data import PVPCData
+from .pvpc_data import DEFAULT_POWER_KW, PVPCData, TARIFFS
 
-__all__ = ("ESIOS_TARIFFS", "PVPCData", "TARIFF_KEYS", "TARIFFS")
+__all__ = ("DEFAULT_POWER_KW", "PVPCData", "TARIFFS")

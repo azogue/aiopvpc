@@ -20,11 +20,11 @@ from aiopvpc.const import (
     DATE_CHANGE_TO_20TD,
     DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
+    OLD_TARIFF2ID,
+    OLD_TARIFFS,
     REFERENCE_TZ,
-    TARIFF_KEYS,
-    TARIFF_KEYS_NEW,
+    TARIFF2ID,
     TARIFFS,
-    TARIFFS_NEW,
     UTC_TZ,
     zoneinfo,
 )
@@ -170,21 +170,21 @@ class PVPCData:
         if tariff is None:
             self.tariff = self.tariff_old = None
             self._logger.warning("Collecting detailed PVPC data for all tariffs")
-        elif tariff in TARIFFS:
+        elif tariff in OLD_TARIFFS:
             self.tariff_old = tariff
-            self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
+            self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
         else:
             self.tariff_old = "discrimination"
             self.tariff = tariff
-            if tariff not in TARIFFS_NEW:  # pragma: no cover
+            if tariff not in TARIFFS:  # pragma: no cover
                 self._logger.error(
                     "Unknown tariff '%s'. Should be one of %s, or, "
                     "if using it to retrieve old prices, one of %s",
                     tariff,
-                    TARIFFS_NEW,
                     TARIFFS,
+                    OLD_TARIFFS,
                 )
-                self.tariff = TARIFFS_NEW[1] if zone_ceuta_melilla else TARIFFS_NEW[0]
+                self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
 
     async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
         """
@@ -201,9 +201,9 @@ class PVPCData:
         url = get_url_for_daily_json(day)
         assert self._session is not None
         if day < DATE_CHANGE_TO_20TD:
-            tariff = TARIFF_KEYS.get(self.tariff_old) if self.tariff_old else None
+            tariff = OLD_TARIFF2ID.get(self.tariff_old) if self.tariff_old else None
         else:
-            tariff = TARIFF_KEYS_NEW.get(self.tariff) if self.tariff else None
+            tariff = TARIFF2ID.get(self.tariff) if self.tariff else None
 
         try:
             with async_timeout.timeout(self.timeout):
