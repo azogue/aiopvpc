@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from aiohttp import ClientError
 
-from aiopvpc.const import ESIOS_TARIFFS, REFERENCE_TZ
+from aiopvpc.const import OLD_TARIFS_IDS, REFERENCE_TZ
 from aiopvpc.pvpc_data import PVPCData
 from .conftest import MockAsyncSession, TZ_TEST
 
@@ -134,10 +134,10 @@ def test_full_data_download_range(timezone, start, end):
 
     # Check full PVPC data is retrieved
     assert len(data_first_hour) == 30
-    assert all(tag in data_first_hour for tag in ESIOS_TARIFFS)
+    assert all(tag in data_first_hour for tag in OLD_TARIFS_IDS)
 
     # Check units have not changed in full data retrieval (they are in €/MWh)
-    assert all(data_first_hour[tag] > 1 for tag in ESIOS_TARIFFS)
+    assert all(data_first_hour[tag] > 1 for tag in OLD_TARIFS_IDS)
 
     # check tz-alignment (price at 15h is tz-independent)
     assert prices[first_price]["NOC"] == 119.16
