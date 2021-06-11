@@ -109,6 +109,10 @@ def _make_sensor_attributes(
     def _is_tomorrow_price(ts, ref):
         return any(map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar())))
 
+    cheaper_hours = 0
+    ts_last = max(current_prices.keys())
+    price_current = current_prices[utc_time]
+
     for ts_utc, price_h in current_prices.items():
         ts_local = ts_utc.astimezone(timezone)
         if _is_tomorrow_price(ts_local, actual_time):
@@ -118,6 +122,11 @@ def _make_sensor_attributes(
         if attr_key in attributes:  # DST change with duplicated hour :)
             attr_key += "_d"
         attributes[attr_key] = price_h
+
+        if ts_utc > ts_last - timedelta(hours=27) and price_h < price_current:
+              cheaper_hours+=1
+
+    attributes["cheaper_hours"] =  cheaper_hours
 
     return attributes
 
