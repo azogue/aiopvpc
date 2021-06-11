@@ -124,9 +124,9 @@ def _make_sensor_attributes(
         attributes[attr_key] = price_h
 
         if ts_utc > ts_last - timedelta(hours=27) and price_h < price_current:
-              cheaper_hours+=1
+            cheaper_hours += 1
 
-    attributes["cheaper_hours"] =  cheaper_hours
+    attributes["cheaper_hours"] = cheaper_hours
 
     return attributes
 
