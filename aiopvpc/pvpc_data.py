@@ -71,8 +71,8 @@ def _make_sensor_attributes(
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
     zone_ceuta_melilla: bool,
-    power: float,
-    power_valley: float,
+    power: int,
+    power_valley: int,
 ) -> Dict[str, Any]:
     attributes: Dict[str, Any] = {}
     actual_time = utc_time.astimezone(timezone)
@@ -292,8 +292,8 @@ class PVPCData:
             utc_time,
             self._local_timezone,
             self._zone_ceuta_melilla,
-            1000.0 * self._power,
-            1000.0 * self._power_valley,
+            int(1000 * self._power),
+            int(1000 * self._power_valley),
         )
         self.attributes = {**attributes, **current_hour_attrs}
         return True
