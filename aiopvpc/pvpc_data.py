@@ -75,21 +75,34 @@ def _make_sensor_attributes(
     power_valley: int,
 ) -> Dict[str, Any]:
     attributes: Dict[str, Any] = {}
-    actual_time = utc_time.astimezone(timezone)
+    current_price = current_prices[utc_time]
+    local_time = utc_time.astimezone(timezone)
     current_period, next_period, delta = _get_current_and_next_tariff_periods(
-        actual_time, zone_ceuta_melilla
+        local_time, zone_ceuta_melilla
     )
     attributes["period"] = current_period
     attributes["available_power"] = power_valley if current_period == "P3" else power
     attributes["next_period"] = next_period
-    attributes["hours_to_next_period"] = delta.total_seconds() // 3600
+    attributes["hours_to_next_period"] = int(delta.total_seconds()) // 3600
+
+    better_prices_ahead = [
+        (ts, price)
+        for ts, price in current_prices.items()
+        if ts > utc_time and price < current_price
+    ]
+    if better_prices_ahead:
+        next_better_ts, next_better_price = better_prices_ahead[0]
+        delta_better = next_better_ts - utc_time
+        attributes["next_better_price"] = next_better_price
+        attributes["hours_to_better_price"] = int(delta_better.total_seconds()) // 3600
+        attributes["num_better_prices_ahead"] = len(better_prices_ahead)
 
     prices_sorted = dict(sorted(current_prices.items(), key=lambda x: x[1]))
     max_price = max(current_prices.values())
     min_price = min(current_prices.values())
     try:
         attributes["price_ratio"] = round(
-            (current_prices[utc_time] - min_price) / (max_price - min_price), 2
+            (current_price - min_price) / (max_price - min_price), 2
         )
     except ZeroDivisionError:  # pragma: no cover
         pass
@@ -111,7 +124,7 @@ def _make_sensor_attributes(
 
     for ts_utc, price_h in current_prices.items():
         ts_local = ts_utc.astimezone(timezone)
-        if _is_tomorrow_price(ts_local, actual_time):
+        if _is_tomorrow_price(ts_local, local_time):
             attr_key = f"price_next_day_{ts_local.hour:02d}h"
         else:
             attr_key = f"price_{ts_local.hour:02d}h"
