@@ -1,6 +1,6 @@
 # Changelog
 
-## [v2.2.0](https://github.com/azogue/aiopvpc/tree/v2.2.0) - New sensor attributes for new tariff 2.0TD (2021-06-??)
+## [v2.2.0](https://github.com/azogue/aiopvpc/tree/v2.2.0) - New sensor attributes for new tariff 2.0TD (2021-06-12)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.0...v2.1.2)
 
@@ -8,8 +8,9 @@
 
 * Determine tariff period (P1/P2/P3) for current hour, and calculate the delta hours to the next one, publishing attributes `period`, `next_period`, and `hours_to_next_period`
 * Add `price_ratio`, `max_price`, and `max_price_at` attributes
-* Add contracted powers as new parameters to show the `available_power` for each period
-* Use `holidays` library to retrieve national holidays
+* When there are cheaper prices ahead, add attributes `next_better_price`, `hours_to_better_price`, and `num_better_prices_ahead`
+* Add contracted power in kW as new parameters (power for P1/P2 and power for P3) to show the `available_power` for each period
+* Use `holidays` library to retrieve national holidays where to apply the valley period P3 for the full day
 
 ## [v2.1.2](https://github.com/azogue/aiopvpc/tree/v2.1.2) - Quick adapt to new tariff 2.0TD (2021-05-31)
 
