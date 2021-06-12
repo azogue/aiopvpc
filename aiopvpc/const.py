@@ -7,7 +7,7 @@ from datetime import date
 if sys.version_info[:2] >= (3, 9):  # pragma: no cover
     import zoneinfo  # pylint: disable=import-error
 else:  # pragma: no cover
-    from backports import zoneinfo  # pylint: disable=import-error
+    from backports import zoneinfo  # type: ignore
 
 DATE_CHANGE_TO_20TD = date(2021, 6, 1)
 
