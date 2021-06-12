@@ -98,6 +98,7 @@ def _make_sensor_attributes(
         attributes["num_better_prices_ahead"] = len(better_prices_ahead)
 
     prices_sorted = dict(sorted(current_prices.items(), key=lambda x: x[1]))
+    attributes["price_position"] = list(prices_sorted.values()).index(current_price) + 1
     max_price = max(current_prices.values())
     min_price = min(current_prices.values())
     try:
