@@ -1,12 +1,19 @@
 """Tests for aiopvpc."""
 from datetime import datetime, timedelta
 
+import holidays
 import pytest
 
 from aiopvpc.const import REFERENCE_TZ
 from aiopvpc.pvpc_data import _tariff_period_key
 
+_HOLIDAYS_VERSION = tuple(map(int, holidays.__version__.split(".")))
 
+
+@pytest.mark.skipif(
+    _HOLIDAYS_VERSION > (0, 11, 1),
+    reason="Expected Good Friday as national holiday, please modify the test!",
+)
 @pytest.mark.parametrize(
     "year, days_weekend_p3, extra_days_p3",
     (
