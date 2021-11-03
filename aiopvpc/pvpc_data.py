@@ -31,6 +31,12 @@ from aiopvpc.const import (
 from aiopvpc.pvpc_download import extract_pvpc_data, get_url_for_daily_json
 
 
+_REQUEST_HEADERS = {
+    "User-Agent": "aioPVPC Python library",
+    "Accept": "application/json",
+}
+
+
 def _ensure_utc_time(ts: datetime):
     if ts.tzinfo is None:
         return datetime(*ts.timetuple()[:6], tzinfo=UTC_TZ)
@@ -43,7 +49,6 @@ def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
     """Return period key (P1/P2/P3) for current hour."""
     day = local_ts.date()
     # TODO review 'festivos nacionales no sustituibles de fecha fija', + 6/1
-    # TODO review Viernes Santo en holidays library
     national_holiday = day in holidays.Spain(observed=False, years=day.year).keys()
     if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
         return "P3"
@@ -217,11 +222,15 @@ class PVPCData:
             tariff = TARIFF2ID.get(self.tariff) if self.tariff else None
 
         try:
-            with async_timeout.timeout(self.timeout):
-                resp = await self._session.get(url)
+            async with async_timeout.timeout(self.timeout):
+                resp = await self._session.get(url, headers=_REQUEST_HEADERS)
                 if resp.status < 400:
                     data = await resp.json()
                     return extract_pvpc_data(data, tariff, tz=self._local_timezone)
+                elif resp.status == 403:  # pragma: no cover
+                    self._logger.error(
+                        "Forbidden error with '%s' -> Headers:  %s", url, resp.headers
+                    )
         except KeyError:
             self._logger.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
