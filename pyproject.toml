@@ -44,8 +44,8 @@ readme = "README.md"
 repository = "https://github.com/azogue/aiopvpc"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
-aiohttp = ">=3.6.2"
+python = ">=3.8,<4.0"
+aiohttp = ">=3.7.4.post0"
 async_timeout = ">=3.0.1"
 holidays = ">0.11.1"
 "backports.zoneinfo" = {version = "^0.2.1", python = "<3.9"}
