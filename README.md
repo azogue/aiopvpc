@@ -1,6 +1,6 @@
 [![PyPi](https://pypip.in/v/aiopvpc/badge.svg)](https://pypi.org/project/aiopvpc/)
 [![Wheel](https://pypip.in/wheel/aiopvpc/badge.svg)](https://pypi.org/project/aiopvpc/)
-[![Travis Status](https://travis-ci.org/azogue/aiopvpc.svg?branch=master)](https://travis-ci.org/azogue/aiopvpc)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/azogue/aiopvpc/master.svg)](https://results.pre-commit.ci/latest/github/azogue/aiopvpc/master)
 [![codecov](https://codecov.io/gh/azogue/aiopvpc/branch/master/graph/badge.svg)](https://codecov.io/gh/azogue/aiopvpc)
 
 # aiopvpc
