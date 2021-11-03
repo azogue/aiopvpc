@@ -2,7 +2,7 @@ language: python
 dist: xenial   # required for Python >= 3.7
 os: linux
 python:
-- 3.8
+- 3.9
 stages:
 - lint
 - test
