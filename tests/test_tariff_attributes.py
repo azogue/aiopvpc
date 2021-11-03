@@ -10,10 +10,6 @@ from aiopvpc.pvpc_data import _tariff_period_key
 _HOLIDAYS_VERSION = tuple(map(int, holidays.__version__.split(".")))
 
 
-@pytest.mark.skipif(
-    _HOLIDAYS_VERSION > (0, 11, 1),
-    reason="Expected Good Friday as national holiday, please modify the test!",
-)
 @pytest.mark.parametrize(
     "year, days_weekend_p3, extra_days_p3",
     (
@@ -34,5 +30,4 @@ def test_number_of_national_holidays(year, days_weekend_p3, extra_days_p3):
                 holidays_p3 += 1
         day += timedelta(days=1)
     assert weekend_days_p3 == days_weekend_p3
-    # TODO bump python-holidays version to fix Good Friday as national holiday
-    assert holidays_p3 + 1 == extra_days_p3
+    assert holidays_p3 == extra_days_p3
