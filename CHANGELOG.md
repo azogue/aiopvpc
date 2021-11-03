@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.2.1](https://github.com/azogue/aiopvpc/tree/v2.2.1) - Dependency update (2021-11-03)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.1...v2.2.0)
+
+**Changes:**
+
+* Fix Esios request returning a 403 status code since 2021-11-02, by:
+  - just adding an 'User-Agent' to request headers, if `aiohttp==3.7.4.post0`
+  - or upgrading to `aiohttp==3.8.0`, where it is not needed and the original request works like before
+* Add better error logging for this 'forbidden' error if reappears in the future
+* Update deps, requiring holidays>0.11.1
+
 ## [v2.2.0](https://github.com/azogue/aiopvpc/tree/v2.2.0) - New sensor attributes for new tariff 2.0TD (2021-06-12)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.0...v2.1.2)
