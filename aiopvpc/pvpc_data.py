@@ -30,7 +30,6 @@ from aiopvpc.const import (
 )
 from aiopvpc.pvpc_download import extract_pvpc_data, get_url_for_daily_json
 
-
 _REQUEST_HEADERS = {
     "User-Agent": "aioPVPC Python library",
     "Accept": "application/json",
