@@ -9,7 +9,7 @@ from aiohttp import ClientError
 
 from aiopvpc.const import OLD_TARIFS_IDS, REFERENCE_TZ
 from aiopvpc.pvpc_data import PVPCData
-from .conftest import MockAsyncSession, TZ_TEST
+from tests.conftest import MockAsyncSession, TZ_TEST
 
 
 @pytest.mark.parametrize(
