@@ -1,6 +1,21 @@
 # Changelog
 
-## [v2.2.1](https://github.com/azogue/aiopvpc/tree/v2.2.1) - Dependency update (2021-11-03)
+## [v2.2.2](https://github.com/azogue/aiopvpc/tree/v2.2.2) - Migrate CI from travis to gh-actions (2021-11-04)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.2...v2.2.1)
+
+**Changes:**
+
+* :art: Add isort to pre-commit config
+* :green_heart: Add configuration for pre-commit.ci to run linter checks there
+* :green_heart: CI flow with GitHub Actions to
+  - install library with `poetry`
+  - run tests
+  - upload coverage when merging to master
+  - publish a new pypi version when merging to master if `pyproject.toml` changes
+* :fire: Remove previus travis CI config
+
+## [v2.2.1](https://github.com/azogue/aiopvpc/tree/v2.2.1) - Quickfix for 403 status code from ESIOS API (2021-11-03)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.1...v2.2.0)
 
