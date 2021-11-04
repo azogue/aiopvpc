@@ -1,7 +1,16 @@
-[![PyPi](https://pypip.in/v/aiopvpc/badge.svg)](https://pypi.org/project/aiopvpc/)
-[![Wheel](https://pypip.in/wheel/aiopvpc/badge.svg)](https://pypi.org/project/aiopvpc/)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/azogue/aiopvpc/master.svg)](https://results.pre-commit.ci/latest/github/azogue/aiopvpc/master)
-[![codecov](https://codecov.io/gh/azogue/aiopvpc/branch/master/graph/badge.svg)](https://codecov.io/gh/azogue/aiopvpc)
+[![PyPI Version][pypi-image]][pypi-url]
+[![pre-commit.ci Status][pre-commit-ci-image]][pre-commit-ci-url]
+[![Build Status][build-image]][build-url]
+[![Code Coverage][coverage-image]][coverage-url]
+<!-- Badges -->
+[pypi-image]: https://img.shields.io/pypi/v/aiopvpc
+[pypi-url]: https://pypi.org/project/aiopvpc/
+[pre-commit-ci-image]: https://results.pre-commit.ci/badge/github/azogue/aiopvpc/master.svg
+[pre-commit-ci-url]: https://results.pre-commit.ci/latest/github/azogue/aiopvpc/master
+[build-image]: https://github.com/azogue/aiopvpc/actions/workflows/main.yml/badge.svg
+[build-url]: https://github.com/azogue/aiopvpc/actions/workflows/main.yml
+[coverage-image]: https://codecov.io/gh/azogue/aiopvpc/branch/master/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/azogue/aiopvpc
 
 # aiopvpc
 
