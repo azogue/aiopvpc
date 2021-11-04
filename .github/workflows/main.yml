@@ -26,4 +26,8 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run tests
-        run: poetry run pytest -m ''
+        run: poetry run pytest
+
+      - name: Upload coverage
+        # if: ${{ github.ref == 'refs/heads/master' }}
+        uses: codecov/codecov-action@v2
