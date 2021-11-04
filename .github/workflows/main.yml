@@ -6,7 +6,7 @@ on:
     branches: [master]
 
 jobs:
-  test:
+  test-and-publish-flow:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -28,19 +28,21 @@ jobs:
       - name: Run tests
         run: poetry run pytest
 
+        # upload coverage only on master branch
       - name: Upload coverage
-        # if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: codecov/codecov-action@v2
 
-      - uses: dorny/paths-filter@v2
+        # publish version only when pyproject.toml is changed in master
+      - name: Filter changes in pyproject
+        uses: dorny/paths-filter@v2
         id: changes
         with:
           filters: |
             root:
               - 'pyproject.toml'
 
-        # run only if pyproject.toml is changed in master
-      - if: ${{ (github.ref != 'refs/heads/master') && (steps.changes.outputs.root == 'false')}}
+      - if: ${{ (github.ref == 'refs/heads/master') && (steps.changes.outputs.root == 'true')}}
         name: Build and publish
         env:
           PYPI_USER: ${{ secrets.PYPI_USER }}
