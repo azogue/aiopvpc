@@ -13,7 +13,6 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import aiohttp
 import async_timeout
-import holidays
 
 from aiopvpc.const import (
     ATTRIBUTION,
@@ -28,7 +27,9 @@ from aiopvpc.const import (
     UTC_TZ,
     zoneinfo,
 )
+from aiopvpc.prices import make_price_sensor_attributes
 from aiopvpc.pvpc_download import extract_pvpc_data, get_url_for_daily_json
+from aiopvpc.pvpc_tariff import get_current_and_next_tariff_periods
 
 _REQUEST_HEADERS = {
     "User-Agent": "aioPVPC Python library",
@@ -42,102 +43,6 @@ def _ensure_utc_time(ts: datetime):
     elif str(ts.tzinfo) != str(UTC_TZ):
         return ts.astimezone(UTC_TZ)
     return ts
-
-
-def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
-    """Return period key (P1/P2/P3) for current hour."""
-    day = local_ts.date()
-    # TODO review 'festivos nacionales no sustituibles de fecha fija', + 6/1
-    national_holiday = day in holidays.Spain(observed=False, years=day.year).keys()
-    if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
-        return "P3"
-    elif zone_ceuta_melilla and local_ts.hour in (8, 9, 10, 15, 16, 17, 18, 23):
-        return "P2"
-    elif not zone_ceuta_melilla and local_ts.hour in (8, 9, 14, 15, 16, 17, 22, 23):
-        return "P2"
-    return "P1"
-
-
-def _get_current_and_next_tariff_periods(
-    local_ts: datetime, zone_ceuta_melilla: bool
-) -> Tuple[str, str, timedelta]:
-    current_period = _tariff_period_key(local_ts, zone_ceuta_melilla)
-    delta = timedelta(hours=1)
-    while (
-        next_period := _tariff_period_key(local_ts + delta, zone_ceuta_melilla)
-    ) == current_period:
-        delta += timedelta(hours=1)
-    return current_period, next_period, delta
-
-
-def _make_sensor_attributes(
-    current_prices: Dict[datetime, float],
-    utc_time: datetime,
-    timezone: zoneinfo.ZoneInfo,
-    zone_ceuta_melilla: bool,
-    power: int,
-    power_valley: int,
-) -> Dict[str, Any]:
-    attributes: Dict[str, Any] = {}
-    current_price = current_prices[utc_time]
-    local_time = utc_time.astimezone(timezone)
-    current_period, next_period, delta = _get_current_and_next_tariff_periods(
-        local_time, zone_ceuta_melilla
-    )
-    attributes["period"] = current_period
-    attributes["available_power"] = power_valley if current_period == "P3" else power
-    attributes["next_period"] = next_period
-    attributes["hours_to_next_period"] = int(delta.total_seconds()) // 3600
-
-    better_prices_ahead = [
-        (ts, price)
-        for ts, price in current_prices.items()
-        if ts > utc_time and price < current_price
-    ]
-    if better_prices_ahead:
-        next_better_ts, next_better_price = better_prices_ahead[0]
-        delta_better = next_better_ts - utc_time
-        attributes["next_better_price"] = next_better_price
-        attributes["hours_to_better_price"] = int(delta_better.total_seconds()) // 3600
-        attributes["num_better_prices_ahead"] = len(better_prices_ahead)
-
-    prices_sorted = dict(sorted(current_prices.items(), key=lambda x: x[1]))
-    attributes["price_position"] = list(prices_sorted.values()).index(current_price) + 1
-    max_price = max(current_prices.values())
-    min_price = min(current_prices.values())
-    try:
-        attributes["price_ratio"] = round(
-            (current_price - min_price) / (max_price - min_price), 2
-        )
-    except ZeroDivisionError:  # pragma: no cover
-        pass
-    attributes["max_price"] = max_price
-    attributes["max_price_at"] = (
-        next(iter(reversed(prices_sorted))).astimezone(timezone).hour
-    )
-    attributes["min_price"] = min_price
-    attributes["min_price_at"] = next(iter(prices_sorted)).astimezone(timezone).hour
-    attributes["next_best_at"] = list(
-        map(
-            lambda x: x.astimezone(timezone).hour,
-            filter(lambda x: x >= utc_time, prices_sorted.keys()),
-        )
-    )
-
-    def _is_tomorrow_price(ts, ref):
-        return any(map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar())))
-
-    for ts_utc, price_h in current_prices.items():
-        ts_local = ts_utc.astimezone(timezone)
-        if _is_tomorrow_price(ts_local, local_time):
-            attr_key = f"price_next_day_{ts_local.hour:02d}h"
-        else:
-            attr_key = f"price_{ts_local.hour:02d}h"
-        if attr_key in attributes:  # DST change with duplicated hour :)
-            attr_key += "_d"
-        attributes[attr_key] = price_h
-
-    return attributes
 
 
 class PVPCData:
@@ -308,16 +213,22 @@ class PVPCData:
             self.attributes = attributes
             return False
 
-        # generate sensor attributes
-        current_hour_attrs = _make_sensor_attributes(
-            self._current_prices,
-            utc_time,
-            self._local_timezone,
-            self._zone_ceuta_melilla,
-            int(1000 * self._power),
-            int(1000 * self._power_valley),
+        # generate PVPC 2.0TD sensor attributes
+        local_time = utc_time.astimezone(self._local_timezone)
+        (current_period, next_period, delta,) = get_current_and_next_tariff_periods(
+            local_time, zone_ceuta_melilla=self._zone_ceuta_melilla
         )
-        self.attributes = {**attributes, **current_hour_attrs}
+        attributes["period"] = current_period
+        power = self._power_valley if current_period == "P3" else self._power
+        attributes["available_power"] = int(1000 * power)
+        attributes["next_period"] = next_period
+        attributes["hours_to_next_period"] = int(delta.total_seconds()) // 3600
+
+        # generate price attributes
+        price_attrs = make_price_sensor_attributes(
+            self._current_prices, utc_time, self._local_timezone
+        )
+        self.attributes = {**attributes, **price_attrs}
         return True
 
     async def _download_worker(self, wk_name: str, queue: asyncio.Queue):
