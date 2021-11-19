@@ -1,6 +1,6 @@
 # Changelog
 
-## [v2.2.3](https://github.com/azogue/aiopvpc/tree/v2.2.3) - Splitt today / tomorrow price sensor attributes (2021-11-04)
+## [v2.2.3](https://github.com/azogue/aiopvpc/tree/v2.2.3) - Split today / tomorrow price sensor attributes (2021-11-19)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.3...v2.2.2)
 
