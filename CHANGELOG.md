@@ -1,5 +1,13 @@
 # Changelog
 
+## [v2.2.3](https://github.com/azogue/aiopvpc/tree/v2.2.3) - Splitt today / tomorrow price sensor attributes (2021-11-04)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.3...v2.2.2)
+
+**Changes:**
+
+* Generate different sets of sensor attributes for hourly prices for current day and for the next day (available at evening), so attrs like `price_position` or `price_ratio` don't change for the current day when next-day prices are received.
+
 ## [v2.2.2](https://github.com/azogue/aiopvpc/tree/v2.2.2) - Migrate CI from travis to gh-actions (2021-11-04)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.2...v2.2.1)

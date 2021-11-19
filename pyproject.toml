@@ -40,7 +40,7 @@ markers = [
 
 [tool.poetry]
 name = "aiopvpc"
-version = "2.2.2"
+version = "2.2.3"
 description = "Retrieval of Spanish Electricity hourly prices (PVPC)"
 authors = ["Eugenio Panadero <eugenio.panadero@gmail.com>"]
 license = "MIT"
