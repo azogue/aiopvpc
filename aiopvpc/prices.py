@@ -1,7 +1,8 @@
 """ESIOS API handler for HomeAssistant. Hourly price attributes."""
-import zoneinfo
 from datetime import datetime
 from typing import Any, Dict, Tuple
+
+from aiopvpc.const import zoneinfo
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
