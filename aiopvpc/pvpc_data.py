@@ -24,25 +24,21 @@ from aiopvpc.const import (
     REFERENCE_TZ,
     TARIFF2ID,
     TARIFFS,
+    URL_PVPC_RESOURCE,
     UTC_TZ,
     zoneinfo,
 )
+from aiopvpc.parser import extract_pvpc_data
 from aiopvpc.prices import make_price_sensor_attributes
-from aiopvpc.pvpc_download import extract_pvpc_data, get_url_for_daily_json
 from aiopvpc.pvpc_tariff import get_current_and_next_tariff_periods
+from aiopvpc.utils import ensure_utc_time
+
+_LOGGER = logging.getLogger(__name__)
 
 _REQUEST_HEADERS = {
     "User-Agent": "aioPVPC Python library",
     "Accept": "application/json",
 }
-
-
-def _ensure_utc_time(ts: datetime):
-    if ts.tzinfo is None:
-        return datetime(*ts.timetuple()[:6], tzinfo=UTC_TZ)
-    elif str(ts.tzinfo) != str(UTC_TZ):
-        return ts.astimezone(UTC_TZ)
-    return ts
 
 
 class PVPCData:
@@ -69,7 +65,6 @@ class PVPCData:
         zone_ceuta_melilla: bool = False,
         power: float = DEFAULT_POWER_KW,
         power_valley: float = DEFAULT_POWER_KW,
-        logger: Optional[logging.Logger] = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         self.source_available = True
@@ -81,7 +76,6 @@ class PVPCData:
         self._session = websession
         self._with_initial_session = websession is not None
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
-        self._logger = logger or logging.getLogger(__name__)
 
         self._current_prices: Dict[datetime, float] = {}
         self._power = power
@@ -89,7 +83,7 @@ class PVPCData:
         self._zone_ceuta_melilla = zone_ceuta_melilla
         if tariff is None:
             self.tariff = self.tariff_old = None
-            self._logger.warning("Collecting detailed PVPC data for all tariffs")
+            _LOGGER.warning("Collecting detailed PVPC data for all tariffs")
         elif tariff in OLD_TARIFFS:
             self.tariff_old = tariff
             self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
@@ -97,7 +91,7 @@ class PVPCData:
             self.tariff_old = "discrimination"
             self.tariff = tariff
             if tariff not in TARIFFS:  # pragma: no cover
-                self._logger.error(
+                _LOGGER.error(
                     "Unknown tariff '%s'. Should be one of %s, or, "
                     "if using it to retrieve old prices, one of %s",
                     tariff,
@@ -118,7 +112,7 @@ class PVPCData:
 
         Prices are referenced with datetimes in UTC.
         """
-        url = get_url_for_daily_json(day)
+        url = URL_PVPC_RESOURCE.format(day=day)
         assert self._session is not None
         if day < DATE_CHANGE_TO_20TD:
             tariff = OLD_TARIFF2ID.get(self.tariff_old) if self.tariff_old else None
@@ -132,17 +126,17 @@ class PVPCData:
                     data = await resp.json()
                     return extract_pvpc_data(data, tariff, tz=self._local_timezone)
                 elif resp.status == 403:  # pragma: no cover
-                    self._logger.error(
+                    _LOGGER.error(
                         "Forbidden error with '%s' -> Headers:  %s", url, resp.headers
                     )
         except KeyError:
-            self._logger.debug("Bad try on getting prices for %s", day)
+            _LOGGER.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
             if self.source_available:
-                self._logger.warning("Timeout error requesting data from '%s'", url)
+                _LOGGER.warning("Timeout error requesting data from '%s'", url)
         except aiohttp.ClientError:
             if self.source_available:
-                self._logger.warning("Client error in '%s'", url)
+                _LOGGER.warning("Client error in '%s'", url)
         return {}
 
     async def async_update_prices(self, now: datetime) -> Dict[datetime, float]:
@@ -153,7 +147,7 @@ class PVPCData:
         If not, it is converted to UTC from the original timezone,
         or set as UTC-time if it is a naive datetime.
         """
-        utc_now = _ensure_utc_time(now)
+        utc_now = ensure_utc_time(now)
         local_ref_now = utc_now.astimezone(REFERENCE_TZ)
         prices = await self._download_pvpc_prices(local_ref_now.date())
         if not prices:
@@ -167,7 +161,7 @@ class PVPCData:
                 prices.update(prices_fut)
 
         self._current_prices.update(prices)
-        self._logger.debug(
+        _LOGGER.debug(
             "Download done, now with %d prices from %s UTC",
             len(self._current_prices),
             list(self._current_prices)[0].strftime("%Y-%m-%d %Hh"),
@@ -190,7 +184,7 @@ class PVPCData:
         if utc_now.isoformat() < DATE_CHANGE_TO_20TD.isoformat():
             tariff = self.tariff_old
         attributes: Dict[str, Any] = {"attribution": ATTRIBUTION, "tariff": tariff}
-        utc_time = _ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
+        utc_time = ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
         # todo power_period/power_price €/kW*año
         if len(self._current_prices) > 25 and actual_time.hour < 20:
@@ -241,13 +235,13 @@ class PVPCData:
                 took = monotonic() - tic
                 queue.task_done()
                 if not prices:
-                    self._logger.warning(
+                    _LOGGER.warning(
                         "[%s]: Bad download for day: %s in %.3f s", wk_name, day, took
                     )
                     continue
 
                 downloaded_prices.append((day, prices))
-                self._logger.debug(
+                _LOGGER.debug(
                     "[%s]: Task done for day: %s in %.3f s", wk_name, day, took
                 )
         except asyncio.CancelledError:
@@ -324,7 +318,7 @@ class PVPCData:
             if start_utc <= hour <= end_utc
         }
         if prices:
-            self._logger.warning(
+            _LOGGER.warning(
                 "Download of %d prices from %s to %s in %.2f sec",
                 len(prices),
                 min(prices),
@@ -332,7 +326,7 @@ class PVPCData:
                 monotonic() - tic,
             )
         else:
-            self._logger.error(
+            _LOGGER.error(
                 "BAD Download of PVPC prices from %s to %s in %.2f sec",
                 start,
                 end,
