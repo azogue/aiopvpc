@@ -7,7 +7,9 @@ https://www.home-assistant.io/integrations/pvpc_hourly_pricing/
 """
 import asyncio
 import logging
+from collections import deque
 from datetime import date, datetime, timedelta
+from random import random
 from time import monotonic
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
@@ -35,13 +37,26 @@ from aiopvpc.utils import ensure_utc_time
 
 _LOGGER = logging.getLogger(__name__)
 
-_REQUEST_HEADERS = {
-    "User-Agent": (
+# 🙈😱 Use randomized standard User-Agent info to avoid server banning 😖🤷
+_STANDARD_USER_AGENTS = [
+    (
+        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) "
+        "Gecko/20100101 Firefox/47.3"
+    ),
+    (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) "
+        "Gecko/20100101 Firefox/43.4"
+    ),
+    (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
     ),
-    "Accept": "application/json",
-}
+    (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 11_3_1 like Mac OS X) "
+        "AppleWebKit/603.1.30 (KHTML, like Gecko)"
+    ),
+    "Version/10.0 Mobile/14E304 Safari/602.1",
+]
 
 
 class PVPCData:
@@ -77,6 +92,12 @@ class PVPCData:
 
         self.timeout = timeout
         self._session = websession
+        self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
+        self._headers = {
+            "User-Agent": self._user_agents[0],
+            "Accept": "application/json",
+        }
+
         self._with_initial_session = websession is not None
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
 
@@ -103,6 +124,35 @@ class PVPCData:
                 )
                 self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
 
+    async def _api_get_prices(
+        self, url: str, tariff: Optional[str]
+    ) -> Dict[datetime, Any]:
+        assert self._session is not None
+        resp = await self._session.get(url, headers=self._headers)
+        if resp.status < 400:
+            data = await resp.json()
+            return extract_pvpc_data(data, tariff, tz=self._local_timezone)
+        elif resp.status == 403:  # pragma: no cover
+            _LOGGER.warning(
+                "Forbidden error with '%s' -> Headers: %s", url, resp.headers
+            )
+            # loop user-agent
+            self._user_agents.rotate()
+            self._headers["User-Agent"] = self._user_agents[0]
+            # and retry
+            resp = await self._session.get(url, headers=self._headers)
+            if resp.status < 400:
+                data = await resp.json()
+                return extract_pvpc_data(data, tariff, tz=self._local_timezone)
+            elif resp.status == 403:
+                _LOGGER.error(
+                    "Repeaed forbidden error with '%s' -> Headers: %s",
+                    url,
+                    resp.headers,
+                )
+                self._headers.pop("User-Agent")
+        return {}
+
     async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
         """
         PVPC data extractor.
@@ -116,22 +166,14 @@ class PVPCData:
         Prices are referenced with datetimes in UTC.
         """
         url = URL_PVPC_RESOURCE.format(day=day)
-        assert self._session is not None
         if day < DATE_CHANGE_TO_20TD:
             tariff = OLD_TARIFF2ID.get(self.tariff_old) if self.tariff_old else None
         else:
             tariff = TARIFF2ID.get(self.tariff) if self.tariff else None
 
         try:
-            async with async_timeout.timeout(self.timeout):
-                resp = await self._session.get(url, headers=_REQUEST_HEADERS)
-                if resp.status < 400:
-                    data = await resp.json()
-                    return extract_pvpc_data(data, tariff, tz=self._local_timezone)
-                elif resp.status == 403:  # pragma: no cover
-                    _LOGGER.error(
-                        "Forbidden error with '%s' -> Headers:  %s", url, resp.headers
-                    )
+            async with async_timeout.timeout(2 * self.timeout):
+                return await self._api_get_prices(url, tariff)
         except KeyError:
             _LOGGER.debug("Bad try on getting prices for %s", day)
         except asyncio.TimeoutError:
