@@ -4,21 +4,10 @@ Simple aio library to download Spanish electricity hourly prices.
 * URL for JSON daily files
 * Parser for the contents of the JSON files
 """
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
-from aiopvpc.const import (
-    PRICE_PRECISION,
-    REFERENCE_TZ,
-    URL_PVPC_RESOURCE,
-    UTC_TZ,
-    zoneinfo,
-)
-
-
-def get_url_for_daily_json(day: Union[date, datetime]) -> str:
-    """Get URL for JSON file with PVPC data for a specific day (in Europe/Madrid TZ)."""
-    return URL_PVPC_RESOURCE.format(day=day)
+from aiopvpc.const import PRICE_PRECISION, REFERENCE_TZ, UTC_TZ, zoneinfo
 
 
 def extract_pvpc_data(
