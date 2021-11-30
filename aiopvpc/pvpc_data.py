@@ -194,6 +194,27 @@ class PVPCData:
         """
         utc_now = ensure_utc_time(now)
         local_ref_now = utc_now.astimezone(REFERENCE_TZ)
+        current_num_prices = len(self._current_prices)
+        if local_ref_now.hour >= 20 and current_num_prices > 30:
+            # already have today+tomorrow prices, avoid requests
+            _LOGGER.info(
+                "Evening download avoided, now with %d prices from %s UTC",
+                current_num_prices,
+                list(self._current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            )
+            return self._current_prices
+        elif current_num_prices > 20 and (
+            list(self._current_prices)[0].astimezone(REFERENCE_TZ).date()
+            == local_ref_now.date()
+        ):
+            # already have today prices, avoid request
+            _LOGGER.info(
+                "Download avoided, now with %d prices from %s UTC",
+                current_num_prices,
+                list(self._current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            )
+            return self._current_prices
+
         prices = await self._download_pvpc_prices(local_ref_now.date())
         if not prices:
             return prices
