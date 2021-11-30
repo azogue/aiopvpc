@@ -36,7 +36,10 @@ from aiopvpc.utils import ensure_utc_time
 _LOGGER = logging.getLogger(__name__)
 
 _REQUEST_HEADERS = {
-    "User-Agent": "aioPVPC Python library",
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36"
+    ),
     "Accept": "application/json",
 }
 
