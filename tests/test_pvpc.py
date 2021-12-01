@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from aiohttp import ClientError
 
-from aiopvpc.const import OLD_TARIFS_IDS, REFERENCE_TZ
+from aiopvpc.const import OLD_TARIFS_IDS, REFERENCE_TZ, UTC_TZ
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
 
@@ -177,3 +177,81 @@ async def test_download_range(caplog):
     # Check only tariff values are retrieved
     assert isinstance(prices[first_price], float)
     assert prices[first_price] < 1
+
+
+async def _run_h_step(
+    mock_session: MockAsyncSession, pvpc_data: PVPCData, start: datetime
+):
+    if pvpc_data._current_prices:
+        logging.debug(
+            "[Calls=%d]-> start=%s --> %s -> %s (%d prices)",
+            mock_session.call_count,
+            start,
+            list(pvpc_data._current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            list(pvpc_data._current_prices)[-1].strftime("%Y-%m-%d %Hh"),
+            len(pvpc_data._current_prices),
+        )
+    await pvpc_data.async_update_prices(start)
+    assert pvpc_data.process_state_and_attributes(start)
+    start += timedelta(hours=1)
+    return start, pvpc_data._current_prices
+
+
+# TODO review download schedule for Canary Islands TZ
+@pytest.mark.parametrize("local_tz", (TZ_TEST, REFERENCE_TZ))
+@pytest.mark.asyncio
+async def test_reduced_api_download_rate(local_tz):
+    """Test time evolution and number of API calls."""
+    start = datetime(2019, 10, 26, 15, tzinfo=UTC_TZ)
+    mock_session = MockAsyncSession()
+    # logging.critical(local_tz)
+    pvpc_data = PVPCData(
+        tariff="electric_car", local_timezone=local_tz, websession=mock_session
+    )
+
+    # avoid extra calls at day if already got all today prices
+    for _ in range(3):
+        start, prices = await _run_h_step(mock_session, pvpc_data, start)
+        assert mock_session.call_count == 1
+        assert len(prices) == 24
+
+    # first call for next-day prices
+    assert start == datetime(2019, 10, 26, 18, tzinfo=UTC_TZ)
+    start, prices = await _run_h_step(mock_session, pvpc_data, start)
+    assert mock_session.call_count == 2
+    assert len(prices) == 49
+
+    # avoid calls at evening if already got all today+tomorrow prices
+    for _ in range(3):
+        start, prices = await _run_h_step(mock_session, pvpc_data, start)
+        assert mock_session.call_count == 2
+        assert len(prices) == 49
+
+    # avoid calls at day if already got all today prices
+    for _ in range(21):
+        start, prices = await _run_h_step(mock_session, pvpc_data, start)
+        assert mock_session.call_count == 2
+        assert pvpc_data.state_available
+        # assert len(prices) == 25
+
+    # call for next-day prices (no more available)
+    assert start == datetime(2019, 10, 27, 19, tzinfo=UTC_TZ)
+    call_count = mock_session.call_count
+    while start.astimezone(local_tz) <= datetime(2019, 10, 27, 23, tzinfo=local_tz):
+        start, prices = await _run_h_step(mock_session, pvpc_data, start)
+        call_count += 1
+        assert mock_session.call_count == call_count
+        # assert len(prices) == 25
+
+    # assert mock_session.call_count == 6
+    assert pvpc_data.state
+    assert pvpc_data.state_available
+    assert start.astimezone(local_tz) == datetime(2019, 10, 28, tzinfo=local_tz)
+    assert not pvpc_data.process_state_and_attributes(start)
+
+    # After known prices are exausted, the state is flagged as unavailable
+    with pytest.raises(AssertionError):
+        await _run_h_step(mock_session, pvpc_data, start)
+    assert not pvpc_data.state_available
+    start += timedelta(hours=1)
+    assert not pvpc_data.process_state_and_attributes(start)
