@@ -1,5 +1,33 @@
 # Changelog
 
+## [v2.3.0](https://github.com/azogue/aiopvpc/tree/v2.3.0) - Decrease API refresh rate and try to avoid banning (2021-12-01)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.3.0...v2.2.4)
+
+Quick-Fix Release motivated by the last change in the ESIOS server (on 2021-11-30 😱),
+which is now apparently banning HomeAssistant requests,
+filtering us out because of the 'User-Agent' headers data 😤,
+as the server is returning a 403 status code error for a PUBLIC url 🤷.
+
+**Changes:**
+
+* :zap: **Substantially decrease the number of API requests to ESIOS**,
+avoiding unnecesary calls to refresh data for the same electricity prices.
+  Before, when used from the `pvpc_hourly_pricing` HA Core integration,
+the ESIOS API was called 2 times/hour from 0h to 20h, and 4 times/hour in the evening,
+from 20h to 0h, retrieving today + tomorrow prices.
+  This makes a total of ~56 requests/day, which is _not a lot_ 😅,
+but it seems the aggregated total for the HA user base (🔥 >30k requests/day just
+counting users pushing HA analytics) is being some kind of a problem for ESIOS,
+as it looks like they're trying to bane us 🥺😭
+  Now, the API handler avoids calls to retrieve already available prices,
+cutting down the number of requests to just 1-2 requests/day 🤩
+
+* :bug: **Set standard `User-Agent` header info**, to try to avoid server-side banning 🙈,
+and _rotate_ it if banning is detected, using common User-Agent browser identifiers.
+
+* :recycle: Minor code refactor to prepare for future library changes, in order to move to authenticated API endpoints in future versions.
+
 ## [v2.2.4](https://github.com/azogue/aiopvpc/tree/v2.2.4) - Split today / tomorrow price sensor attributes (2021-11-20)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.4...v2.2.2)
