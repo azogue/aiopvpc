@@ -197,27 +197,58 @@ class PVPCData:
         current_num_prices = len(self._current_prices)
         if local_ref_now.hour >= 20 and current_num_prices > 30:
             # already have today+tomorrow prices, avoid requests
-            _LOGGER.info(
+            _LOGGER.debug(
                 "Evening download avoided, now with %d prices from %s UTC",
                 current_num_prices,
                 list(self._current_prices)[0].strftime("%Y-%m-%d %Hh"),
             )
             return self._current_prices
-        elif current_num_prices > 20 and (
-            list(self._current_prices)[0].astimezone(REFERENCE_TZ).date()
-            == local_ref_now.date()
+        elif (
+            local_ref_now.hour < 20
+            and current_num_prices > 20
+            and (
+                list(self._current_prices)[-12].astimezone(REFERENCE_TZ).date()
+                == local_ref_now.date()
+            )
         ):
             # already have today prices, avoid request
-            _LOGGER.info(
-                "Download avoided, now with %d prices from %s UTC",
+            _LOGGER.debug(
+                "Download avoided, now with %d prices up to %s UTC",
                 current_num_prices,
-                list(self._current_prices)[0].strftime("%Y-%m-%d %Hh"),
+                list(self._current_prices)[-1].strftime("%Y-%m-%d %Hh"),
             )
             return self._current_prices
 
-        prices = await self._download_pvpc_prices(local_ref_now.date())
-        if not prices:
-            return prices
+        if current_num_prices and (
+            list(self._current_prices)[0].astimezone(REFERENCE_TZ).date()
+            == local_ref_now.date()
+        ):
+            # avoid download of today prices
+            prices = self._current_prices.copy()
+            _LOGGER.debug(
+                "Avoided: %s, with %d prices -> last: %s, download-day: %s",
+                local_ref_now,
+                current_num_prices,
+                list(self._current_prices)[0].astimezone(REFERENCE_TZ).date(),
+                local_ref_now.date(),
+            )
+        else:
+            txt_last = "--"
+            if current_num_prices:
+                txt_last = str(
+                    list(self._current_prices)[-1].astimezone(self._local_timezone)
+                )
+            # make API call to download today prices
+            _LOGGER.debug(
+                "UN-Avoided: %s, with %d prices ->; last:%s, download-day: %s",
+                local_ref_now,
+                current_num_prices,
+                txt_last,
+                local_ref_now.date(),
+            )
+            prices = await self._download_pvpc_prices(local_ref_now.date())
+            if not prices:
+                return prices
 
         # At evening, it is possible to retrieve next day prices
         if local_ref_now.hour >= 20:
