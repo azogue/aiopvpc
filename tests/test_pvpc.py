@@ -14,17 +14,17 @@ from tests.conftest import MockAsyncSession, TZ_TEST
 @pytest.mark.parametrize(
     "day_str, timezone, zone_cm, num_prices, num_calls, num_prices_8h, available_8h",
     (
-        ("2019-10-26 00:00:00+08:00", TZ_TEST, False, 0, 1, 0, False),
-        ("2019-10-26 00:00:00", TZ_TEST, False, 24, 1, 24, True),
-        ("2019-10-27 00:00:00", TZ_TEST, False, 25, 1, 25, True),
-        ("2019-03-31 20:00:00", TZ_TEST, False, 23, 2, 23, False),
-        ("2019-03-31 20:00:00+04:00", TZ_TEST, False, 23, 1, 23, False),
-        ("2019-10-26 21:00:00", TZ_TEST, False, 49, 2, 26, True),
-        ("2019-10-26 21:00:00+01:00", TZ_TEST, False, 49, 2, 26, True),
-        ("2019-10-26 00:00:00", REFERENCE_TZ, True, 24, 1, 24, True),
-        ("2019-10-27 00:00:00", REFERENCE_TZ, True, 25, 1, 25, True),
-        ("2019-03-31 20:00:00", REFERENCE_TZ, True, 23, 2, 23, False),
-        ("2019-10-26 21:00:00", REFERENCE_TZ, True, 49, 2, 25, True),
+        ("2021-10-30 00:00:00+08:00", TZ_TEST, False, 0, 1, 0, False),
+        ("2021-10-30 00:00:00", TZ_TEST, False, 24, 1, 24, True),
+        ("2021-10-31 00:00:00", TZ_TEST, False, 25, 1, 25, True),
+        ("2022-03-27 20:00:00", TZ_TEST, False, 23, 2, 23, False),
+        ("2022-03-27 20:00:00+04:00", TZ_TEST, False, 23, 1, 23, False),
+        ("2021-10-30 21:00:00", TZ_TEST, False, 49, 2, 26, True),
+        ("2021-10-30 21:00:00+01:00", TZ_TEST, False, 49, 2, 26, True),
+        ("2021-10-30 00:00:00", REFERENCE_TZ, True, 24, 1, 24, True),
+        ("2021-10-31 00:00:00", REFERENCE_TZ, True, 25, 1, 25, True),
+        ("2022-03-27 20:00:00", REFERENCE_TZ, True, 23, 2, 23, False),
+        ("2021-10-30 21:00:00", REFERENCE_TZ, True, 49, 2, 25, True),
         ("2021-06-01 09:00:00", REFERENCE_TZ, True, 24, 1, 24, True),
     ),
 )
@@ -91,9 +91,9 @@ async def test_bad_downloads(
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.INFO):
         pvpc_data = PVPCData(
-            local_timezone=REFERENCE_TZ,
-            tariff="normal",
             websession=mock_session,
+            tariff="2.0TD",
+            local_timezone=REFERENCE_TZ,
         )
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
@@ -128,11 +128,11 @@ async def _run_h_step(
 @pytest.mark.asyncio
 async def test_reduced_api_download_rate(local_tz):
     """Test time evolution and number of API calls."""
-    start = datetime(2019, 10, 26, 15, tzinfo=UTC_TZ)
+    start = datetime(2021, 10, 30, 15, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
     # logging.critical(local_tz)
     pvpc_data = PVPCData(
-        tariff="electric_car", local_timezone=local_tz, websession=mock_session
+        websession=mock_session, tariff="2.0TD", local_timezone=local_tz
     )
 
     # avoid extra calls at day if already got all today prices
@@ -142,7 +142,7 @@ async def test_reduced_api_download_rate(local_tz):
         assert len(prices) == 24
 
     # first call for next-day prices
-    assert start == datetime(2019, 10, 26, 18, tzinfo=UTC_TZ)
+    assert start == datetime(2021, 10, 30, 18, tzinfo=UTC_TZ)
     start, prices = await _run_h_step(mock_session, pvpc_data, start)
     assert mock_session.call_count == 2
     assert len(prices) == 49
@@ -161,9 +161,9 @@ async def test_reduced_api_download_rate(local_tz):
         # assert len(prices) == 25
 
     # call for next-day prices (no more available)
-    assert start == datetime(2019, 10, 27, 19, tzinfo=UTC_TZ)
+    assert start == datetime(2021, 10, 31, 19, tzinfo=UTC_TZ)
     call_count = mock_session.call_count
-    while start.astimezone(local_tz) <= datetime(2019, 10, 27, 23, tzinfo=local_tz):
+    while start.astimezone(local_tz) <= datetime(2021, 10, 31, 23, tzinfo=local_tz):
         start, prices = await _run_h_step(mock_session, pvpc_data, start)
         call_count += 1
         assert mock_session.call_count == call_count
@@ -172,7 +172,7 @@ async def test_reduced_api_download_rate(local_tz):
     # assert mock_session.call_count == 6
     assert pvpc_data.state
     assert pvpc_data.state_available
-    assert start.astimezone(local_tz) == datetime(2019, 10, 28, tzinfo=local_tz)
+    assert start.astimezone(local_tz) == datetime(2021, 11, 1, tzinfo=local_tz)
     assert not pvpc_data.process_state_and_attributes(start)
 
     # After known prices are exausted, the state is flagged as unavailable
