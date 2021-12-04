@@ -3,6 +3,7 @@ Simple aio library to download Spanish electricity hourly prices. Constants.
 """
 import sys
 from datetime import date
+from typing import Dict, Literal
 
 if sys.version_info[:2] >= (3, 9):  # pragma: no cover
     import zoneinfo  # pylint: disable=import-error
@@ -28,8 +29,18 @@ UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
 DEFAULT_TIMEOUT = 5
 PRICE_PRECISION = 5
+
+DataSource = Literal["esios_public", "apidatos"]  # , "esios"
 URL_PVPC_RESOURCE = (
     "https://api.esios.ree.es/archives/70/download_json"
     "?locale=es&date={day:%Y-%m-%d}"
 )
-ATTRIBUTION = "Data retrieved from api.esios.ree.es by REE"
+URL_APIDATOS_PRICES_RESOURCE = (
+    "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real"
+    "?time_trunc=hour"
+    "&start_date={start:%Y-%m-%dT%H:%M}&end_date={end:%Y-%m-%dT%H:%M}"
+)
+ATTRIBUTIONS: Dict[DataSource, str] = {
+    "esios_public": "Data retrieved from api.esios.ree.es by REE",
+    "apidatos": "Data retrieved from apidatos.ree.es by REE",
+}
