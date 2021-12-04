@@ -12,61 +12,6 @@ from tests.conftest import MockAsyncSession, TZ_TEST
 
 
 @pytest.mark.parametrize(
-    "day_str, timezone, zone_cm, num_prices, num_calls, num_prices_8h, available_8h",
-    (
-        ("2021-10-30 00:00:00+08:00", TZ_TEST, False, 0, 1, 0, False),
-        ("2021-10-30 00:00:00", TZ_TEST, False, 24, 1, 24, True),
-        ("2021-10-31 00:00:00", TZ_TEST, False, 25, 1, 25, True),
-        ("2022-03-27 20:00:00", TZ_TEST, False, 23, 2, 23, False),
-        ("2022-03-27 20:00:00+04:00", TZ_TEST, False, 23, 1, 23, False),
-        ("2021-10-30 21:00:00", TZ_TEST, False, 49, 2, 26, True),
-        ("2021-10-30 21:00:00+01:00", TZ_TEST, False, 49, 2, 26, True),
-        ("2021-10-30 00:00:00", REFERENCE_TZ, True, 24, 1, 24, True),
-        ("2021-10-31 00:00:00", REFERENCE_TZ, True, 25, 1, 25, True),
-        ("2022-03-27 20:00:00", REFERENCE_TZ, True, 23, 2, 23, False),
-        ("2021-10-30 21:00:00", REFERENCE_TZ, True, 49, 2, 25, True),
-        ("2021-06-01 09:00:00", REFERENCE_TZ, True, 24, 1, 24, True),
-    ),
-)
-@pytest.mark.asyncio
-async def test_price_extract(
-    day_str,
-    timezone,
-    zone_cm,
-    num_prices,
-    num_calls,
-    num_prices_8h,
-    available_8h,
-):
-    """Test data parsing of official API files."""
-    day = datetime.fromisoformat(day_str)
-    mock_session = MockAsyncSession()
-
-    pvpc_data = PVPCData(
-        tariff="2.0TD",
-        local_timezone=timezone,
-        websession=mock_session,
-        zone_ceuta_melilla=zone_cm,
-    )
-
-    pvpc_data.source_available = True
-    assert not pvpc_data.process_state_and_attributes(day)
-    assert mock_session.call_count == 0
-
-    await pvpc_data.async_update_prices(day)
-    pvpc_data.process_state_and_attributes(day)
-    assert len(pvpc_data._current_prices) == num_prices
-    assert mock_session.call_count == num_calls
-
-    has_prices = pvpc_data.process_state_and_attributes(day + timedelta(hours=10))
-    assert len(pvpc_data._current_prices) == num_prices_8h
-    assert has_prices == available_8h
-    if has_prices:
-        last_dt, last_p = list(pvpc_data._current_prices.items())[-1]
-        assert last_dt.astimezone(timezone).hour == 23
-
-
-@pytest.mark.parametrize(
     "available, day_str, num_log_msgs, status, exception",
     (
         (False, "2032-10-26 00:00:00+00:00", 0, 200, None),
@@ -87,14 +32,10 @@ async def test_bad_downloads(
     caplog,
 ):
     """Test data parsing of official API files."""
-    day = datetime.fromisoformat(day_str)
+    day = datetime.fromisoformat(day_str).astimezone(REFERENCE_TZ)
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.INFO):
-        pvpc_data = PVPCData(
-            websession=mock_session,
-            tariff="2.0TD",
-            local_timezone=REFERENCE_TZ,
-        )
+        pvpc_data = PVPCData(websession=mock_session, tariff="2.0TD")
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
         prices = await pvpc_data.async_update_prices(day)
