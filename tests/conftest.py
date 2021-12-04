@@ -16,6 +16,9 @@ FIXTURE_JSON_DATA_2021_10_30 = "PVPC_CURV_DD_2021_10_30.json"
 FIXTURE_JSON_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
 FIXTURE_JSON_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
 FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
+FIXTURE_JSON_DATA_S2_2021_06_01 = "PRICES_APIDATOS_2021_06_01.json"
+FIXTURE_JSON_DATA_S2_2021_10_30 = "PRICES_APIDATOS_2021_10_30.json"
+FIXTURE_JSON_DATA_S2_2021_10_31 = "PRICES_APIDATOS_2021_10_31.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
 
@@ -46,7 +49,12 @@ class MockAsyncSession:
         self.status = status
         self.exc = exc
 
-        self.responses = {
+        self.responses_apidatos = {
+            date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_30),
+            date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_31),
+            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_S2_2021_06_01),
+        }
+        self.responses_esios = {
             date(2022, 3, 27): load_fixture(FIXTURE_JSON_DATA_2022_03_27),
             date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_2021_10_30),
             date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_2021_10_31),
@@ -60,11 +68,16 @@ class MockAsyncSession:
     async def get(self, url, *_args, **_kwargs):
         """Dumb await."""
         self._counter += 1
-        day = datetime.fromisoformat(url.split("=")[-1]).date()
         if self.exc:
             raise self.exc
-        if day in self.responses:
-            self._raw_response = self.responses[day]
+        key = datetime.fromisoformat(url.split("=")[-1]).date()
+        if (
+            url.startswith("https://api.esios.ree.es/archives")
+            and key in self.responses_esios
+        ):
+            self._raw_response = self.responses_esios[key]
+        elif url.startswith("https://apidatos.ree.es"):
+            self._raw_response = self.responses_apidatos[key]
         else:
             self._raw_response = _DEFAULT_EMPTY_VALUE
         return self
