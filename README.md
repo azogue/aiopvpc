@@ -28,14 +28,14 @@ Install with `pip install aiopvpc` or clone it to run tests or anything else.
 ## Usage
 
 ```python
+import aiohttp
 from datetime import datetime
 from aiopvpc import PVPCData
 
-pvpc_handler = PVPCData(tariff="discrimination", zone_ceuta_melilla=False)
-
-start = datetime(2021, 5, 20, 22)
-end = datetime(2021, 6, 7, 16)
-prices_range: dict = await pvpc_handler.async_download_prices_for_range(start, end)
+async with aiohttp.ClientSession() as session:
+    pvpc_handler = PVPCData(websession=session, tariff="2.0TD")
+    prices: dict = await pvpc_handler.async_update_prices(datetime.utcnow())
+print(prices)
 ```
 
 Check [this example on a jupyter notebook](https://github.com/azogue/aiopvpc/blob/master/Notebooks/Download%20PVPC%20prices.ipynb), where the downloader is combined with pandas and matplotlib to plot the electricity prices.
