@@ -8,7 +8,7 @@ https://www.home-assistant.io/integrations/pvpc_hourly_pricing/
 import asyncio
 import logging
 from collections import deque
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from random import random
 from typing import Any, Dict, Optional, Union
 
@@ -16,18 +16,18 @@ import aiohttp
 import async_timeout
 
 from aiopvpc.const import (
-    ATTRIBUTION,
+    ATTRIBUTIONS,
+    DataSource,
     DATE_CHANGE_TO_20TD,
     DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
     REFERENCE_TZ,
     TARIFF2ID,
     TARIFFS,
-    URL_PVPC_RESOURCE,
     UTC_TZ,
     zoneinfo,
 )
-from aiopvpc.parser import extract_pvpc_data
+from aiopvpc.parser import extract_pvpc_data, get_url_prices
 from aiopvpc.prices import make_price_sensor_attributes
 from aiopvpc.pvpc_tariff import get_current_and_next_tariff_periods
 from aiopvpc.utils import ensure_utc_time
@@ -81,6 +81,7 @@ class PVPCData:
         power: float = DEFAULT_POWER_KW,
         power_valley: float = DEFAULT_POWER_KW,
         timeout: float = DEFAULT_TIMEOUT,
+        data_source: DataSource = "apidatos",  # "esios_public",
     ):
         self.source_available = True
         self.state: Optional[float] = None
@@ -89,6 +90,7 @@ class PVPCData:
 
         self.timeout = timeout
         self._session = websession
+        self._data_source = data_source
         self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
         self._headers = {
             "User-Agent": self._user_agents[0],
@@ -110,29 +112,18 @@ class PVPCData:
         resp = await self._session.get(url, headers=self._headers)
         if resp.status < 400:
             data = await resp.json()
-            return extract_pvpc_data(data, tariff, tz=self._local_timezone)
+            return extract_pvpc_data(data, url, tariff, tz=self._local_timezone)
         elif resp.status == 403:  # pragma: no cover
-            _LOGGER.warning(
-                "Forbidden error with '%s' -> Headers: %s", url, resp.headers
-            )
-            # loop user-agent
+            _LOGGER.warning("Forbidden error with '%s': %s", self._data_source, url)
+            # loop user-agent and data-source
             self._user_agents.rotate()
             self._headers["User-Agent"] = self._user_agents[0]
-            # and retry
-            resp = await self._session.get(url, headers=self._headers)
-            if resp.status < 400:
-                data = await resp.json()
-                return extract_pvpc_data(data, tariff, tz=self._local_timezone)
-            elif resp.status == 403:
-                _LOGGER.error(
-                    "Repeaed forbidden error with '%s' -> Headers: %s",
-                    url,
-                    resp.headers,
-                )
-                self._headers.pop("User-Agent")
+            self._data_source = (
+                "apidatos" if self._data_source == "esios_public" else "esios_public"
+            )
         return {}
 
-    async def _download_pvpc_prices(self, day: date) -> Dict[datetime, Any]:
+    async def _download_pvpc_prices(self, now: datetime) -> Dict[datetime, Any]:
         """
         PVPC data extractor.
 
@@ -144,15 +135,14 @@ class PVPCData:
 
         Prices are referenced with datetimes in UTC.
         """
-        assert day >= DATE_CHANGE_TO_20TD, "Deprecated support for old tariffs"
-        url = URL_PVPC_RESOURCE.format(day=day)
+        assert now.date() >= DATE_CHANGE_TO_20TD, "No support for old tariffs"
+        url = get_url_prices(self._data_source, now)
         tariff = TARIFF2ID[self.tariff]
-
         try:
             async with async_timeout.timeout(2 * self.timeout):
                 return await self._api_get_prices(url, tariff)
         except KeyError:
-            _LOGGER.debug("Bad try on getting prices for %s", day)
+            _LOGGER.debug("Bad try on getting prices for %s", now)
         except asyncio.TimeoutError:
             if self.source_available:
                 _LOGGER.warning("Timeout error requesting data from '%s'", url)
@@ -223,13 +213,13 @@ class PVPCData:
                 txt_last,
                 local_ref_now.date(),
             )
-            prices = await self._download_pvpc_prices(local_ref_now.date())
+            prices = await self._download_pvpc_prices(local_ref_now)
             if not prices:
                 return prices
 
         # At evening, it is possible to retrieve next day prices
         if local_ref_now.hour >= 20:
-            next_day = (local_ref_now + timedelta(days=1)).date()
+            next_day = local_ref_now + timedelta(days=1)
             prices_fut = await self._download_pvpc_prices(next_day)
             if prices_fut:
                 prices.update(prices_fut)
@@ -243,6 +233,11 @@ class PVPCData:
 
         return prices
 
+    @property
+    def attribution(self) -> str:
+        """Return data-source attribution string."""
+        return ATTRIBUTIONS[self._data_source]
+
     def process_state_and_attributes(self, utc_now: datetime) -> bool:
         """
         Generate the current state and sensor attributes.
@@ -254,7 +249,10 @@ class PVPCData:
         If not, it is converted to UTC from the original timezone,
         or set as UTC-time if it is a naive datetime.
         """
-        attributes: Dict[str, Any] = {"attribution": ATTRIBUTION, "tariff": self.tariff}
+        attributes: Dict[str, Any] = {
+            "attribution": self.attribution,
+            "tariff": self.tariff,
+        }
         utc_time = ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
         # todo power_period/power_price €/kW*año
