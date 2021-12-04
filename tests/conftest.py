@@ -12,9 +12,9 @@ else:
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
 TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
 
-FIXTURE_JSON_DATA_2019_10_26 = "PVPC_CURV_DD_2019_10_26.json"
-FIXTURE_JSON_DATA_2019_10_27 = "PVPC_CURV_DD_2019_10_27.json"
-FIXTURE_JSON_DATA_2019_03_31 = "PVPC_CURV_DD_2019_03_31.json"
+FIXTURE_JSON_DATA_2021_10_30 = "PVPC_CURV_DD_2021_10_30.json"
+FIXTURE_JSON_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
+FIXTURE_JSON_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
 FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
@@ -47,9 +47,9 @@ class MockAsyncSession:
         self.exc = exc
 
         self.responses = {
-            date(2019, 3, 31): load_fixture(FIXTURE_JSON_DATA_2019_03_31),
-            date(2019, 10, 26): load_fixture(FIXTURE_JSON_DATA_2019_10_26),
-            date(2019, 10, 27): load_fixture(FIXTURE_JSON_DATA_2019_10_27),
+            date(2022, 3, 27): load_fixture(FIXTURE_JSON_DATA_2022_03_27),
+            date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_2021_10_30),
+            date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_2021_10_31),
             date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_2021_06_01),
         }
 
