@@ -92,10 +92,6 @@ class PVPCData:
         self._session = websession
         self._data_source = data_source
         self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
-        self._headers = {
-            "User-Agent": self._user_agents[0],
-            "Accept": "application/json",
-        }
 
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
 
@@ -107,9 +103,23 @@ class PVPCData:
             _LOGGER.error("Unknown tariff '%s'. Should be one of %s", tariff, TARIFFS)
         self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
 
+    def _request_headers(self) -> Dict[str, str]:
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        }
+        if self._data_source == "apidatos":
+            headers["Host"] = "apidatos.ree.es"
+            return headers
+        headers["Host"] = "api.esios.ree.es"
+        headers["User-Agent"] = self._user_agents[0]
+        # TODO add auth token
+        # if self._data_source == "esios":
+        return headers
+
     async def _api_get_prices(self, url: str, tariff: str) -> Dict[datetime, Any]:
         assert self._session is not None
-        resp = await self._session.get(url, headers=self._headers)
+        resp = await self._session.get(url, headers=self._request_headers())
         if resp.status < 400:
             data = await resp.json()
             return extract_pvpc_data(data, url, tariff, tz=self._local_timezone)
@@ -117,7 +127,6 @@ class PVPCData:
             _LOGGER.warning("Forbidden error with '%s': %s", self._data_source, url)
             # loop user-agent and data-source
             self._user_agents.rotate()
-            self._headers["User-Agent"] = self._user_agents[0]
             self._data_source = (
                 "apidatos" if self._data_source == "esios_public" else "esios_public"
             )
