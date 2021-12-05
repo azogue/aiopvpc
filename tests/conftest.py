@@ -76,7 +76,9 @@ class MockAsyncSession:
             and key in self.responses_esios
         ):
             self._raw_response = self.responses_esios[key]
-        elif url.startswith("https://apidatos.ree.es"):
+        elif (
+            url.startswith("https://apidatos.ree.es") and key in self.responses_apidatos
+        ):
             self._raw_response = self.responses_apidatos[key]
         else:
             self._raw_response = _DEFAULT_EMPTY_VALUE

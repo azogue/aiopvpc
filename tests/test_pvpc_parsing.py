@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from aiopvpc.const import REFERENCE_TZ, UTC_TZ
+from aiopvpc.const import REFERENCE_TZ
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
 
@@ -51,7 +51,7 @@ async def test_price_extract(
     available_8h,
 ):
     """Test data parsing of official API files."""
-    day = datetime.fromisoformat(ts).astimezone(UTC_TZ)
+    day = datetime.fromisoformat(ts)
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
