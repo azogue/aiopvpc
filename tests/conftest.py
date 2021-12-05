@@ -17,6 +17,7 @@ FIXTURE_JSON_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
 FIXTURE_JSON_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
 FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
 FIXTURE_JSON_DATA_S2_2021_06_01 = "PRICES_APIDATOS_2021_06_01.json"
+FIXTURE_JSON_DATA_S2_2021_06_01_CYM = "PRICES_APIDATOS_2021_06_01_CYM.json"
 FIXTURE_JSON_DATA_S2_2021_10_30 = "PRICES_APIDATOS_2021_10_30.json"
 FIXTURE_JSON_DATA_S2_2021_10_31 = "PRICES_APIDATOS_2021_10_31.json"
 
@@ -50,6 +51,7 @@ class MockAsyncSession:
         self.exc = exc
 
         self.responses_apidatos = {
+            "CYM_PRICES": load_fixture(FIXTURE_JSON_DATA_S2_2021_06_01_CYM),
             date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_30),
             date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_31),
             date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_S2_2021_06_01),
@@ -71,7 +73,10 @@ class MockAsyncSession:
         if self.exc:
             raise self.exc
         key = datetime.fromisoformat(url.split("=")[-1]).date()
-        if (
+        if key == date(2021, 6, 1) and "geo_ids=8744" in url:
+            assert url.startswith("https://apidatos.ree.es")
+            self._raw_response = self.responses_apidatos["CYM_PRICES"]
+        elif (
             url.startswith("https://api.esios.ree.es/archives")
             and key in self.responses_esios
         ):
