@@ -79,7 +79,6 @@ async def test_reduced_api_download_rate(local_tz, source):
     """Test time evolution and number of API calls."""
     start = datetime(2021, 10, 30, 15, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
-    # logging.critical(local_tz)
     pvpc_data = PVPCData(
         websession=mock_session,
         tariff="2.0TD",
