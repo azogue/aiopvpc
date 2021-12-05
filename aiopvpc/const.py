@@ -38,6 +38,7 @@ URL_PVPC_RESOURCE = (
 URL_APIDATOS_PRICES_RESOURCE = (
     "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real"
     "?time_trunc=hour"
+    "&geo_ids={geo_id}"
     "&start_date={start:%Y-%m-%dT%H:%M}&end_date={end:%Y-%m-%dT%H:%M}"
 )
 ATTRIBUTIONS: Dict[DataSource, str] = {

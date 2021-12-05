@@ -62,14 +62,9 @@ class PVPCData:
 
     * Async download of prices for each day
     * Generate state attributes for HA integration.
-    * Async download of prices for a range of days
 
     - Prices are returned in a `Dict[datetime, float]`,
     with timestamps in UTC and prices in €/kWh.
-
-    - Without a specific `tariff`, it would return the entire collection
-    of PVPC data, without any unit conversion,
-    and type `Dict[datetime, Dict[str, float]`.
     """
 
     def __init__(
@@ -145,7 +140,7 @@ class PVPCData:
         Prices are referenced with datetimes in UTC.
         """
         assert now.date() >= DATE_CHANGE_TO_20TD, "No support for old tariffs"
-        url = get_url_prices(self._data_source, now)
+        url = get_url_prices(self._data_source, self._zone_ceuta_melilla, now)
         tariff = TARIFF2ID[self.tariff]
         try:
             async with async_timeout.timeout(2 * self.timeout):
