@@ -94,11 +94,15 @@ def extract_pvpc_data(
     return prices_data["series"]["PVPC"]
 
 
-def get_url_prices(source: DataSource, now_local_ref: datetime) -> str:
+def get_url_prices(
+    source: DataSource, zone_ceuta_melilla: bool, now_local_ref: datetime
+) -> str:
+    """Make URL for PVPC prices."""
     if source == "esios_public":
         return URL_PVPC_RESOURCE.format(day=now_local_ref.date())
 
     start = now_local_ref.replace(hour=0, minute=0)
     end = now_local_ref.replace(hour=23, minute=59)
-    # TODO implement geo_zones!!!
-    return URL_APIDATOS_PRICES_RESOURCE.format(start=start, end=end)
+    return URL_APIDATOS_PRICES_RESOURCE.format(
+        start=start, end=end, geo_id=8744 if zone_ceuta_melilla else 8741
+    )
