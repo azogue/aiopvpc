@@ -35,7 +35,7 @@ async def test_bad_downloads(
     day = datetime.fromisoformat(day_str).astimezone(REFERENCE_TZ)
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.INFO):
-        pvpc_data = PVPCData(websession=mock_session, tariff="2.0TD")
+        pvpc_data = PVPCData(session=mock_session, tariff="2.0TD")
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
         prices = await pvpc_data.async_update_prices(day)
@@ -80,7 +80,7 @@ async def test_reduced_api_download_rate(local_tz, source):
     start = datetime(2021, 10, 30, 15, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
     pvpc_data = PVPCData(
-        websession=mock_session,
+        session=mock_session,
         tariff="2.0TD",
         local_timezone=local_tz,
         data_source=source,

@@ -33,7 +33,7 @@ from datetime import datetime
 from aiopvpc import PVPCData
 
 async with aiohttp.ClientSession() as session:
-    pvpc_handler = PVPCData(websession=session, tariff="2.0TD")
+    pvpc_handler = PVPCData(session=session, tariff="2.0TD")
     prices: dict = await pvpc_handler.async_update_prices(datetime.utcnow())
 print(prices)
 ```

@@ -69,10 +69,10 @@ class PVPCData:
 
     def __init__(
         self,
-        websession: aiohttp.ClientSession,
-        tariff: str,
+        *,
+        session: aiohttp.ClientSession,
+        tariff: str = TARIFFS[0],
         local_timezone: Union[str, zoneinfo.ZoneInfo] = REFERENCE_TZ,
-        zone_ceuta_melilla: bool = False,
         power: float = DEFAULT_POWER_KW,
         power_valley: float = DEFAULT_POWER_KW,
         timeout: float = DEFAULT_TIMEOUT,
@@ -84,19 +84,19 @@ class PVPCData:
         self.attributes: Dict[str, Any] = {}
 
         self.timeout = timeout
-        self._session = websession
+        self._session = session
         self._data_source = data_source
         self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
 
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
+        self.tariff = tariff
+        if tariff not in TARIFFS:  # pragma: no cover
+            _LOGGER.error("Unknown tariff '%s'. Should be one of %s", tariff, TARIFFS)
+            self.tariff = TARIFFS[0]
 
         self._current_prices: Dict[datetime, float] = {}
         self._power = power
         self._power_valley = power_valley
-        self._zone_ceuta_melilla = zone_ceuta_melilla
-        if tariff not in TARIFFS:  # pragma: no cover
-            _LOGGER.error("Unknown tariff '%s'. Should be one of %s", tariff, TARIFFS)
-        self.tariff = TARIFFS[1] if zone_ceuta_melilla else TARIFFS[0]
 
     def _request_headers(self) -> Dict[str, str]:
         headers = {
@@ -140,7 +140,7 @@ class PVPCData:
         Prices are referenced with datetimes in UTC.
         """
         assert now.date() >= DATE_CHANGE_TO_20TD, "No support for old tariffs"
-        url = get_url_prices(self._data_source, self._zone_ceuta_melilla, now)
+        url = get_url_prices(self._data_source, self.tariff != TARIFFS[0], now)
         tariff = TARIFF2ID[self.tariff]
         try:
             async with async_timeout.timeout(2 * self.timeout):
@@ -283,7 +283,7 @@ class PVPCData:
         # generate PVPC 2.0TD sensor attributes
         local_time = utc_time.astimezone(self._local_timezone)
         (current_period, next_period, delta,) = get_current_and_next_tariff_periods(
-            local_time, zone_ceuta_melilla=self._zone_ceuta_melilla
+            local_time, zone_ceuta_melilla=self.tariff != TARIFFS[0]
         )
         attributes["period"] = current_period
         power = self._power_valley if current_period == "P3" else self._power

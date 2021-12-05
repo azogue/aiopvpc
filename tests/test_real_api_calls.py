@@ -23,10 +23,10 @@ from tests.conftest import TZ_TEST
 async def test_real_download_today_async(data_source, tz):
     async with ClientSession() as session:
         pvpc_handler = PVPCData(
-            websession=session,
+            session=session,
             tariff="2.0TD",
-            data_source=data_source,
             local_timezone=tz,
+            data_source=data_source,
         )
         prices = await pvpc_handler.async_update_prices(datetime.utcnow())
     assert 22 < len(prices) < 49

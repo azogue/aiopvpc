@@ -55,10 +55,9 @@ async def test_price_extract(
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
+        session=mock_session,
         tariff="2.0TD",
         local_timezone=timezone,
-        websession=mock_session,
-        zone_ceuta_melilla=zone_cm,
         data_source=source,
     )
 
