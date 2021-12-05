@@ -65,15 +65,26 @@ async def _run_h_step(
 
 
 # TODO review download schedule for Canary Islands TZ
-@pytest.mark.parametrize("local_tz", (TZ_TEST, REFERENCE_TZ))
+@pytest.mark.parametrize(
+    "local_tz, source",
+    (
+        (TZ_TEST, "apidatos"),
+        (REFERENCE_TZ, "apidatos"),
+        (TZ_TEST, "esios_public"),
+        (REFERENCE_TZ, "esios_public"),
+    ),
+)
 @pytest.mark.asyncio
-async def test_reduced_api_download_rate(local_tz):
+async def test_reduced_api_download_rate(local_tz, source):
     """Test time evolution and number of API calls."""
     start = datetime(2021, 10, 30, 15, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
     # logging.critical(local_tz)
     pvpc_data = PVPCData(
-        websession=mock_session, tariff="2.0TD", local_timezone=local_tz
+        websession=mock_session,
+        tariff="2.0TD",
+        local_timezone=local_tz,
+        data_source=source,
     )
 
     # avoid extra calls at day if already got all today prices
