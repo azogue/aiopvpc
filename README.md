@@ -37,8 +37,3 @@ async with aiohttp.ClientSession() as session:
     prices: dict = await pvpc_handler.async_update_prices(datetime.utcnow())
 print(prices)
 ```
-
-Check [this example on a jupyter notebook](https://github.com/azogue/aiopvpc/blob/master/Notebooks/Download%20PVPC%20prices.ipynb), where the downloader is combined with pandas and matplotlib to plot the electricity prices.
-To play with it, clone the repo and install the project with `poetry install -E jupyter`, and then `poetry run jupyter notebook`.
-
-![sample_pvpc_plot.png](https://github.com/azogue/aiopvpc/blob/master/Notebooks/sample_pvpc_plot.png)
