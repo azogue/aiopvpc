@@ -1,5 +1,38 @@
 # Changelog
 
+## [v3.0.0](https://github.com/azogue/aiopvpc/tree/v3.0.0) - Change Data Source to apidatos.ree.es (2021-12-05)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v3.0.0...v2.3.0)
+
+🔥 **BREAKING-CHANGE**: this release **removes support for the old PVPC tariffs**
+(prices < 2021-06-01), and the extra methods to use this library as a _dataloader_
+(`.download_prices_for_range(...)`), leaving only the **code to support the HA Core integration**.
+
+Motivated by recent successful attempts to kick us out from `api.esios.ree.es`,
+we are changing the data source to another REE public server, at `apidatos.ree.es`,
+with the same information than the current one, available without authentication 👌
+
+**This release implements the new data-source**, but also maintains the _legacy_ one.
+
+* Initial configuration is set with a new `data_source` parameter, **with the new source as default**.
+* If a 403 status-code is received, the **data source is switched** (new to legacy / legacy to new), no retry is done,
+  and the User-Agent loop trick is only used for the legacy data-source.
+
+**Changes:**
+
+* :fire: Remove support for old PVPC tariffs and range download methods,
+and make `tariff` and `websession` required arguments
+
+* :sparkles: Add alternative data-source from 'apidatos.ree.es'
+  * Implement data parsing from `apidatos.ree.es`, using endpoint at `/es/datos/mercados/precios-mercados-tiempo-real`
+  * Add `data_source` parameter with valid keys 'apidatos' and 'esios_public', setting the new one as default ;-)
+  * Remove retry call if 403 status is received, but maintain the User-Agent loop, and also toggle the data-source for the next call
+  * Move old ATTRIBUTION to `.attribution` property, as function of the data-source
+
+* :truck: Change test patterns to new tariffs by substituting old examples in DST days from 2019 to equivalent days since 2021-06, using the new tariff keys
+
+* :truck: Add test patterns from new data-source, and adjust tests
+
 ## [v2.3.0](https://github.com/azogue/aiopvpc/tree/v2.3.0) - Decrease API refresh rate and try to avoid banning (2021-12-01)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.3.0...v2.2.4)

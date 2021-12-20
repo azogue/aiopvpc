@@ -40,7 +40,7 @@ markers = [
 
 [tool.poetry]
 name = "aiopvpc"
-version = "2.3.0"
+version = "3.0.0"
 description = "Retrieval of Spanish Electricity hourly prices (PVPC)"
 authors = ["Eugenio Panadero <eugenio.panadero@gmail.com>"]
 license = "MIT"
@@ -53,13 +53,6 @@ aiohttp = ">=3.7.4.post0"
 async_timeout = ">=3.0.1"
 holidays = ">0.11.1"
 "backports.zoneinfo" = {version = "^0.2.1", python = "<3.9"}
-# just for example notebooks
-jupyter = {version = "*", optional = true}
-pandas = {version = "*", optional = true}
-matplotlib = {version = "*", optional = true}
-
-[tool.poetry.extras]
-jupyter = ["pandas", "jupyter", "matplotlib"]
 
 [tool.poetry.dev-dependencies]
 pytest-sugar = ">=0.9.2"
