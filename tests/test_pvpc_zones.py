@@ -17,6 +17,9 @@ from tests.conftest import MockAsyncSession, TZ_TEST
         (TZ_TEST, "esios_public", TARIFFS[0], 0.23144),
         (REFERENCE_TZ, "esios_public", TARIFFS[0], 0.23144),
         (REFERENCE_TZ, "esios_public", TARIFFS[1], 0.13813),
+        (REFERENCE_TZ, "esios", TARIFFS[0], 0.23144),
+        (REFERENCE_TZ, "esios", TARIFFS[1], 0.13813),
+        (TZ_TEST, "esios", TARIFFS[0], 0.23144),
     ),
 )
 @pytest.mark.asyncio
@@ -29,6 +32,7 @@ async def test_geo_ids(local_tz, source, tariff, expected_18h):
         tariff=tariff,
         local_timezone=local_tz,
         data_source=source,
+        esios_api_token="test-token",
     )
     await pvpc_data.async_update_prices(start)
     assert pvpc_data.process_state_and_attributes(start)

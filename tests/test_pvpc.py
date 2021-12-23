@@ -12,18 +12,21 @@ from tests.conftest import MockAsyncSession, TZ_TEST
 
 
 @pytest.mark.parametrize(
-    "available, day_str, num_log_msgs, status, exception",
+    "data_source, api_token, available, day_str, num_log_msgs, status, exception",
     (
-        (False, "2032-10-26 00:00:00+00:00", 0, 200, None),
-        (False, "2032-10-26 00:00:00+00:00", 0, 500, None),
-        (True, "2032-10-26 00:00:00+00:00", 1, 200, TimeoutError),
-        (False, "2032-10-26 00:00:00+00:00", 0, 200, TimeoutError),
-        (True, "2032-10-26 00:00:00+00:00", 1, 200, ClientError),
-        (False, "2032-10-26 00:00:00+00:00", 0, 200, ClientError),
+        ("esios_public", None, False, "2032-10-26", 0, 200, None),
+        ("esios_public", None, False, "2032-10-26", 1, 500, None),
+        ("esios", "bad-token", False, "2032-10-26", 1, 401, None),
+        ("esios_public", None, True, "2032-10-26", 1, 200, TimeoutError),
+        ("esios_public", None, False, "2032-10-26", 0, 200, TimeoutError),
+        ("esios_public", None, True, "2032-10-26", 1, 200, ClientError),
+        ("esios_public", None, False, "2032-10-26", 0, 200, ClientError),
     ),
 )
 @pytest.mark.asyncio
 async def test_bad_downloads(
+    data_source,
+    api_token,
     available,
     day_str,
     num_log_msgs,
@@ -35,7 +38,9 @@ async def test_bad_downloads(
     day = datetime.fromisoformat(day_str).astimezone(REFERENCE_TZ)
     mock_session = MockAsyncSession(status=status, exc=exception)
     with caplog.at_level(logging.INFO):
-        pvpc_data = PVPCData(session=mock_session, tariff="2.0TD")
+        pvpc_data = PVPCData(
+            session=mock_session, data_source=data_source, esios_api_token=api_token
+        )
         pvpc_data.source_available = available
         assert not pvpc_data.process_state_and_attributes(day)
         prices = await pvpc_data.async_update_prices(day)
