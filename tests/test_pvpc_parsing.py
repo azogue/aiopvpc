@@ -24,6 +24,8 @@ from tests.conftest import MockAsyncSession, TZ_TEST
         ("2021-10-30 21:00:00", "apidatos", REFERENCE_TZ, True, 49, 2, 25, True),
         ("2021-06-01 09:00:00", "apidatos", REFERENCE_TZ, True, 24, 1, 24, True),
         ("2021-06-01 09:00:00", "apidatos", TZ_TEST, True, 24, 1, 24, True),
+        ("2021-06-01 09:00:00", "esios", REFERENCE_TZ, True, 24, 1, 24, True),
+        ("2021-06-01 09:00:00", "esios", TZ_TEST, True, 24, 1, 24, True),
         ("2021-10-30 00:00:00+08:00", "esios_public", TZ_TEST, False, 0, 1, 0, False),
         ("2021-10-30 00:00:00", "esios_public", TZ_TEST, False, 24, 1, 24, True),
         ("2021-10-31 00:00:00", "esios_public", TZ_TEST, False, 25, 1, 25, True),
@@ -59,6 +61,7 @@ async def test_price_extract(
         tariff="2.0TD",
         local_timezone=timezone,
         data_source=source,
+        esios_api_token="test-token",
     )
 
     pvpc_data.source_available = True
