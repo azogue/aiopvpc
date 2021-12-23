@@ -15,6 +15,7 @@ FIXTURE_JSON_DATA_S2_2021_06_01 = "PRICES_APIDATOS_2021_06_01.json"
 FIXTURE_JSON_DATA_S2_2021_06_01_CYM = "PRICES_APIDATOS_2021_06_01_CYM.json"
 FIXTURE_JSON_DATA_S2_2021_10_30 = "PRICES_APIDATOS_2021_10_30.json"
 FIXTURE_JSON_DATA_S2_2021_10_31 = "PRICES_APIDATOS_2021_10_31.json"
+FIXTURE_JSON_DATA_S3_2021_06_01 = "PRICES_ESIOS_PVPC_2021_06_01.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
 
@@ -57,6 +58,9 @@ class MockAsyncSession:
             date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_2021_10_31),
             date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_2021_06_01),
         }
+        self.responses_esios_token = {
+            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_S3_2021_06_01),
+        }
 
     async def json(self, *_args, **_kwargs):
         """Dumb await."""
@@ -68,7 +72,11 @@ class MockAsyncSession:
         if self.exc:
             raise self.exc
         key = datetime.fromisoformat(url.split("=")[-1]).date()
-        if key == date(2021, 6, 1) and "geo_ids=8744" in url:
+        if url.startswith("https://api.esios.ree.es/indicators"):
+            self._raw_response = self.responses_esios_token.get(
+                key, "HTTP Token: Access denied."
+            )
+        elif key == date(2021, 6, 1) and "geo_ids=8744" in url:
             assert url.startswith("https://apidatos.ree.es")
             self._raw_response = self.responses_apidatos["CYM_PRICES"]
         elif (
