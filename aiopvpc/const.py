@@ -25,10 +25,24 @@ UTC_TZ = zoneinfo.ZoneInfo("UTC")
 DEFAULT_TIMEOUT = 5
 PRICE_PRECISION = 5
 
-DataSource = Literal["esios_public", "apidatos"]  # , "esios"
-URL_PVPC_RESOURCE = (
+DataSource = Literal["esios_public", "esios", "apidatos"]
+GEOZONES = ["Península", "Canarias", "Baleares", "Ceuta", "Melilla"]
+GEOZONE_ID2NAME: Dict[int, str] = {
+    3: "España",
+    8741: "Península",
+    8742: "Canarias",
+    8743: "Baleares",
+    8744: "Ceuta",
+    8745: "Melilla",
+}
+
+URL_PVPC_ESIOS_PUBLIC_RESOURCE = (
     "https://api.esios.ree.es/archives/70/download_json"
     "?locale=es&date={day:%Y-%m-%d}"
+)
+URL_PVPC_ESIOS_TOKEN_RESOURCE = (
+    "https://api.esios.ree.es/indicators/1001"
+    "?start_date={day:%Y-%m-%d}T00:00&end_date={day:%Y-%m-%d}T23:59"
 )
 URL_APIDATOS_PRICES_RESOURCE = (
     "https://apidatos.ree.es/es/datos/mercados/precios-mercados-tiempo-real"
@@ -38,5 +52,6 @@ URL_APIDATOS_PRICES_RESOURCE = (
 )
 ATTRIBUTIONS: Dict[DataSource, str] = {
     "esios_public": "Data retrieved from api.esios.ree.es by REE",
+    "esios": "Data retrieved with API token from api.esios.ree.es by REE",
     "apidatos": "Data retrieved from apidatos.ree.es by REE",
 }
