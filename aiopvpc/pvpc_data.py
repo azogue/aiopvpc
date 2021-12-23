@@ -77,6 +77,7 @@ class PVPCData:
         power_valley: float = DEFAULT_POWER_KW,
         timeout: float = DEFAULT_TIMEOUT,
         data_source: DataSource = "apidatos",  # "esios_public",
+        fixed_data_source: bool = True,
     ):
         self.source_available = True
         self.state: Optional[float] = None
@@ -86,13 +87,12 @@ class PVPCData:
         self.timeout = timeout
         self._session = session
         self._data_source = data_source
+        self._fixed_data_source = fixed_data_source
         self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
 
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
+        assert tariff in TARIFFS
         self.tariff = tariff
-        if tariff not in TARIFFS:  # pragma: no cover
-            _LOGGER.error("Unknown tariff '%s'. Should be one of %s", tariff, TARIFFS)
-            self.tariff = TARIFFS[0]
 
         self._current_prices: Dict[datetime, float] = {}
         self._power = power
@@ -121,10 +121,13 @@ class PVPCData:
         elif resp.status == 403:  # pragma: no cover
             _LOGGER.warning("Forbidden error with '%s': %s", self._data_source, url)
             # loop user-agent and data-source
-            self._user_agents.rotate()
-            self._data_source = (
-                "apidatos" if self._data_source == "esios_public" else "esios_public"
-            )
+            if not self._fixed_data_source:
+                self._user_agents.rotate()
+                self._data_source = (
+                    "apidatos"
+                    if self._data_source == "esios_public"
+                    else "esios_public"
+                )
         return {}
 
     async def _download_pvpc_prices(self, now: datetime) -> Dict[datetime, Any]:
@@ -282,7 +285,7 @@ class PVPCData:
 
         # generate PVPC 2.0TD sensor attributes
         local_time = utc_time.astimezone(self._local_timezone)
-        (current_period, next_period, delta,) = get_current_and_next_tariff_periods(
+        current_period, next_period, delta = get_current_and_next_tariff_periods(
             local_time, zone_ceuta_melilla=self.tariff != TARIFFS[0]
         )
         attributes["period"] = current_period
