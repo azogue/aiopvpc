@@ -5,6 +5,8 @@ Externalization of download and parsing logic for the `pvpc_hourly_pricing`
 HomeAssistant integration,
 https://www.home-assistant.io/integrations/pvpc_hourly_pricing/
 """
+from __future__ import annotations
+
 import asyncio
 import logging
 from collections import deque
@@ -22,7 +24,6 @@ from aiopvpc.const import (
     DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
     REFERENCE_TZ,
-    TARIFF2ID,
     TARIFFS,
     UTC_TZ,
     zoneinfo,
@@ -76,7 +77,8 @@ class PVPCData:
         power: float = DEFAULT_POWER_KW,
         power_valley: float = DEFAULT_POWER_KW,
         timeout: float = DEFAULT_TIMEOUT,
-        data_source: DataSource = "apidatos",  # "esios_public",
+        data_source: DataSource = "apidatos",
+        esios_api_token: Optional[str] = None,
         fixed_data_source: bool = True,
     ):
         self.source_available = True
@@ -86,6 +88,7 @@ class PVPCData:
 
         self.timeout = timeout
         self._session = session
+        self._esios_api_token = esios_api_token
         self._data_source = data_source
         self._fixed_data_source = fixed_data_source
         self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
@@ -102,23 +105,27 @@ class PVPCData:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
+            "Host": "api.esios.ree.es",
         }
-        if self._data_source == "apidatos":
+        if self._esios_api_token and self._data_source == "esios":
+            headers["Authorization"] = f"Token token={self._esios_api_token}"
+        elif self._data_source == "apidatos":
             headers["Host"] = "apidatos.ree.es"
-            return headers
-        headers["Host"] = "api.esios.ree.es"
-        headers["User-Agent"] = self._user_agents[0]
-        # TODO add auth token
-        # if self._data_source == "esios":
+        else:
+            headers["User-Agent"] = self._user_agents[0]
         return headers
 
-    async def _api_get_prices(self, url: str, tariff: str) -> Dict[datetime, Any]:
+    async def _api_get_prices(
+        self, url: str, headers: dict[str, str]
+    ) -> Dict[datetime, Any]:
         assert self._session is not None
-        resp = await self._session.get(url, headers=self._request_headers())
+        resp = await self._session.get(url, headers=headers)
         if resp.status < 400:
             data = await resp.json()
-            return extract_pvpc_data(data, url, tariff, tz=self._local_timezone)
-        elif resp.status == 403:  # pragma: no cover
+            return extract_pvpc_data(data, url, self.tariff, tz=self._local_timezone)
+        elif resp.status == 401 and self._data_source == "esios":
+            _LOGGER.error("Invalid API token (%s) for %s", self._esios_api_token, url)
+        elif resp.status == 403:
             _LOGGER.warning("Forbidden error with '%s': %s", self._data_source, url)
             # loop user-agent and data-source
             if not self._fixed_data_source:
@@ -128,6 +135,13 @@ class PVPCData:
                     if self._data_source == "esios_public"
                     else "esios_public"
                 )
+        else:
+            _LOGGER.error(
+                "Bad API call [status=%d] with '%s' at %s",
+                resp.status,
+                self._data_source,
+                url,
+            )
         return {}
 
     async def _download_pvpc_prices(self, now: datetime) -> Dict[datetime, Any]:
@@ -144,18 +158,20 @@ class PVPCData:
         """
         assert now.date() >= DATE_CHANGE_TO_20TD, "No support for old tariffs"
         url = get_url_prices(self._data_source, self.tariff != TARIFFS[0], now)
-        tariff = TARIFF2ID[self.tariff]
+        headers = self._request_headers()
         try:
             async with async_timeout.timeout(2 * self.timeout):
-                return await self._api_get_prices(url, tariff)
-        except KeyError:
-            _LOGGER.debug("Bad try on getting prices for %s", now)
+                return await self._api_get_prices(url, headers)
+        except KeyError as exc:
+            _LOGGER.debug(
+                "Bad try getting data for %s at %s: KeyError %s", now, url, exc
+            )
         except asyncio.TimeoutError:
             if self.source_available:
                 _LOGGER.warning("Timeout error requesting data from '%s'", url)
-        except aiohttp.ClientError:
+        except aiohttp.ClientError as exc:
             if self.source_available:
-                _LOGGER.warning("Client error in '%s'", url)
+                _LOGGER.warning("Client error in '%s': %s", url, exc)
         return {}
 
     async def async_update_prices(self, now: datetime) -> Dict[datetime, float]:
