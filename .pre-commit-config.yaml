@@ -43,6 +43,8 @@ repos:
       - id: "mypy"
         name: "Check type hints (mypy)"
         verbose: true
+        additional_dependencies:
+          - types-attrs
 ci:
   autofix_commit_msg: |
       [pre-commit.ci] auto fixes from pre-commit.com hooks
