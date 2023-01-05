@@ -1,13 +1,10 @@
 """Tests for aiopvpc."""
 from datetime import datetime, timedelta
 
-import holidays
 import pytest
 
 from aiopvpc.const import REFERENCE_TZ
 from aiopvpc.pvpc_tariff import get_current_and_next_tariff_periods
-
-_HOLIDAYS_VERSION = tuple(map(int, holidays.__version__.split(".")))
 
 
 @pytest.mark.parametrize(
