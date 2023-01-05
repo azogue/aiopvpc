@@ -13,7 +13,10 @@ def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
     """Return period key (P1/P2/P3) for current hour."""
     day = local_ts.date()
     # TODO review 'festivos nacionales no sustituibles de fecha fija', + 6/1
-    national_holiday = day in holidays.Spain(observed=False, years=day.year).keys()
+    base_holidays = holidays.Spain(observed=False, years=day.year)
+    national_holiday = day in base_holidays and all(
+        exclude not in base_holidays[day] for exclude in ("Trasladado", "Jueves Santo")
+    )
     if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
         return "P3"
     elif zone_ceuta_melilla and local_ts.hour in _HOURS_P2_CYM:

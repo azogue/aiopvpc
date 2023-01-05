@@ -16,6 +16,8 @@ _HOLIDAYS_VERSION = tuple(map(int, holidays.__version__.split(".")))
         (2021, 104, 7),
         (2022, 105, 7),
         (2023, 105, 9),
+        (2024, 104, 7),
+        (2025, 104, 7),
     ),
 )
 def test_number_of_national_holidays(year, days_weekend_p3, extra_days_p3):
