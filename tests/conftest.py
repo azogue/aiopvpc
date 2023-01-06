@@ -9,17 +9,24 @@ from aiopvpc.const import ESIOS_INYECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
 TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
 
-FIXTURE_JSON_DATA_2021_10_30 = "PVPC_CURV_DD_2021_10_30.json"
-FIXTURE_JSON_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
-FIXTURE_JSON_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
-FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
-FIXTURE_JSON_ESIOS_DATA_PVPC_2021_06_01 = "PRICES_ESIOS_PVPC_2021_06_01.json"
-FIXTURE_JSON_ESIOS_DATA_PVPC_2023_01_06 = "PRICES_ESIOS_PVPC_2021_06_01.json"
-FIXTURE_JSON_ESIOS_DATA_OMIE_2023_01_06 = "PRICES_ESIOS_10211_2023_01_06.json"
-FIXTURE_JSON_ESIOS_DATA_INYECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
-FIXTURE_JSON_ESIOS_DATA_MAG_2023_01_06 = "PRICES_ESIOS_1900_2023_01_06.json"
+_FIXTURE_DATA_2021_10_30 = "PVPC_CURV_DD_2021_10_30.json"
+_FIXTURE_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
+_FIXTURE_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
+_FIXTURE_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
+_FIXTURE_ESIOS_PVPC_2021_10_30 = "PRICES_ESIOS_1001_2021_10_30.json"
+_FIXTURE_ESIOS_PVPC_2021_10_31 = "PRICES_ESIOS_1001_2021_10_31.json"
+_FIXTURE_ESIOS_PVPC_2021_06_01 = "PRICES_ESIOS_1001_2021_06_01.json"
+_FIXTURE_ESIOS_PVPC_2023_01_06 = "PRICES_ESIOS_1001_2023_01_06.json"
+_FIXTURE_ESIOS_INYECTION_2021_10_30 = "PRICES_ESIOS_1739_2021_10_30.json"
+_FIXTURE_ESIOS_INYECTION_2021_10_31 = "PRICES_ESIOS_1739_2021_10_31.json"
+_FIXTURE_ESIOS_INYECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
+_FIXTURE_ESIOS_OMIE_2021_10_30 = "PRICES_ESIOS_10211_2021_10_30.json"
+_FIXTURE_ESIOS_OMIE_2021_10_31 = "PRICES_ESIOS_10211_2021_10_31.json"
+_FIXTURE_ESIOS_OMIE_2023_01_06 = "PRICES_ESIOS_10211_2023_01_06.json"
+_FIXTURE_ESIOS_MAG_2023_01_06 = "PRICES_ESIOS_1900_2023_01_06.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
+_DEFAULT_UNAUTH_MSG = "HTTP Token: Access denied (TEST)."
 
 
 class MockAsyncSession:
@@ -49,26 +56,30 @@ class MockAsyncSession:
         self.exc = exc
 
         self.responses_public = {
-            date(2022, 3, 27): load_fixture(FIXTURE_JSON_DATA_2022_03_27),
-            date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_2021_10_30),
-            date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_2021_10_31),
-            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_2021_06_01),
+            date(2022, 3, 27): load_fixture(_FIXTURE_DATA_2022_03_27),
+            date(2021, 10, 30): load_fixture(_FIXTURE_DATA_2021_10_30),
+            date(2021, 10, 31): load_fixture(_FIXTURE_DATA_2021_10_31),
+            date(2021, 6, 1): load_fixture(_FIXTURE_DATA_2021_06_01),
         }
         self.responses_token = {
             ESIOS_PVPC: {
-                date(2021, 6, 1): load_fixture(FIXTURE_JSON_ESIOS_DATA_PVPC_2021_06_01),
-                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_PVPC_2023_01_06),
+                date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_PVPC_2021_10_30),
+                date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_PVPC_2021_10_31),
+                date(2021, 6, 1): load_fixture(_FIXTURE_ESIOS_PVPC_2021_06_01),
+                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_PVPC_2023_01_06),
             },
             ESIOS_INYECTION: {
-                date(2023, 1, 6): load_fixture(
-                    FIXTURE_JSON_ESIOS_DATA_INYECTION_2023_01_06
-                ),
+                date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_INYECTION_2021_10_30),
+                date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_INYECTION_2021_10_31),
+                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_INYECTION_2023_01_06),
             },
             ESIOS_MAG: {
-                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_MAG_2023_01_06),
+                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_MAG_2023_01_06),
             },
             ESIOS_OMIE: {
-                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_OMIE_2023_01_06),
+                date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_OMIE_2021_10_30),
+                date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_OMIE_2021_10_31),
+                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_OMIE_2023_01_06),
             },
         }
 
@@ -88,7 +99,7 @@ class MockAsyncSession:
         if url.startswith(prefix_token):
             indicator = url.removeprefix(prefix_token).split("?")[0]
             self._raw_response = self.responses_token.get(indicator, {}).get(
-                key, "HTTP Token: Access denied."
+                key, _DEFAULT_UNAUTH_MSG
             )
         elif url.startswith(prefix_public) and key in self.responses_public:
             self._raw_response = self.responses_public[key]

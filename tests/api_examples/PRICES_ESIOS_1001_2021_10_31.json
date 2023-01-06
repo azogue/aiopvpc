@@ -1,0 +1,1047 @@
+{
+  "indicator": {
+    "name": "Término de facturación de energía activa del PVPC 2.0TD",
+    "short_name": "PVPC T. 2.0TD",
+    "id": 1001,
+    "composited": false,
+    "step_type": "linear",
+    "disaggregated": true,
+    "magnitud": [
+      {
+        "name": "Precio",
+        "id": 23
+      }
+    ],
+    "tiempo": [
+      {
+        "name": "Hora",
+        "id": 4
+      }
+    ],
+    "geos": [
+      {
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      }
+    ],
+    "values_updated_at": "2021-10-30T20:16:46.000+02:00",
+    "values": [
+      {
+        "value": 171.48,
+        "datetime": "2021-10-31T00:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T22:00:00Z",
+        "tz_time": "2021-10-30T22:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 171.48,
+        "datetime": "2021-10-31T00:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T22:00:00Z",
+        "tz_time": "2021-10-30T22:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 171.48,
+        "datetime": "2021-10-31T00:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T22:00:00Z",
+        "tz_time": "2021-10-30T22:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 171.48,
+        "datetime": "2021-10-31T00:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T22:00:00Z",
+        "tz_time": "2021-10-30T22:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 171.48,
+        "datetime": "2021-10-31T00:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T22:00:00Z",
+        "tz_time": "2021-10-30T22:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 123.9,
+        "datetime": "2021-10-31T01:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T23:00:00Z",
+        "tz_time": "2021-10-30T23:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 123.9,
+        "datetime": "2021-10-31T01:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T23:00:00Z",
+        "tz_time": "2021-10-30T23:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 123.9,
+        "datetime": "2021-10-31T01:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T23:00:00Z",
+        "tz_time": "2021-10-30T23:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 123.9,
+        "datetime": "2021-10-31T01:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T23:00:00Z",
+        "tz_time": "2021-10-30T23:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 123.9,
+        "datetime": "2021-10-31T01:00:00.000+02:00",
+        "datetime_utc": "2021-10-30T23:00:00Z",
+        "tz_time": "2021-10-30T23:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 109.55,
+        "datetime": "2021-10-31T02:00:00.000+02:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T00:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 109.55,
+        "datetime": "2021-10-31T02:00:00.000+02:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T00:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 109.55,
+        "datetime": "2021-10-31T02:00:00.000+02:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T00:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 109.55,
+        "datetime": "2021-10-31T02:00:00.000+02:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T00:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 109.55,
+        "datetime": "2021-10-31T02:00:00.000+02:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T00:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 104.85,
+        "datetime": "2021-10-31T02:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T01:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 104.85,
+        "datetime": "2021-10-31T02:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T01:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 104.85,
+        "datetime": "2021-10-31T02:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T01:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 104.85,
+        "datetime": "2021-10-31T02:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T01:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 104.85,
+        "datetime": "2021-10-31T02:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T00:00:00Z",
+        "tz_time": "2021-10-31T01:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 92.03,
+        "datetime": "2021-10-31T03:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T02:00:00Z",
+        "tz_time": "2021-10-31T02:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 92.03,
+        "datetime": "2021-10-31T03:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T02:00:00Z",
+        "tz_time": "2021-10-31T02:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 92.03,
+        "datetime": "2021-10-31T03:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T02:00:00Z",
+        "tz_time": "2021-10-31T02:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 92.03,
+        "datetime": "2021-10-31T03:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T02:00:00Z",
+        "tz_time": "2021-10-31T02:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 92.03,
+        "datetime": "2021-10-31T03:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T02:00:00Z",
+        "tz_time": "2021-10-31T02:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 92.99,
+        "datetime": "2021-10-31T04:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T03:00:00Z",
+        "tz_time": "2021-10-31T03:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 92.99,
+        "datetime": "2021-10-31T04:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T03:00:00Z",
+        "tz_time": "2021-10-31T03:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 92.99,
+        "datetime": "2021-10-31T04:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T03:00:00Z",
+        "tz_time": "2021-10-31T03:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 92.99,
+        "datetime": "2021-10-31T04:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T03:00:00Z",
+        "tz_time": "2021-10-31T03:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 92.99,
+        "datetime": "2021-10-31T04:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T03:00:00Z",
+        "tz_time": "2021-10-31T03:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 86.87,
+        "datetime": "2021-10-31T05:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T04:00:00Z",
+        "tz_time": "2021-10-31T04:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 86.87,
+        "datetime": "2021-10-31T05:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T04:00:00Z",
+        "tz_time": "2021-10-31T04:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 86.87,
+        "datetime": "2021-10-31T05:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T04:00:00Z",
+        "tz_time": "2021-10-31T04:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 86.87,
+        "datetime": "2021-10-31T05:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T04:00:00Z",
+        "tz_time": "2021-10-31T04:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 86.87,
+        "datetime": "2021-10-31T05:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T04:00:00Z",
+        "tz_time": "2021-10-31T04:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 86.2,
+        "datetime": "2021-10-31T06:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T05:00:00Z",
+        "tz_time": "2021-10-31T05:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 86.2,
+        "datetime": "2021-10-31T06:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T05:00:00Z",
+        "tz_time": "2021-10-31T05:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 86.2,
+        "datetime": "2021-10-31T06:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T05:00:00Z",
+        "tz_time": "2021-10-31T05:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 86.2,
+        "datetime": "2021-10-31T06:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T05:00:00Z",
+        "tz_time": "2021-10-31T05:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 86.2,
+        "datetime": "2021-10-31T06:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T05:00:00Z",
+        "tz_time": "2021-10-31T05:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 88.03,
+        "datetime": "2021-10-31T07:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T06:00:00Z",
+        "tz_time": "2021-10-31T06:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 88.03,
+        "datetime": "2021-10-31T07:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T06:00:00Z",
+        "tz_time": "2021-10-31T06:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 88.03,
+        "datetime": "2021-10-31T07:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T06:00:00Z",
+        "tz_time": "2021-10-31T06:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 88.03,
+        "datetime": "2021-10-31T07:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T06:00:00Z",
+        "tz_time": "2021-10-31T06:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 88.03,
+        "datetime": "2021-10-31T07:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T06:00:00Z",
+        "tz_time": "2021-10-31T06:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 81.82,
+        "datetime": "2021-10-31T08:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T07:00:00Z",
+        "tz_time": "2021-10-31T07:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 81.82,
+        "datetime": "2021-10-31T08:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T07:00:00Z",
+        "tz_time": "2021-10-31T07:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 81.82,
+        "datetime": "2021-10-31T08:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T07:00:00Z",
+        "tz_time": "2021-10-31T07:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 81.82,
+        "datetime": "2021-10-31T08:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T07:00:00Z",
+        "tz_time": "2021-10-31T07:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 81.82,
+        "datetime": "2021-10-31T08:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T07:00:00Z",
+        "tz_time": "2021-10-31T07:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 102.63,
+        "datetime": "2021-10-31T09:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T08:00:00Z",
+        "tz_time": "2021-10-31T08:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 102.63,
+        "datetime": "2021-10-31T09:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T08:00:00Z",
+        "tz_time": "2021-10-31T08:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 102.63,
+        "datetime": "2021-10-31T09:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T08:00:00Z",
+        "tz_time": "2021-10-31T08:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 102.63,
+        "datetime": "2021-10-31T09:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T08:00:00Z",
+        "tz_time": "2021-10-31T08:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 102.63,
+        "datetime": "2021-10-31T09:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T08:00:00Z",
+        "tz_time": "2021-10-31T08:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 91.09,
+        "datetime": "2021-10-31T10:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T09:00:00Z",
+        "tz_time": "2021-10-31T09:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 91.09,
+        "datetime": "2021-10-31T10:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T09:00:00Z",
+        "tz_time": "2021-10-31T09:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 91.09,
+        "datetime": "2021-10-31T10:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T09:00:00Z",
+        "tz_time": "2021-10-31T09:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 91.09,
+        "datetime": "2021-10-31T10:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T09:00:00Z",
+        "tz_time": "2021-10-31T09:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 91.09,
+        "datetime": "2021-10-31T10:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T09:00:00Z",
+        "tz_time": "2021-10-31T09:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 91.1,
+        "datetime": "2021-10-31T11:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T10:00:00Z",
+        "tz_time": "2021-10-31T10:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 91.1,
+        "datetime": "2021-10-31T11:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T10:00:00Z",
+        "tz_time": "2021-10-31T10:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 91.1,
+        "datetime": "2021-10-31T11:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T10:00:00Z",
+        "tz_time": "2021-10-31T10:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 91.1,
+        "datetime": "2021-10-31T11:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T10:00:00Z",
+        "tz_time": "2021-10-31T10:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 91.1,
+        "datetime": "2021-10-31T11:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T10:00:00Z",
+        "tz_time": "2021-10-31T10:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 86.49,
+        "datetime": "2021-10-31T12:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T11:00:00Z",
+        "tz_time": "2021-10-31T11:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 86.49,
+        "datetime": "2021-10-31T12:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T11:00:00Z",
+        "tz_time": "2021-10-31T11:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 86.49,
+        "datetime": "2021-10-31T12:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T11:00:00Z",
+        "tz_time": "2021-10-31T11:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 86.49,
+        "datetime": "2021-10-31T12:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T11:00:00Z",
+        "tz_time": "2021-10-31T11:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 86.49,
+        "datetime": "2021-10-31T12:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T11:00:00Z",
+        "tz_time": "2021-10-31T11:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 79.78,
+        "datetime": "2021-10-31T13:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T12:00:00Z",
+        "tz_time": "2021-10-31T12:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 79.78,
+        "datetime": "2021-10-31T13:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T12:00:00Z",
+        "tz_time": "2021-10-31T12:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 79.78,
+        "datetime": "2021-10-31T13:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T12:00:00Z",
+        "tz_time": "2021-10-31T12:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 79.78,
+        "datetime": "2021-10-31T13:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T12:00:00Z",
+        "tz_time": "2021-10-31T12:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 79.78,
+        "datetime": "2021-10-31T13:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T12:00:00Z",
+        "tz_time": "2021-10-31T12:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 80.8,
+        "datetime": "2021-10-31T14:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T13:00:00Z",
+        "tz_time": "2021-10-31T13:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 80.8,
+        "datetime": "2021-10-31T14:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T13:00:00Z",
+        "tz_time": "2021-10-31T13:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 80.8,
+        "datetime": "2021-10-31T14:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T13:00:00Z",
+        "tz_time": "2021-10-31T13:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 80.8,
+        "datetime": "2021-10-31T14:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T13:00:00Z",
+        "tz_time": "2021-10-31T13:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 80.8,
+        "datetime": "2021-10-31T14:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T13:00:00Z",
+        "tz_time": "2021-10-31T13:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 81.34,
+        "datetime": "2021-10-31T15:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T14:00:00Z",
+        "tz_time": "2021-10-31T14:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 81.34,
+        "datetime": "2021-10-31T15:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T14:00:00Z",
+        "tz_time": "2021-10-31T14:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 81.34,
+        "datetime": "2021-10-31T15:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T14:00:00Z",
+        "tz_time": "2021-10-31T14:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 81.34,
+        "datetime": "2021-10-31T15:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T14:00:00Z",
+        "tz_time": "2021-10-31T14:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 81.34,
+        "datetime": "2021-10-31T15:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T14:00:00Z",
+        "tz_time": "2021-10-31T14:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 92.09,
+        "datetime": "2021-10-31T16:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T15:00:00Z",
+        "tz_time": "2021-10-31T15:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 92.09,
+        "datetime": "2021-10-31T16:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T15:00:00Z",
+        "tz_time": "2021-10-31T15:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 92.09,
+        "datetime": "2021-10-31T16:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T15:00:00Z",
+        "tz_time": "2021-10-31T15:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 92.09,
+        "datetime": "2021-10-31T16:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T15:00:00Z",
+        "tz_time": "2021-10-31T15:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 92.09,
+        "datetime": "2021-10-31T16:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T15:00:00Z",
+        "tz_time": "2021-10-31T15:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 111.3,
+        "datetime": "2021-10-31T17:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T16:00:00Z",
+        "tz_time": "2021-10-31T16:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 111.3,
+        "datetime": "2021-10-31T17:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T16:00:00Z",
+        "tz_time": "2021-10-31T16:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 111.3,
+        "datetime": "2021-10-31T17:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T16:00:00Z",
+        "tz_time": "2021-10-31T16:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 111.3,
+        "datetime": "2021-10-31T17:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T16:00:00Z",
+        "tz_time": "2021-10-31T16:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 111.3,
+        "datetime": "2021-10-31T17:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T16:00:00Z",
+        "tz_time": "2021-10-31T16:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 122.85,
+        "datetime": "2021-10-31T18:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T17:00:00Z",
+        "tz_time": "2021-10-31T17:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 122.85,
+        "datetime": "2021-10-31T18:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T17:00:00Z",
+        "tz_time": "2021-10-31T17:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 122.85,
+        "datetime": "2021-10-31T18:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T17:00:00Z",
+        "tz_time": "2021-10-31T17:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 122.85,
+        "datetime": "2021-10-31T18:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T17:00:00Z",
+        "tz_time": "2021-10-31T17:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 122.85,
+        "datetime": "2021-10-31T18:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T17:00:00Z",
+        "tz_time": "2021-10-31T17:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 131.87,
+        "datetime": "2021-10-31T19:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T18:00:00Z",
+        "tz_time": "2021-10-31T18:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 131.87,
+        "datetime": "2021-10-31T19:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T18:00:00Z",
+        "tz_time": "2021-10-31T18:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 131.87,
+        "datetime": "2021-10-31T19:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T18:00:00Z",
+        "tz_time": "2021-10-31T18:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 131.87,
+        "datetime": "2021-10-31T19:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T18:00:00Z",
+        "tz_time": "2021-10-31T18:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 131.87,
+        "datetime": "2021-10-31T19:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T18:00:00Z",
+        "tz_time": "2021-10-31T18:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 185.38,
+        "datetime": "2021-10-31T20:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T19:00:00Z",
+        "tz_time": "2021-10-31T19:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 185.38,
+        "datetime": "2021-10-31T20:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T19:00:00Z",
+        "tz_time": "2021-10-31T19:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 185.38,
+        "datetime": "2021-10-31T20:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T19:00:00Z",
+        "tz_time": "2021-10-31T19:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 185.38,
+        "datetime": "2021-10-31T20:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T19:00:00Z",
+        "tz_time": "2021-10-31T19:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 185.38,
+        "datetime": "2021-10-31T20:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T19:00:00Z",
+        "tz_time": "2021-10-31T19:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 165.54,
+        "datetime": "2021-10-31T21:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T20:00:00Z",
+        "tz_time": "2021-10-31T20:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 165.54,
+        "datetime": "2021-10-31T21:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T20:00:00Z",
+        "tz_time": "2021-10-31T20:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 165.54,
+        "datetime": "2021-10-31T21:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T20:00:00Z",
+        "tz_time": "2021-10-31T20:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 165.54,
+        "datetime": "2021-10-31T21:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T20:00:00Z",
+        "tz_time": "2021-10-31T20:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 165.54,
+        "datetime": "2021-10-31T21:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T20:00:00Z",
+        "tz_time": "2021-10-31T20:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 152.39,
+        "datetime": "2021-10-31T22:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T21:00:00Z",
+        "tz_time": "2021-10-31T21:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 152.39,
+        "datetime": "2021-10-31T22:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T21:00:00Z",
+        "tz_time": "2021-10-31T21:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 152.39,
+        "datetime": "2021-10-31T22:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T21:00:00Z",
+        "tz_time": "2021-10-31T21:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 152.39,
+        "datetime": "2021-10-31T22:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T21:00:00Z",
+        "tz_time": "2021-10-31T21:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 152.39,
+        "datetime": "2021-10-31T22:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T21:00:00Z",
+        "tz_time": "2021-10-31T21:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      },
+      {
+        "value": 146.12,
+        "datetime": "2021-10-31T23:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T22:00:00Z",
+        "tz_time": "2021-10-31T22:00:00.000Z",
+        "geo_id": 8741,
+        "geo_name": "Península"
+      },
+      {
+        "value": 146.12,
+        "datetime": "2021-10-31T23:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T22:00:00Z",
+        "tz_time": "2021-10-31T22:00:00.000Z",
+        "geo_id": 8742,
+        "geo_name": "Canarias"
+      },
+      {
+        "value": 146.12,
+        "datetime": "2021-10-31T23:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T22:00:00Z",
+        "tz_time": "2021-10-31T22:00:00.000Z",
+        "geo_id": 8743,
+        "geo_name": "Baleares"
+      },
+      {
+        "value": 146.12,
+        "datetime": "2021-10-31T23:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T22:00:00Z",
+        "tz_time": "2021-10-31T22:00:00.000Z",
+        "geo_id": 8744,
+        "geo_name": "Ceuta"
+      },
+      {
+        "value": 146.12,
+        "datetime": "2021-10-31T23:00:00.000+01:00",
+        "datetime_utc": "2021-10-31T22:00:00Z",
+        "tz_time": "2021-10-31T22:00:00.000Z",
+        "geo_id": 8745,
+        "geo_name": "Melilla"
+      }
+    ]
+  }
+}
