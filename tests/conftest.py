@@ -4,6 +4,8 @@ import pathlib
 import zoneinfo
 from datetime import date, datetime
 
+from aiopvpc.const import ESIOS_INYECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC
+
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
 TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
 
@@ -11,11 +13,11 @@ FIXTURE_JSON_DATA_2021_10_30 = "PVPC_CURV_DD_2021_10_30.json"
 FIXTURE_JSON_DATA_2021_10_31 = "PVPC_CURV_DD_2021_10_31.json"
 FIXTURE_JSON_DATA_2022_03_27 = "PVPC_CURV_DD_2022_03_27.json"
 FIXTURE_JSON_DATA_2021_06_01 = "PVPC_CURV_DD_2021_06_01.json"
-FIXTURE_JSON_DATA_S2_2021_06_01 = "PRICES_APIDATOS_2021_06_01.json"
-FIXTURE_JSON_DATA_S2_2021_06_01_CYM = "PRICES_APIDATOS_2021_06_01_CYM.json"
-FIXTURE_JSON_DATA_S2_2021_10_30 = "PRICES_APIDATOS_2021_10_30.json"
-FIXTURE_JSON_DATA_S2_2021_10_31 = "PRICES_APIDATOS_2021_10_31.json"
-FIXTURE_JSON_DATA_S3_2021_06_01 = "PRICES_ESIOS_PVPC_2021_06_01.json"
+FIXTURE_JSON_ESIOS_DATA_PVPC_2021_06_01 = "PRICES_ESIOS_PVPC_2021_06_01.json"
+FIXTURE_JSON_ESIOS_DATA_PVPC_2023_01_06 = "PRICES_ESIOS_PVPC_2021_06_01.json"
+FIXTURE_JSON_ESIOS_DATA_OMIE_2023_01_06 = "PRICES_ESIOS_10211_2023_01_06.json"
+FIXTURE_JSON_ESIOS_DATA_INYECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
+FIXTURE_JSON_ESIOS_DATA_MAG_2023_01_06 = "PRICES_ESIOS_1900_2023_01_06.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
 
@@ -46,48 +48,50 @@ class MockAsyncSession:
         self.status = status
         self.exc = exc
 
-        self.responses_apidatos = {
-            "CYM_PRICES": load_fixture(FIXTURE_JSON_DATA_S2_2021_06_01_CYM),
-            date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_30),
-            date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_S2_2021_10_31),
-            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_S2_2021_06_01),
-        }
-        self.responses_esios = {
+        self.responses_public = {
             date(2022, 3, 27): load_fixture(FIXTURE_JSON_DATA_2022_03_27),
             date(2021, 10, 30): load_fixture(FIXTURE_JSON_DATA_2021_10_30),
             date(2021, 10, 31): load_fixture(FIXTURE_JSON_DATA_2021_10_31),
             date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_2021_06_01),
         }
-        self.responses_esios_token = {
-            date(2021, 6, 1): load_fixture(FIXTURE_JSON_DATA_S3_2021_06_01),
+        self.responses_token = {
+            ESIOS_PVPC: {
+                date(2021, 6, 1): load_fixture(FIXTURE_JSON_ESIOS_DATA_PVPC_2021_06_01),
+                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_PVPC_2023_01_06),
+            },
+            ESIOS_INYECTION: {
+                date(2023, 1, 6): load_fixture(
+                    FIXTURE_JSON_ESIOS_DATA_INYECTION_2023_01_06
+                ),
+            },
+            ESIOS_MAG: {
+                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_MAG_2023_01_06),
+            },
+            ESIOS_OMIE: {
+                date(2023, 1, 6): load_fixture(FIXTURE_JSON_ESIOS_DATA_OMIE_2023_01_06),
+            },
         }
 
     async def json(self, *_args, **_kwargs):
         """Dumb await."""
         return self._raw_response
 
-    async def get(self, url, *_args, **_kwargs):
+    async def get(self, url: str, *_args, **_kwargs):
         """Dumb await."""
         self._counter += 1
         if self.exc:
             raise self.exc
+
+        prefix_public = "https://api.esios.ree.es/archives/"
+        prefix_token = "https://api.esios.ree.es/indicators/"
         key = datetime.fromisoformat(url.split("=")[-1]).date()
-        if url.startswith("https://api.esios.ree.es/indicators"):
-            self._raw_response = self.responses_esios_token.get(
+        if url.startswith(prefix_token):
+            indicator = url.removeprefix(prefix_token).split("?")[0]
+            self._raw_response = self.responses_token.get(indicator, {}).get(
                 key, "HTTP Token: Access denied."
             )
-        elif key == date(2021, 6, 1) and "geo_ids=8744" in url:
-            assert url.startswith("https://apidatos.ree.es")
-            self._raw_response = self.responses_apidatos["CYM_PRICES"]
-        elif (
-            url.startswith("https://api.esios.ree.es/archives")
-            and key in self.responses_esios
-        ):
-            self._raw_response = self.responses_esios[key]
-        elif (
-            url.startswith("https://apidatos.ree.es") and key in self.responses_apidatos
-        ):
-            self._raw_response = self.responses_apidatos[key]
+        elif url.startswith(prefix_public) and key in self.responses_public:
+            self._raw_response = self.responses_public[key]
         else:
             self._raw_response = _DEFAULT_EMPTY_VALUE
         return self
