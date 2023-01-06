@@ -1,9 +1,10 @@
 """Tests for aiopvpc."""
 from datetime import datetime
+from typing import cast
 
 import pytest
 
-from aiopvpc.const import REFERENCE_TZ, TARIFFS, UTC_TZ
+from aiopvpc.const import DataSource, ESIOS_PVPC, REFERENCE_TZ, TARIFFS, UTC_TZ
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
 
@@ -28,13 +29,13 @@ async def test_geo_ids(local_tz, source, tariff, expected_18h):
         session=mock_session,
         tariff=tariff,
         local_timezone=local_tz,
-        data_source=source,
-        esios_api_token="test-token",
+        data_source=cast(DataSource, source),
+        api_token="test-token" if source == "esios" else None,
     )
-    await pvpc_data.async_update_prices(start)
-    assert pvpc_data.process_state_and_attributes(start)
+    api_data = await pvpc_data.async_update_all(None, start)
+    assert pvpc_data.process_state_and_attributes(api_data, ESIOS_PVPC, start)
     # for ts, price in pvpc_data._current_prices.items():
     #     print(f"{ts.astimezone(local_tz):%H}h --> {price:.5f} ")
     ts_loc_18h_utc = datetime(2021, 6, 1, 18, tzinfo=local_tz).astimezone(UTC_TZ)
-    price_loc_18h = pvpc_data._current_prices[ts_loc_18h_utc]
+    price_loc_18h = api_data["sensors"][ESIOS_PVPC][ts_loc_18h_utc]
     assert price_loc_18h == expected_18h
