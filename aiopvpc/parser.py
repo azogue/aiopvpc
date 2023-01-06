@@ -7,70 +7,35 @@ Simple aio library to download Spanish electricity hourly prices.
 from datetime import datetime, timedelta
 from itertools import groupby
 from operator import itemgetter
-from typing import Any, Dict, TypedDict
+from typing import Any
 
 from aiopvpc.const import (
     DataSource,
+    ESIOS_PVPC,
     GEOZONE_ID2NAME,
     GEOZONES,
     PRICE_PRECISION,
+    PricesResponse,
     REFERENCE_TZ,
     TARIFF2ID,
     TARIFFS,
-    URL_APIDATOS_PRICES_RESOURCE,
-    URL_PVPC_ESIOS_PUBLIC_RESOURCE,
-    URL_PVPC_ESIOS_TOKEN_RESOURCE,
+    URL_ESIOS_TOKEN_RESOURCE,
+    URL_PUBLIC_PVPC_RESOURCE,
     UTC_TZ,
     zoneinfo,
 )
 
 
-class PricesResponse(TypedDict):
-    """Data schema for parsed prices coming from `apidatos.ree.es`."""
-
-    name: str
-    data_id: str
-    last_update: datetime
-    unit: str
-    series: Dict[str, Dict[datetime, float]]
-
-
 def _timezone_offset(tz: zoneinfo.ZoneInfo = REFERENCE_TZ) -> timedelta:
     ref_ts = datetime(2021, 1, 1, tzinfo=REFERENCE_TZ).astimezone(UTC_TZ)
     loc_ts = datetime(2021, 1, 1, tzinfo=tz).astimezone(UTC_TZ)
-    loc_ts - ref_ts.astimezone(UTC_TZ)
     return loc_ts - ref_ts
 
 
-def extract_prices_from_apidatos_ree(
-    data: Dict[str, Any], tz: zoneinfo.ZoneInfo = REFERENCE_TZ
-) -> PricesResponse:
-    """Parse the contents of a query to 'precios-mercados-tiempo-real'."""
-    offset_timezone = _timezone_offset(tz)
-
-    def _parse_dt(ts: str) -> datetime:
-        return datetime.fromisoformat(ts).astimezone(UTC_TZ) + offset_timezone
-
-    return PricesResponse(
-        name=data["data"]["type"],
-        data_id=data["data"]["id"],
-        last_update=_parse_dt(data["data"]["attributes"]["last-update"]),
-        unit="€/kWh",
-        series={
-            data_series["type"].replace(" (€/MWh)", ""): {
-                _parse_dt(price["datetime"]): round(price["value"] / 1000.0, 5)
-                for price in data_series["attributes"]["values"]
-            }
-            for data_series in data["included"]
-        },
-    )
-
-
 def extract_prices_from_esios_public(
-    data: Dict[str, Any], tariff: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
+    data: dict[str, Any], key: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
 ) -> PricesResponse:
     """Parse the contents of a daily PVPC json file."""
-    key = TARIFF2ID[tariff]
     ts_init = datetime(
         *datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y").timetuple()[:3],
         tzinfo=tz,
@@ -89,12 +54,12 @@ def extract_prices_from_esios_public(
         data_id="legacy",
         last_update=datetime.utcnow().replace(microsecond=0, tzinfo=UTC_TZ),
         unit="€/kWh",
-        series={"PVPC": pvpc_prices},
+        series={ESIOS_PVPC: pvpc_prices},
     )
 
 
 def extract_prices_from_esios_token(
-    data: Dict[str, Any], tz: zoneinfo.ZoneInfo = REFERENCE_TZ
+    data: dict[str, Any], geo_zone: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
 ) -> PricesResponse:
     """Parse the contents of an 'indicator' json file from ESIOS API."""
     offset_timezone = _timezone_offset(tz)
@@ -102,6 +67,7 @@ def extract_prices_from_esios_token(
     unit = "•".join(mag["name"] for mag in indicator_data["magnitud"])
     unit_tiempo = "•".join(mag["name"] for mag in indicator_data["tiempo"])
     unit += f"/{unit_tiempo}"
+    ts_update = datetime.utcnow().replace(microsecond=0, tzinfo=UTC_TZ)
 
     def _parse_dt(ts: str) -> datetime:
         return datetime.fromisoformat(ts).astimezone(UTC_TZ) + offset_timezone
@@ -121,48 +87,67 @@ def extract_prices_from_esios_token(
         }
         for key, group in value_gen
     }
+    if geo_zone in parsed_data:
+        geo_data = parsed_data[geo_zone]
+    elif "Península" in parsed_data:
+        geo_data = parsed_data["Península"]
+    else:
+        geo_data = parsed_data["España"]
 
     return PricesResponse(
         name=indicator_data["name"],
         data_id=indicator_data["id"],
-        last_update=datetime.utcnow().replace(microsecond=0, tzinfo=UTC_TZ),
+        last_update=ts_update,
         unit=unit,
-        series=parsed_data,
+        series={str(indicator_data["id"]): geo_data},
     )
 
 
-def extract_pvpc_data(
-    data: Dict[str, Any], url: str, tariff: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
-) -> Dict[datetime, float]:
+def extract_esios_data(
+    data: dict[str, Any], url: str, tariff: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
+) -> PricesResponse:
     """Parse the contents of a daily PVPC json file."""
-    if url.startswith("https://api.esios.ree.es/archives"):
-        prices_data = extract_prices_from_esios_public(data, tariff, tz)
-    elif url.startswith("https://api.esios.ree.es/indicators"):
-        prices_data = extract_prices_from_esios_token(data, tz)
-        # TODO adapt to geozones
-        # if tariff == TARIFFS[0] and tz != REFERENCE_TZ:
-        #     return prices_data["series"][GEOZONES[1]]
-        if tariff == TARIFFS[0]:
-            return prices_data["series"][GEOZONES[0]]
-        return prices_data["series"][GEOZONES[3]]
-    elif url.startswith("https://apidatos.ree.es"):
-        prices_data = extract_prices_from_apidatos_ree(data, tz)
-    else:
-        raise NotImplementedError(f"Data source not known: {url} >{data}")
-    return prices_data["series"]["PVPC"]
+    if url.startswith("https://api.esios.ree.es/archives") or url.startswith(
+        "https://apip.esios.ree.es/archives"
+    ):
+        return extract_prices_from_esios_public(data, TARIFF2ID[tariff], tz)
+
+    if url.startswith("https://api.esios.ree.es/indicators") or url.startswith(
+        "https://apip.esios.ree.es/indicators"
+    ):
+        # TODO adapt better to geozones
+        if tariff == TARIFFS[0] and tz != REFERENCE_TZ:
+            geo_zone = GEOZONES[1]
+        elif tariff == TARIFFS[0]:
+            geo_zone = GEOZONES[0]
+        else:
+            geo_zone = GEOZONES[3]
+
+        return extract_prices_from_esios_token(data, geo_zone, tz)
+    raise NotImplementedError(f"Data source not known: {url} >{data}")
 
 
-def get_url_prices(
-    source: DataSource, zone_ceuta_melilla: bool, now_local_ref: datetime
-) -> str:
-    """Make URL for PVPC prices."""
+def get_daily_urls_to_download(
+    source: DataSource,
+    indicators: set[str],
+    now_local_ref: datetime,
+    next_day_local_ref: datetime,
+) -> tuple[list[str], list[str]]:
+    """Make URLs for ESIOS price series."""
     if source == "esios_public":
-        return URL_PVPC_ESIOS_PUBLIC_RESOURCE.format(day=now_local_ref.date())
-    elif source == "esios":
-        return URL_PVPC_ESIOS_TOKEN_RESOURCE.format(day=now_local_ref.date())
-    assert source == "apidatos"
-    start = now_local_ref.replace(hour=0, minute=0)
-    end = now_local_ref.replace(hour=23, minute=59)
-    return URL_APIDATOS_PRICES_RESOURCE.format(
-        start=start, end=end, geo_id=8744 if zone_ceuta_melilla else 8741
-    )
+        assert indicators == {ESIOS_PVPC}
+        return (
+            [URL_PUBLIC_PVPC_RESOURCE.format(day=now_local_ref.date())],
+            [URL_PUBLIC_PVPC_RESOURCE.format(day=next_day_local_ref.date())],
+        )
+
+    assert source == "esios"
+    today = [
+        URL_ESIOS_TOKEN_RESOURCE.format(ind=indicator, day=now_local_ref.date())
+        for indicator in indicators
+    ]
+    tomorrow = [
+        URL_ESIOS_TOKEN_RESOURCE.format(ind=indicator, day=next_day_local_ref.date())
+        for indicator in indicators
+    ]
+    return today, tomorrow
