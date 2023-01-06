@@ -15,19 +15,19 @@ from aiopvpc.const import (
     TARIFFS,
     UTC_TZ,
 )
-from aiopvpc.ha_helpers import get_enabled_sensor_unique_ids, make_sensor_unique_id
+from aiopvpc.ha_helpers import get_enabled_sensor_keys, make_sensor_unique_id
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import check_num_datapoints, MockAsyncSession, run_h_step
 
 
 def test_sensor_unique_ids():
-    all_sensor_keys = get_enabled_sensor_unique_ids(
-        using_private_api=False, disabled_sensors=[]
+    all_sensor_keys = get_enabled_sensor_keys(
+        using_private_api=False, disabled_sensor_ids=[]
     )
     assert all_sensor_keys == {KEY_PVPC}
 
-    all_sensor_keys = get_enabled_sensor_unique_ids(
-        using_private_api=True, disabled_sensors=[]
+    all_sensor_keys = get_enabled_sensor_keys(
+        using_private_api=True, disabled_sensor_ids=[]
     )
     assert sorted(all_sensor_keys) == sorted(ALL_SENSORS)
     counter_combs = 0
@@ -40,8 +40,8 @@ def test_sensor_unique_ids():
             counter_combs += 1
     assert counter_combs == len(unique_ids)
 
-    assert not get_enabled_sensor_unique_ids(
-        using_private_api=True, disabled_sensors=list(unique_ids)
+    assert not get_enabled_sensor_keys(
+        using_private_api=True, disabled_sensor_ids=list(unique_ids)
     )
 
 
