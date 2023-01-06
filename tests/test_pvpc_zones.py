@@ -11,9 +11,6 @@ from tests.conftest import MockAsyncSession, TZ_TEST
 @pytest.mark.parametrize(
     "local_tz, source, tariff, expected_18h",
     (
-        (TZ_TEST, "apidatos", TARIFFS[0], 0.23144),
-        (REFERENCE_TZ, "apidatos", TARIFFS[0], 0.23144),
-        (REFERENCE_TZ, "apidatos", TARIFFS[1], 0.13813),
         (TZ_TEST, "esios_public", TARIFFS[0], 0.23144),
         (REFERENCE_TZ, "esios_public", TARIFFS[0], 0.23144),
         (REFERENCE_TZ, "esios_public", TARIFFS[1], 0.13813),

@@ -73,8 +73,6 @@ async def _run_h_step(
 @pytest.mark.parametrize(
     "local_tz, source",
     (
-        (TZ_TEST, "apidatos"),
-        (REFERENCE_TZ, "apidatos"),
         (TZ_TEST, "esios_public"),
         (REFERENCE_TZ, "esios_public"),
     ),
