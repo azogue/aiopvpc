@@ -20,7 +20,7 @@ from aiopvpc.const import (
     REFERENCE_TZ,
     UTC_TZ,
 )
-from aiopvpc.pvpc_data import PVPCData
+from aiopvpc.pvpc_data import PVPCData, BadApiTokenAuth
 from tests.conftest import MockAsyncSession, TZ_TEST
 
 
@@ -53,6 +53,11 @@ async def test_bad_downloads(
             data_source=cast(DataSource, data_source),
             api_token=api_token,
         )
+        if status == 401:
+            with pytest.raises(BadApiTokenAuth):
+                await pvpc_data.async_update_all(None, day)
+            assert mock_session.call_count == 1
+            return
 
         api_data = await pvpc_data.async_update_all(None, day)
         assert not api_data["sensors"][KEY_PVPC]

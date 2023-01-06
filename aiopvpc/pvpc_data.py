@@ -61,6 +61,11 @@ _STANDARD_USER_AGENTS = [
 ]
 
 
+class BadApiTokenAuth(Exception):
+    """Exception to signal HA that ESIOS API token is invalid (401 status)."""
+    pass
+
+
 class PVPCData:
     """
     Data handler for PVPC hourly prices.
@@ -132,8 +137,7 @@ class PVPCData:
                 self._data_source,
                 url,
             )
-            self._data_source = "esios_public"
-            # TODO raise for ConfigEntryAuthFailed
+            raise BadApiTokenAuth(f"Bad response with token '{self._api_token}'")
         elif resp.status == 403:  # pragma: no cover
             _LOGGER.warning(
                 "[%s] Forbidden error with '%s': %s", sensor_key, self._data_source, url
@@ -167,6 +171,9 @@ class PVPCData:
             )
         except aiohttp.ClientError as exc:
             _LOGGER.warning("[%s] Client error in '%s' -> %s", sensor_key, url, exc)
+        except BadApiTokenAuth:
+            _LOGGER.error("[%s] Auth error with token %s", sensor_key, self._api_token)
+            raise
         return None
 
     async def async_update_all(
