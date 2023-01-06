@@ -20,7 +20,7 @@ async def _get_real_data(
             session=session,
             tariff="2.0TD",
             local_timezone=timezone,
-            api_token=os.getenv("ESIOS_TOKEN"),
+            api_token=os.getenv("ESIOS_TOKEN") if data_source == "esios" else None,
             data_source=cast(DataSource, data_source),
             sensor_keys=indicators,
         )
@@ -46,9 +46,9 @@ async def test_real_download_today_async(data_source, timezone):
     assert 22 < len(api_data["sensors"][KEY_PVPC]) < 49
 
 
-if __name__ == '__main__':
-    from pprint import pprint
+if __name__ == "__main__":
     import asyncio
+    from pprint import pprint
 
     # timestamp = datetime(2021, 10, 30, 21)
     timestamp = datetime.utcnow()

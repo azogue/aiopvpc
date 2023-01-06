@@ -159,7 +159,7 @@ class PVPCData:
         try:
             async with async_timeout.timeout(self._timeout):
                 return await self._api_get_data(sensor_key, url)
-        except KeyError as exc:
+        except (AttributeError, KeyError) as exc:
             _LOGGER.debug("Bad try on getting prices for %s ---> %s", sensor_key, exc)
         except asyncio.TimeoutError:
             _LOGGER.warning(
