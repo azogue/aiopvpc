@@ -83,9 +83,9 @@ def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
     national_holiday = day in _NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD[day.year]
     if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
         return "P3"
-    elif zone_ceuta_melilla and local_ts.hour in _HOURS_P2_CYM:
+    if zone_ceuta_melilla and local_ts.hour in _HOURS_P2_CYM:
         return "P2"
-    elif not zone_ceuta_melilla and local_ts.hour in _HOURS_P2:
+    if not zone_ceuta_melilla and local_ts.hour in _HOURS_P2:
         return "P2"
     return "P1"
 

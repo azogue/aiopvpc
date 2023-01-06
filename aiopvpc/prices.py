@@ -1,8 +1,7 @@
 """ESIOS API handler for HomeAssistant. Hourly price attributes."""
+import zoneinfo
 from datetime import datetime
-from typing import Any, Dict, Tuple
-
-from aiopvpc.const import zoneinfo
+from typing import Any
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
@@ -10,10 +9,10 @@ def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
 
 
 def _split_today_tomorrow_prices(
-    current_prices: Dict[datetime, float],
+    current_prices: dict[datetime, float],
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
-) -> Tuple[Dict[datetime, float], Dict[datetime, float]]:
+) -> tuple[dict[datetime, float], dict[datetime, float]]:
     local_time = utc_time.astimezone(timezone)
     today, tomorrow = {}, {}
     for ts_utc, price_h in current_prices.items():
@@ -26,8 +25,8 @@ def _split_today_tomorrow_prices(
 
 
 def _make_price_tag_attributes(
-    prices: Dict[datetime, float], timezone: zoneinfo.ZoneInfo, tomorrow: bool
-) -> Dict[str, Any]:
+    prices: dict[datetime, float], timezone: zoneinfo.ZoneInfo, tomorrow: bool
+) -> dict[str, Any]:
     prefix = "price_next_day_" if tomorrow else "price_"
     attributes = {}
     for ts_utc, price_h in prices.items():
@@ -35,17 +34,17 @@ def _make_price_tag_attributes(
         attr_key = f"{prefix}{ts_local.hour:02d}h"
         if attr_key in attributes:  # DST change with duplicated hour :)
             attr_key += "_d"
-        attributes[attr_key] = price_h
+        attributes[attr_key] = 1000 * price_h
     return attributes
 
 
 def _make_price_stats_attributes(
     current_price: float,
-    current_prices: Dict[datetime, float],
+    current_prices: dict[datetime, float],
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
-) -> Dict[str, Any]:
-    attributes: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    attributes: dict[str, Any] = {}
     better_prices_ahead = [
         (ts, price)
         for ts, price in current_prices.items()
@@ -80,20 +79,17 @@ def _make_price_stats_attributes(
     )
     attributes["min_price"] = min_price
     attributes["min_price_at"] = next(iter(prices_sorted)).astimezone(timezone).hour
-    attributes["next_best_at"] = list(
-        map(
-            lambda x: x.astimezone(timezone).hour,
-            filter(lambda x: x >= utc_time, prices_sorted.keys()),
-        )
-    )
+    attributes["next_best_at"] = [
+        ts.astimezone(timezone).hour for ts in prices_sorted.keys() if ts >= utc_time
+    ]
     return attributes
 
 
 def make_price_sensor_attributes(
-    current_prices: Dict[datetime, float],
+    current_prices: dict[datetime, float],
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate sensor attributes for hourly prices variables."""
     current_price = current_prices[utc_time]
     today, tomorrow = _split_today_tomorrow_prices(current_prices, utc_time, timezone)
