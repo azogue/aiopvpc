@@ -20,13 +20,12 @@ _ha_uniqueid_to_sensor_key = {
 }
 
 
-def get_enabled_sensor_unique_ids(
-    using_private_api: bool,
-    disabled_sensors: list[str],
+def get_enabled_sensor_keys(
+    using_private_api: bool, disabled_sensor_ids: list[str]
 ) -> set[str]:
     """(HA) Get enabled API indicators."""
     sensor_keys = set(ALL_SENSORS) if using_private_api else {KEY_PVPC}
-    for unique_id in disabled_sensors:
+    for unique_id in disabled_sensor_ids:
         disabled_ind = _ha_uniqueid_to_sensor_key[unique_id]
         if disabled_ind in sensor_keys:
             sensor_keys.remove(disabled_ind)

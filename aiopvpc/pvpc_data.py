@@ -313,7 +313,8 @@ class PVPCData:
                 current_prices.update(prices_fut)
 
         _LOGGER.debug(
-            "Download done, now with %d prices from %s UTC",
+            "[%s] Download done, now with %d prices from %s UTC",
+            sensor_key,
             len(current_prices),
             list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
         )
