@@ -1,6 +1,4 @@
-"""
-Simple aio library to download Spanish electricity hourly prices. Constants.
-"""
+"""Simple aio library to download Spanish electricity hourly prices. Constants."""
 import zoneinfo
 from datetime import date
 from typing import Dict, Literal
