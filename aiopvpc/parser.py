@@ -11,12 +11,13 @@ from typing import Any
 
 from aiopvpc.const import (
     DataSource,
-    ESIOS_PVPC,
     GEOZONE_ID2NAME,
     GEOZONES,
+    KEY_PVPC,
     PRICE_PRECISION,
     PricesResponse,
     REFERENCE_TZ,
+    SENSOR_KEY_TO_DATAID,
     TARIFF2ID,
     TARIFFS,
     URL_ESIOS_TOKEN_RESOURCE,
@@ -54,12 +55,15 @@ def extract_prices_from_esios_public(
         data_id="legacy",
         last_update=datetime.utcnow().replace(microsecond=0, tzinfo=UTC_TZ),
         unit="€/kWh",
-        series={ESIOS_PVPC: pvpc_prices},
+        series={KEY_PVPC: pvpc_prices},
     )
 
 
 def extract_prices_from_esios_token(
-    data: dict[str, Any], geo_zone: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
+    data: dict[str, Any],
+    sensor_key: str,
+    geo_zone: str,
+    tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
 ) -> PricesResponse:
     """Parse the contents of an 'indicator' json file from ESIOS API."""
     offset_timezone = _timezone_offset(tz)
@@ -99,12 +103,16 @@ def extract_prices_from_esios_token(
         data_id=indicator_data["id"],
         last_update=ts_update,
         unit=unit,
-        series={str(indicator_data["id"]): geo_data},
+        series={sensor_key: geo_data},
     )
 
 
 def extract_esios_data(
-    data: dict[str, Any], url: str, tariff: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
+    data: dict[str, Any],
+    url: str,
+    sensor_key: str,
+    tariff: str,
+    tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
 ) -> PricesResponse:
     """Parse the contents of a daily PVPC json file."""
     if url.startswith("https://api.esios.ree.es/archives") or url.startswith(
@@ -123,19 +131,19 @@ def extract_esios_data(
         else:
             geo_zone = GEOZONES[3]
 
-        return extract_prices_from_esios_token(data, geo_zone, tz)
+        return extract_prices_from_esios_token(data, sensor_key, geo_zone, tz)
     raise NotImplementedError(f"Data source not known: {url} >{data}")
 
 
 def get_daily_urls_to_download(
     source: DataSource,
-    indicators: set[str],
+    sensor_keys: set[str],
     now_local_ref: datetime,
     next_day_local_ref: datetime,
 ) -> tuple[list[str], list[str]]:
     """Make URLs for ESIOS price series."""
     if source == "esios_public":
-        assert indicators == {ESIOS_PVPC}
+        assert sensor_keys == {KEY_PVPC}
         return (
             [URL_PUBLIC_PVPC_RESOURCE.format(day=now_local_ref.date())],
             [URL_PUBLIC_PVPC_RESOURCE.format(day=next_day_local_ref.date())],
@@ -143,11 +151,15 @@ def get_daily_urls_to_download(
 
     assert source == "esios"
     today = [
-        URL_ESIOS_TOKEN_RESOURCE.format(ind=indicator, day=now_local_ref.date())
-        for indicator in indicators
+        URL_ESIOS_TOKEN_RESOURCE.format(
+            ind=SENSOR_KEY_TO_DATAID[key], day=now_local_ref.date()
+        )
+        for key in sensor_keys
     ]
     tomorrow = [
-        URL_ESIOS_TOKEN_RESOURCE.format(ind=indicator, day=next_day_local_ref.date())
-        for indicator in indicators
+        URL_ESIOS_TOKEN_RESOURCE.format(
+            ind=SENSOR_KEY_TO_DATAID[key], day=next_day_local_ref.date()
+        )
+        for key in sensor_keys
     ]
     return today, tomorrow
