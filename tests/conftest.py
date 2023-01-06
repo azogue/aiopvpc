@@ -1,10 +1,14 @@
 """Tests for aiopvpc."""
+from __future__ import annotations
+
 import json
+import logging
 import pathlib
 import zoneinfo
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
-from aiopvpc.const import ESIOS_INYECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC
+from aiopvpc.const import ESIOS_INYECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC
+from aiopvpc.pvpc_data import EsiosApiData, PVPCData
 
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
 TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
@@ -116,3 +120,35 @@ class MockAsyncSession:
 def load_fixture(filename: str):
     """Load stored example for esios API response."""
     return json.loads((TEST_EXAMPLES_PATH / filename).read_text())
+
+
+async def run_h_step(
+    mock_session: MockAsyncSession,
+    pvpc_data: PVPCData,
+    api_data: EsiosApiData | None,
+    start: datetime,
+    should_fail: bool = False,
+) -> tuple[datetime, EsiosApiData]:
+    current_prices = api_data["sensors"][KEY_PVPC] if api_data else {}
+    if current_prices:
+        logging.debug(
+            "[Calls=%d]-> start=%s --> %s -> %s (%d prices)",
+            mock_session.call_count,
+            start,
+            list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            list(current_prices)[-1].strftime("%Y-%m-%d %Hh"),
+            len(current_prices),
+        )
+    api_data = await pvpc_data.async_update_all(api_data, start)
+    state_ok = pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, start)
+    assert should_fail is not state_ok
+    start += timedelta(hours=1)
+    return start, api_data
+
+
+def check_num_datapoints(
+    api_data: EsiosApiData, sensor_keys: tuple[str, ...], expected: int
+):
+    for key in sensor_keys:
+        num_points = len(api_data["sensors"][key])
+        assert num_points == expected, (key, expected, num_points)

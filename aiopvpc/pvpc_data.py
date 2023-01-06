@@ -18,6 +18,7 @@ import aiohttp
 import async_timeout
 
 from aiopvpc.const import (
+    ALL_SENSORS,
     ATTRIBUTIONS,
     DataSource,
     DEFAULT_POWER_KW,
@@ -61,9 +62,10 @@ _STANDARD_USER_AGENTS = [
 ]
 
 
-class BadApiTokenAuth(Exception):
+class BadApiTokenAuthError(Exception):
     """Exception to signal HA that ESIOS API token is invalid (401 status)."""
-    pass
+
+    pass  # noqa PIE790
 
 
 class PVPCData:
@@ -93,7 +95,7 @@ class PVPCData:
         """Set up API access."""
         self.states: dict[str, float | None] = {}
         self.sensor_attributes: dict[str, dict[str, Any]] = {}
-        self.sensor_keys: set[str] = set(sensor_keys)
+        self._sensor_keys: set[str] = {key for key in sensor_keys if key in ALL_SENSORS}
 
         self._timeout = timeout
         self._session = session
@@ -137,7 +139,7 @@ class PVPCData:
                 self._data_source,
                 url,
             )
-            raise BadApiTokenAuth(f"Bad response with token '{self._api_token}'")
+            raise BadApiTokenAuthError(f"Bad response with token '{self._api_token}'")
         elif resp.status == 403:  # pragma: no cover
             _LOGGER.warning(
                 "[%s] Forbidden error with '%s': %s", sensor_key, self._data_source, url
@@ -171,7 +173,7 @@ class PVPCData:
             )
         except aiohttp.ClientError as exc:
             _LOGGER.warning("[%s] Client error in '%s' -> %s", sensor_key, url, exc)
-        except BadApiTokenAuth:
+        except BadApiTokenAuthError:
             _LOGGER.error("[%s] Auth error with token %s", sensor_key, self._api_token)
             raise
         return None
@@ -200,13 +202,15 @@ class PVPCData:
 
         urls_now, urls_next = get_daily_urls_to_download(
             self._data_source,
-            self.sensor_keys,
+            self._sensor_keys,
             local_ref_now,
             next_day,
         )
         updated = False
         tasks = []
-        for url_now, url_next, sensor_key in zip(urls_now, urls_next, self.sensor_keys):
+        for url_now, url_next, sensor_key in zip(
+            urls_now, urls_next, self._sensor_keys
+        ):
             if sensor_key not in current_data["sensors"]:
                 current_data["sensors"][sensor_key] = {}
 
@@ -221,7 +225,7 @@ class PVPCData:
             )
 
         results = await asyncio.gather(*tasks)
-        for new_data, sensor_key in zip(results, self.sensor_keys):
+        for new_data, sensor_key in zip(results, self._sensor_keys):
             if new_data:
                 updated = True
                 current_data["sensors"][sensor_key] = new_data
