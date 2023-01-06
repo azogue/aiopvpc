@@ -20,7 +20,7 @@ DEFAULT_POWER_KW = 3.3
 REFERENCE_TZ = zoneinfo.ZoneInfo("Europe/Madrid")
 UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
-DEFAULT_TIMEOUT = 5
+DEFAULT_TIMEOUT = 10
 PRICE_PRECISION = 5
 
 DataSource = Literal["esios_public", "esios"]
@@ -53,11 +53,12 @@ ESIOS_MAG = "1900"  # regargo GAS
 ESIOS_OMIE = "10211"  # precio mayorista
 
 # unique ids for each series
-KEY_PVPC = "1001"
-KEY_INYECTION = "1739"
-KEY_MAG = "1900"  # regargo GAS
-KEY_OMIE = "10211"  # precio mayorista
+KEY_PVPC = "PVPC"
+KEY_INYECTION = "INYECTION"
+KEY_MAG = "MAG"  # regargo GAS
+KEY_OMIE = "OMIE"  # precio mayorista
 
+ALL_SENSORS = (KEY_PVPC, KEY_INYECTION, KEY_MAG, KEY_OMIE)
 SENSOR_KEY_TO_DATAID = {
     KEY_PVPC: ESIOS_PVPC,
     KEY_INYECTION: ESIOS_INYECTION,

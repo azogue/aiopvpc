@@ -22,10 +22,11 @@ from aiopvpc.const import (
     DataSource,
     DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
-    ESIOS_PVPC,
     EsiosApiData,
+    KEY_PVPC,
     PricesResponse,
     REFERENCE_TZ,
+    SENSOR_KEY_TO_DATAID,
     TARIFFS,
     UTC_TZ,
     zoneinfo,
@@ -82,14 +83,14 @@ class PVPCData:
         timeout: float = DEFAULT_TIMEOUT,
         data_source: DataSource = "esios_public",
         api_token: str | None = None,
-        esios_indicators: tuple[str, ...] = (ESIOS_PVPC,),
+        sensor_keys: tuple[str, ...] = (KEY_PVPC,),
     ) -> None:
         """Set up API access."""
         self.states: dict[str, float | None] = {}
         self.sensor_attributes: dict[str, dict[str, Any]] = {}
-        self.esios_indicators: set[str] = set(esios_indicators)
+        self.sensor_keys: set[str] = set(sensor_keys)
 
-        self.timeout = timeout
+        self._timeout = timeout
         self._session = session
         self._data_source = data_source
         self._api_token = api_token
@@ -105,7 +106,7 @@ class PVPCData:
         self._power = power
         self._power_valley = power_valley
 
-    def _request_headers(self) -> dict[str, str]:
+    async def _api_get_data(self, sensor_key: str, url: str) -> PricesResponse | None:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -116,20 +117,27 @@ class PVPCData:
             assert self._api_token is not None
             headers["x-api-key"] = self._api_token
             headers["Authorization"] = f"Token token={self._api_token}"
-        return headers
 
-    async def _api_get_data(self, url: str) -> PricesResponse | None:
         assert self._session is not None
-        resp = await self._session.get(url, headers=self._request_headers())
+        resp = await self._session.get(url, headers=headers)
         if resp.status < 400:
             data = await resp.json()
-            return extract_esios_data(data, url, self.tariff, tz=self._local_timezone)
+            return extract_esios_data(
+                data, url, sensor_key, self.tariff, tz=self._local_timezone
+            )
         elif resp.status == 401 and self._data_source == "esios":
-            _LOGGER.error("Unauthorized error with '%s': %s", self._data_source, url)
+            _LOGGER.error(
+                "[%s] Unauthorized error with '%s': %s",
+                sensor_key,
+                self._data_source,
+                url,
+            )
             self._data_source = "esios_public"
             # TODO raise for ConfigEntryAuthFailed
         elif resp.status == 403:  # pragma: no cover
-            _LOGGER.warning("Forbidden error with '%s': %s", self._data_source, url)
+            _LOGGER.warning(
+                "[%s] Forbidden error with '%s': %s", sensor_key, self._data_source, url
+            )
             # loop user-agent and data-source
             self._user_agents.rotate()
         else:
@@ -138,34 +146,34 @@ class PVPCData:
             )
         return None
 
-    async def _download_daily_data(self, url: str) -> PricesResponse | None:
+    async def _download_daily_data(
+        self, sensor_key: str, url: str
+    ) -> PricesResponse | None:
         """
         PVPC data extractor.
 
-        Make GET request to 'api.esios.ree.es' and extract hourly prices for
-        the selected tariff from the JSON daily file download
-        of the official _Spain Electric Network_ (Red Eléctrica Española, REE)
-        for the _Voluntary Price for Small Consumers_
-        (Precio Voluntario para el Pequeño Consumidor, PVPC).
+        Make GET request to 'api.esios.ree.es' and extract hourly prices.
 
         Prices are referenced with datetimes in UTC.
         """
         try:
-            async with async_timeout.timeout(2 * self.timeout):
-                return await self._api_get_data(url)
+            async with async_timeout.timeout(self._timeout):
+                return await self._api_get_data(sensor_key, url)
         except KeyError as exc:
-            _LOGGER.debug("Bad try on getting prices for %s ---> %s", url, exc)
+            _LOGGER.debug("Bad try on getting prices for %s ---> %s", sensor_key, exc)
         except asyncio.TimeoutError:
-            _LOGGER.warning("Timeout error requesting data from '%s'", url)
+            _LOGGER.warning(
+                "[%s] Timeout error requesting data from '%s'", sensor_key, url
+            )
         except aiohttp.ClientError as exc:
-            _LOGGER.warning("Client error in '%s' -> %s", url, exc)
+            _LOGGER.warning("[%s] Client error in '%s' -> %s", sensor_key, url, exc)
         return None
 
     async def async_update_all(
         self, current_data: EsiosApiData | None, now: datetime
     ) -> EsiosApiData:
         """
-        Update all electricity prices from the ESIOS API.
+        Update all prices from the ESIOS API.
 
         Input `now: datetime` is assumed tz-aware in UTC.
         If not, it is converted to UTC from the original timezone,
@@ -185,22 +193,20 @@ class PVPCData:
 
         urls_now, urls_next = get_daily_urls_to_download(
             self._data_source,
-            self.esios_indicators,
+            self.sensor_keys,
             local_ref_now,
             next_day,
         )
         updated = False
         tasks = []
-        for url_now, url_next, data_id in zip(
-            urls_now, urls_next, self.esios_indicators
-        ):
-            if data_id not in current_data["sensors"]:
-                current_data["sensors"][data_id] = {}
+        for url_now, url_next, sensor_key in zip(urls_now, urls_next, self.sensor_keys):
+            if sensor_key not in current_data["sensors"]:
+                current_data["sensors"][sensor_key] = {}
 
             tasks.append(
                 self._update_prices_series(
-                    data_id,
-                    current_data["sensors"][data_id],
+                    sensor_key,
+                    current_data["sensors"][sensor_key],
                     url_now,
                     url_next,
                     local_ref_now,
@@ -208,23 +214,23 @@ class PVPCData:
             )
 
         results = await asyncio.gather(*tasks)
-        for new_data, data_id in zip(results, self.esios_indicators):
+        for new_data, sensor_key in zip(results, self.sensor_keys):
             if new_data:
                 updated = True
-                current_data["sensors"][data_id] = new_data
+                current_data["sensors"][sensor_key] = new_data
 
         if updated:
             current_data["available"] = True
             current_data["data_source"] = self._data_source
             current_data["last_update"] = utc_now
 
-        for data_id in current_data["sensors"]:
-            self.process_state_and_attributes(current_data, data_id, now)
+        for sensor_key in current_data["sensors"]:
+            self.process_state_and_attributes(current_data, sensor_key, now)
         return current_data
 
     async def _update_prices_series(
         self,
-        data_id: str,
+        sensor_key: str,
         current_prices: dict[datetime, float],
         url_now: str,
         url_next: str,
@@ -269,17 +275,17 @@ class PVPCData:
             )
         else:
             # make API call to download today prices
-            prices_response = await self._download_daily_data(url_now)
-            if prices_response is None or not prices_response["series"].get(data_id):
+            prices_response = await self._download_daily_data(sensor_key, url_now)
+            if prices_response is None or not prices_response["series"].get(sensor_key):
                 return current_prices
-            prices = prices_response["series"][data_id]
+            prices = prices_response["series"][sensor_key]
             current_prices.update(prices)
 
         # At evening, it is possible to retrieve next day prices
         if local_ref_now.hour >= 20:
-            prices_fut_response = await self._download_daily_data(url_next)
+            prices_fut_response = await self._download_daily_data(sensor_key, url_next)
             if prices_fut_response:
-                prices_fut = prices_fut_response["series"][data_id]
+                prices_fut = prices_fut_response["series"][sensor_key]
                 current_prices.update(prices_fut)
 
         _LOGGER.debug(
@@ -296,7 +302,7 @@ class PVPCData:
         return ATTRIBUTIONS[self._data_source]
 
     def process_state_and_attributes(
-        self, current_data: EsiosApiData, data_id: str, utc_now: datetime
+        self, current_data: EsiosApiData, sensor_key: str, utc_now: datetime
     ) -> bool:
         """
         Generate the current state and sensor attributes.
@@ -308,16 +314,19 @@ class PVPCData:
         If not, it is converted to UTC from the original timezone,
         or set as UTC-time if it is a naive datetime.
         """
-        attributes: dict[str, Any] = {"data_id": data_id}
+        attributes: dict[str, Any] = {
+            "sensor_id": sensor_key,
+            "data_id": SENSOR_KEY_TO_DATAID[sensor_key],
+        }
         utc_time = ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
-        current_prices = current_data["sensors"].get(data_id, {})
+        current_prices = current_data["sensors"].get(sensor_key, {})
         if len(current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
                 utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(UTC_TZ)
             )
-            current_data["sensors"][data_id] = {
+            current_data["sensors"][sensor_key] = {
                 key_ts: price
                 for key_ts, price in current_prices.items()
                 if key_ts >= max_age
@@ -325,21 +334,21 @@ class PVPCData:
 
         # set current price
         try:
-            self.states[data_id] = current_data["sensors"][data_id][utc_time]
+            self.states[sensor_key] = current_data["sensors"][sensor_key][utc_time]
             current_data["available"] = True
         except KeyError:
-            self.states[data_id] = None
+            self.states[sensor_key] = None
             current_data["available"] = False
-            self.sensor_attributes[data_id] = attributes
+            self.sensor_attributes[sensor_key] = attributes
             return False
 
         # generate price attributes
         price_attrs = make_price_sensor_attributes(
-            current_data["sensors"][data_id], utc_time, self._local_timezone
+            current_data["sensors"][sensor_key], utc_time, self._local_timezone
         )
 
         # generate PVPC 2.0TD sensor attributes
-        if data_id == ESIOS_PVPC:
+        if sensor_key == KEY_PVPC:
             local_time = utc_time.astimezone(self._local_timezone)
             (current_period, next_period, delta,) = get_current_and_next_tariff_periods(
                 local_time, zone_ceuta_melilla=self.tariff != TARIFFS[0]
@@ -351,5 +360,5 @@ class PVPCData:
             attributes["next_period"] = next_period
             attributes["hours_to_next_period"] = int(delta.total_seconds()) // 3600
 
-        self.sensor_attributes[data_id] = {**attributes, **price_attrs}
+        self.sensor_attributes[sensor_key] = {**attributes, **price_attrs}
         return True
