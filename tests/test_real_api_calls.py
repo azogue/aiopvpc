@@ -6,10 +6,13 @@ from zoneinfo import ZoneInfo
 
 import pytest
 from aiohttp import ClientSession
+from dotenv import load_dotenv
 
 from aiopvpc import PVPCData
 from aiopvpc.const import ALL_SENSORS, DataSource, KEY_PVPC, REFERENCE_TZ
 from tests.conftest import TZ_TEST
+
+load_dotenv()
 
 
 async def _get_real_data(
