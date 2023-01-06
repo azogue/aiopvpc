@@ -113,6 +113,11 @@ class PVPCData:
         self._power = power
         self._power_valley = power_valley
 
+    @property
+    def using_private_api(self) -> bool:
+        """Check if an API token is available and data-source is ESIOS."""
+        return self._api_token is not None and self._data_source == "esios"
+
     async def _api_get_data(self, sensor_key: str, url: str) -> PricesResponse | None:
         headers = {
             "Accept": "application/json",
@@ -120,7 +125,7 @@ class PVPCData:
             "Host": "api.esios.ree.es",
             "User-Agent": self._user_agents[0],
         }
-        if self._data_source == "esios":
+        if self.using_private_api:
             assert self._api_token is not None
             headers["x-api-key"] = self._api_token
             headers["Authorization"] = f"Token token={self._api_token}"
@@ -177,6 +182,14 @@ class PVPCData:
             _LOGGER.error("[%s] Auth error with token %s", sensor_key, self._api_token)
             raise
         return None
+
+    def update_active_sensors(self, data_id: str, enabled: bool):
+        """Update enabled API indicators to download."""
+        assert data_id in ALL_SENSORS
+        if enabled:
+            self._sensor_keys.add(data_id)
+        elif data_id in self._sensor_keys:
+            self._sensor_keys.remove(data_id)
 
     async def async_update_all(
         self, current_data: EsiosApiData | None, now: datetime
