@@ -1,9 +1,10 @@
 """Tests for aiopvpc."""
 from datetime import datetime, timedelta
+from typing import cast
 
 import pytest
 
-from aiopvpc.const import REFERENCE_TZ
+from aiopvpc.const import DataSource, ESIOS_PVPC, REFERENCE_TZ
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
 
@@ -47,22 +48,20 @@ async def test_price_extract(
         session=mock_session,
         tariff="2.0TD",
         local_timezone=timezone,
-        data_source=source,
-        esios_api_token="test-token",
+        data_source=cast(DataSource, source),
+        api_token="test-token" if source == "esios" else None,
     )
 
-    pvpc_data.source_available = True
-    assert not pvpc_data.process_state_and_attributes(day)
-    assert mock_session.call_count == 0
-
-    await pvpc_data.async_update_prices(day)
-    pvpc_data.process_state_and_attributes(day)
-    assert len(pvpc_data._current_prices) == n_prices
+    api_data = await pvpc_data.async_update_all(None, day)
+    pvpc_data.process_state_and_attributes(api_data, ESIOS_PVPC, day)
+    assert len(api_data["sensors"][ESIOS_PVPC]) == n_prices
     assert mock_session.call_count == n_calls
 
-    has_prices = pvpc_data.process_state_and_attributes(day + timedelta(hours=10))
-    assert len(pvpc_data._current_prices) == n_prices_8h
+    has_prices = pvpc_data.process_state_and_attributes(
+        api_data, ESIOS_PVPC, day + timedelta(hours=10)
+    )
+    assert len(api_data["sensors"][ESIOS_PVPC]) == n_prices_8h
     assert has_prices == available_8h
     if has_prices:
-        last_dt, last_p = list(pvpc_data._current_prices.items())[-1]
+        last_dt, last_p = list(api_data["sensors"][ESIOS_PVPC].items())[-1]
         assert last_dt.astimezone(timezone).hour == 23
