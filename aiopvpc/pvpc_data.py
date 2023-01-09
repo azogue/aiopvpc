@@ -24,8 +24,8 @@ from aiopvpc.const import (
     DEFAULT_POWER_KW,
     DEFAULT_TIMEOUT,
     EsiosApiData,
+    EsiosResponse,
     KEY_PVPC,
-    PricesResponse,
     REFERENCE_TZ,
     SENSOR_KEY_TO_DATAID,
     TARIFFS,
@@ -118,7 +118,7 @@ class PVPCData:
         """Check if an API token is available and data-source is ESIOS."""
         return self._api_token is not None and self._data_source == "esios"
 
-    async def _api_get_data(self, sensor_key: str, url: str) -> PricesResponse | None:
+    async def _api_get_data(self, sensor_key: str, url: str) -> EsiosResponse | None:
         headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
@@ -159,7 +159,7 @@ class PVPCData:
 
     async def _download_daily_data(
         self, sensor_key: str, url: str
-    ) -> PricesResponse | None:
+    ) -> EsiosResponse | None:
         """
         PVPC data extractor.
 
@@ -320,16 +320,16 @@ class PVPCData:
         else:
             # make API call to download today prices
             prices_response = await self._download_daily_data(sensor_key, url_now)
-            if prices_response is None or not prices_response["series"].get(sensor_key):
+            if prices_response is None or not prices_response.series.get(sensor_key):
                 return current_prices
-            prices = prices_response["series"][sensor_key]
+            prices = prices_response.series[sensor_key]
             current_prices.update(prices)
 
         # At evening, it is possible to retrieve next day prices
         if local_ref_now.hour >= 20:
             prices_fut_response = await self._download_daily_data(sensor_key, url_next)
             if prices_fut_response:
-                prices_fut = prices_fut_response["series"][sensor_key]
+                prices_fut = prices_fut_response.series[sensor_key]
                 current_prices.update(prices_fut)
 
         _LOGGER.debug(

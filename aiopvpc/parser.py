@@ -11,11 +11,11 @@ from typing import Any
 
 from aiopvpc.const import (
     DataSource,
+    EsiosResponse,
     GEOZONE_ID2NAME,
     GEOZONES,
     KEY_PVPC,
     PRICE_PRECISION,
-    PricesResponse,
     REFERENCE_TZ,
     SENSOR_KEY_TO_DATAID,
     TARIFF2ID,
@@ -35,7 +35,7 @@ def _timezone_offset(tz: zoneinfo.ZoneInfo = REFERENCE_TZ) -> timedelta:
 
 def extract_prices_from_esios_public(
     data: dict[str, Any], key: str, tz: zoneinfo.ZoneInfo = REFERENCE_TZ
-) -> PricesResponse:
+) -> EsiosResponse:
     """Parse the contents of a daily PVPC json file."""
     ts_init = datetime(
         *datetime.strptime(data["PVPC"][0]["Dia"], "%d/%m/%Y").timetuple()[:3],
@@ -50,7 +50,7 @@ def extract_prices_from_esios_public(
         for i, values_hour in enumerate(data["PVPC"])
     }
 
-    return PricesResponse(
+    return EsiosResponse(
         name="PVPC ESIOS",
         data_id="legacy",
         last_update=datetime.utcnow().replace(microsecond=0, tzinfo=UTC_TZ),
@@ -64,7 +64,7 @@ def extract_prices_from_esios_token(
     sensor_key: str,
     geo_zone: str,
     tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
-) -> PricesResponse:
+) -> EsiosResponse:
     """Parse the contents of an 'indicator' json file from ESIOS API."""
     offset_timezone = _timezone_offset(tz)
     indicator_data = data.pop("indicator")
@@ -98,9 +98,9 @@ def extract_prices_from_esios_token(
     else:
         geo_data = parsed_data["España"]
 
-    return PricesResponse(
+    return EsiosResponse(
         name=indicator_data["name"],
-        data_id=indicator_data["id"],
+        data_id=str(indicator_data["id"]),
         last_update=ts_update,
         unit=unit,
         series={sensor_key: geo_data},
@@ -113,16 +113,12 @@ def extract_esios_data(
     sensor_key: str,
     tariff: str,
     tz: zoneinfo.ZoneInfo = REFERENCE_TZ,
-) -> PricesResponse:
+) -> EsiosResponse:
     """Parse the contents of a daily PVPC json file."""
-    if url.startswith("https://api.esios.ree.es/archives") or url.startswith(
-        "https://apip.esios.ree.es/archives"
-    ):
+    if url.startswith("https://api.esios.ree.es/archives"):
         return extract_prices_from_esios_public(data, TARIFF2ID[tariff], tz)
 
-    if url.startswith("https://api.esios.ree.es/indicators") or url.startswith(
-        "https://apip.esios.ree.es/indicators"
-    ):
+    if url.startswith("https://api.esios.ree.es/indicators"):
         # TODO adapt better to geozones
         if tariff == TARIFFS[0] and tz != REFERENCE_TZ:
             geo_zone = GEOZONES[1]
