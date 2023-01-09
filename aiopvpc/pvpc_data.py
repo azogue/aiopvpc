@@ -397,7 +397,7 @@ class PVPCData:
 
         # generate price attributes
         price_attrs = make_price_sensor_attributes(
-            current_data.sensors[sensor_key], utc_time, self._local_timezone
+            sensor_key, current_data.sensors[sensor_key], utc_time, self._local_timezone
         )
 
         # generate PVPC 2.0TD sensor attributes

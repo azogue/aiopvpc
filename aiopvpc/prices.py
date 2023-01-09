@@ -3,6 +3,8 @@ import zoneinfo
 from datetime import datetime
 from typing import Any
 
+from .const import KEY_INYECTION
+
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
     return any(map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar())))
@@ -39,16 +41,21 @@ def _make_price_tag_attributes(
 
 
 def _make_price_stats_attributes(
+    sensor_key: str,
     current_price: float,
     current_prices: dict[datetime, float],
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
 ) -> dict[str, Any]:
     attributes: dict[str, Any] = {}
+    sign_is_best = 1 if sensor_key != KEY_INYECTION else -1
+    prices_sorted = dict(
+        sorted(current_prices.items(), key=lambda x: sign_is_best * x[1])
+    )
     better_prices_ahead = [
         (ts, price)
         for ts, price in current_prices.items()
-        if ts > utc_time and price < current_price
+        if ts > utc_time and price * sign_is_best < current_price * sign_is_best
     ]
     if better_prices_ahead:
         next_better_ts, next_better_price = better_prices_ahead[0]
@@ -57,7 +64,6 @@ def _make_price_stats_attributes(
         attributes["hours_to_better_price"] = int(delta_better.total_seconds()) // 3600
         attributes["num_better_prices_ahead"] = len(better_prices_ahead)
 
-    prices_sorted = dict(sorted(current_prices.items(), key=lambda x: x[1]))
     try:
         attributes["price_position"] = (
             list(prices_sorted.values()).index(current_price) + 1
@@ -86,6 +92,7 @@ def _make_price_stats_attributes(
 
 
 def make_price_sensor_attributes(
+    sensor_key: str,
     current_prices: dict[datetime, float],
     utc_time: datetime,
     timezone: zoneinfo.ZoneInfo,
@@ -93,13 +100,15 @@ def make_price_sensor_attributes(
     """Generate sensor attributes for hourly prices variables."""
     current_price = current_prices[utc_time]
     today, tomorrow = _split_today_tomorrow_prices(current_prices, utc_time, timezone)
-    price_attrs = _make_price_stats_attributes(current_price, today, utc_time, timezone)
+    price_attrs = _make_price_stats_attributes(
+        sensor_key, current_price, today, utc_time, timezone
+    )
     price_tags = _make_price_tag_attributes(today, timezone, False)
     if tomorrow:
         tomorrow_prices = {
             f"{key} (next day)": value
             for key, value in _make_price_stats_attributes(
-                current_price, tomorrow, utc_time, timezone
+                sensor_key, current_price, tomorrow, utc_time, timezone
             ).items()
         }
         tomorrow_price_tags = _make_price_tag_attributes(tomorrow, timezone, True)
