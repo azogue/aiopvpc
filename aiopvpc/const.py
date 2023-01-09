@@ -2,7 +2,7 @@
 import zoneinfo
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Literal, TypedDict
+from typing import Literal
 
 DATE_CHANGE_TO_20TD = date(2021, 6, 1)
 
@@ -74,8 +74,9 @@ SENSOR_KEY_TO_NAME = {
 }
 
 
-class PricesResponse(TypedDict):
-    """Data schema for parsed prices coming from ESIOS API."""
+@dataclass
+class EsiosResponse:
+    """Data schema for parsed data coming from ESIOS API."""
 
     name: str
     data_id: str
