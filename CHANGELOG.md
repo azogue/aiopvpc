@@ -1,5 +1,33 @@
 # Changelog
 
+## [v4.0.0](https://github.com/azogue/aiopvpc/tree/v4.0.0) - Implement ESIOS API Token (2023-01-09)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.0...v3.0.0)
+
+- ✨ Implement **support to access the extended ESIOS API** with a personal token
+(you must request yours by mailing to [consultasios@ree.es](mailto:consultasios@ree.es?subject=Personal%20token%20request)),
+with initial support for the existent PVPC price sensor (ESIOS indicator code: **1001**), and **3 new ones** 🤩:
+  * **Inyection price** sensor (ESIOS indicator code: **1739**),
+name: "Precio de la energía excedentaria del autoconsumo para el mecanismo de compensación simplificada"
+  * **MAG price** sensor (ESIOS indicator code: **1900**),
+name: "Desglose peaje por defecto 2.0TD excedente o déficit de la liquidación del mecanismo de ajuste de costes de producción"
+  * **OMIE price** sensor (ESIOS indicator code: **10211**),
+name: "Precio medio horario final suma de componentes"
+
+- 💥 Remove 'apidatos' support as alternative _data-source_, leaving only public and private paths for https://api.esios.ree.es
+
+- ✨ Signal bad auth for esios token calls with a custom exception, to handle 'reauth' flow in Home-Assistant
+
+- ✨ Add helper methods for HA integration to manage unique ids for each sensor, to update the enabled sensors to download, and to check the API token
+
+- ♻️ Use dataclasses for `EsiosApiData` and `EsiosResponse` data containers, instead of typed dicts
+
+- ✅ tests: Update fixtures for esios sensors and adapt tests to the new interface and the multiple-sensors behaviour
+
+- 📦️ Bump mayor version to **v4** and lighten dev-env, removing pre-commit related modules and adding python-dotenv
+
+- (from #46, with v3.1.0) Remove `holidays` dependency to evaluate special days under 'P3' period and fix tests
+
 ## [v3.0.0](https://github.com/azogue/aiopvpc/tree/v3.0.0) - Change Data Source to apidatos.ree.es (2021-12-05)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v3.0.0...v2.3.0)
