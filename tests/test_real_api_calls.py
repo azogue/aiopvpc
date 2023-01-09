@@ -46,7 +46,7 @@ async def test_real_download_today_async(data_source, timezone):
     api_data = await _get_real_data(
         timezone, data_source, sensor_keys, datetime.utcnow()
     )
-    assert 22 < len(api_data["sensors"][KEY_PVPC]) < 49
+    assert 22 < len(api_data.sensors[KEY_PVPC]) < 49
 
 
 if __name__ == "__main__":

@@ -129,7 +129,7 @@ async def run_h_step(
     start: datetime,
     should_fail: bool = False,
 ) -> tuple[datetime, EsiosApiData]:
-    current_prices = api_data["sensors"][KEY_PVPC] if api_data else {}
+    current_prices = api_data.sensors[KEY_PVPC] if api_data else {}
     if current_prices:
         logging.debug(
             "[Calls=%d]-> start=%s --> %s -> %s (%d prices)",
@@ -150,5 +150,5 @@ def check_num_datapoints(
     api_data: EsiosApiData, sensor_keys: tuple[str, ...], expected: int
 ):
     for key in sensor_keys:
-        num_points = len(api_data["sensors"][key])
+        num_points = len(api_data.sensors[key])
         assert num_points == expected, (key, expected, num_points)

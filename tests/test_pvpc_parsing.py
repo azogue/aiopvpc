@@ -54,14 +54,14 @@ async def test_price_extract(
 
     api_data = await pvpc_data.async_update_all(None, day)
     pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, day)
-    assert len(api_data["sensors"][KEY_PVPC]) == n_prices
+    assert len(api_data.sensors[KEY_PVPC]) == n_prices
     assert mock_session.call_count == n_calls
 
     has_prices = pvpc_data.process_state_and_attributes(
         api_data, KEY_PVPC, day + timedelta(hours=10)
     )
-    assert len(api_data["sensors"][KEY_PVPC]) == n_prices_8h
+    assert len(api_data.sensors[KEY_PVPC]) == n_prices_8h
     assert has_prices == available_8h
     if has_prices:
-        last_dt, last_p = list(api_data["sensors"][KEY_PVPC].items())[-1]
+        last_dt, last_p = list(api_data.sensors[KEY_PVPC].items())[-1]
         assert last_dt.astimezone(timezone).hour == 23
