@@ -1,5 +1,6 @@
 """Simple aio library to download Spanish electricity hourly prices. Constants."""
 import zoneinfo
+from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Literal, TypedDict
 
@@ -83,10 +84,11 @@ class PricesResponse(TypedDict):
     series: dict[str, dict[datetime, float]]
 
 
-class EsiosApiData(TypedDict):
+@dataclass
+class EsiosApiData:
     """Data schema to store multiple series from ESIOS API."""
 
-    available: bool
     last_update: datetime
     data_source: str
     sensors: dict[str, dict[datetime, float]]
+    availability: dict[str, bool]

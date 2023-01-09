@@ -33,9 +33,10 @@ async def test_geo_ids(local_tz, source, tariff, expected_18h):
         api_token="test-token" if source == "esios" else None,
     )
     api_data = await pvpc_data.async_update_all(None, start)
+    assert all(api_data.availability.values())
     assert pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, start)
     # for ts, price in pvpc_data._current_prices.items():
     #     print(f"{ts.astimezone(local_tz):%H}h --> {price:.5f} ")
     ts_loc_18h_utc = datetime(2021, 6, 1, 18, tzinfo=local_tz).astimezone(UTC_TZ)
-    price_loc_18h = api_data["sensors"][KEY_PVPC][ts_loc_18h_utc]
+    price_loc_18h = api_data.sensors[KEY_PVPC][ts_loc_18h_utc]
     assert price_loc_18h == expected_18h

@@ -183,7 +183,9 @@ class PVPCData:
             raise
         return None
 
-    async def check_api_token(self, now: datetime, api_token: str | None = None) -> bool:
+    async def check_api_token(
+        self, now: datetime, api_token: str | None = None
+    ) -> bool:
         """Check if ESIOS API token is valid."""
         local_ref_now = ensure_utc_time(now).astimezone(REFERENCE_TZ)
         if api_token is not None:
@@ -191,7 +193,7 @@ class PVPCData:
         self._data_source = "esios"
         today, _ = get_daily_urls_to_download(
             self._data_source,
-            [KEY_PVPC],
+            {KEY_PVPC},
             local_ref_now,
             local_ref_now,
         )
@@ -226,7 +228,7 @@ class PVPCData:
         if current_data is None:
             current_data = EsiosApiData(
                 sensors={},
-                available=False,
+                availability={},
                 data_source=self._data_source,
                 last_update=utc_now,
             )
@@ -242,13 +244,13 @@ class PVPCData:
         for url_now, url_next, sensor_key in zip(
             urls_now, urls_next, self._sensor_keys
         ):
-            if sensor_key not in current_data["sensors"]:
-                current_data["sensors"][sensor_key] = {}
+            if sensor_key not in current_data.sensors:
+                current_data.sensors[sensor_key] = {}
 
             tasks.append(
                 self._update_prices_series(
                     sensor_key,
-                    current_data["sensors"][sensor_key],
+                    current_data.sensors[sensor_key],
                     url_now,
                     url_next,
                     local_ref_now,
@@ -259,14 +261,14 @@ class PVPCData:
         for new_data, sensor_key in zip(results, self._sensor_keys):
             if new_data:
                 updated = True
-                current_data["sensors"][sensor_key] = new_data
+                current_data.sensors[sensor_key] = new_data
+                current_data.availability[sensor_key] = True
 
         if updated:
-            current_data["available"] = True
-            current_data["data_source"] = self._data_source
-            current_data["last_update"] = utc_now
+            current_data.data_source = self._data_source
+            current_data.last_update = utc_now
 
-        for sensor_key in current_data["sensors"]:
+        for sensor_key in current_data.sensors:
             self.process_state_and_attributes(current_data, sensor_key, now)
         return current_data
 
@@ -363,13 +365,13 @@ class PVPCData:
         }
         utc_time = ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
-        current_prices = current_data["sensors"].get(sensor_key, {})
+        current_prices = current_data.sensors.get(sensor_key, {})
         if len(current_prices) > 25 and actual_time.hour < 20:
             # there are 'today' and 'next day' prices, but 'today' has expired
             max_age = (
                 utc_time.astimezone(REFERENCE_TZ).replace(hour=0).astimezone(UTC_TZ)
             )
-            current_data["sensors"][sensor_key] = {
+            current_data.sensors[sensor_key] = {
                 key_ts: price
                 for key_ts, price in current_prices.items()
                 if key_ts >= max_age
@@ -377,17 +379,17 @@ class PVPCData:
 
         # set current price
         try:
-            self.states[sensor_key] = current_data["sensors"][sensor_key][utc_time]
-            current_data["available"] = True
+            self.states[sensor_key] = current_data.sensors[sensor_key][utc_time]
+            current_data.availability[sensor_key] = True
         except KeyError:
             self.states[sensor_key] = None
-            current_data["available"] = False
+            current_data.availability[sensor_key] = False
             self.sensor_attributes[sensor_key] = attributes
             return False
 
         # generate price attributes
         price_attrs = make_price_sensor_attributes(
-            current_data["sensors"][sensor_key], utc_time, self._local_timezone
+            current_data.sensors[sensor_key], utc_time, self._local_timezone
         )
 
         # generate PVPC 2.0TD sensor attributes

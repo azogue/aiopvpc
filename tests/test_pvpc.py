@@ -57,7 +57,7 @@ async def test_bad_downloads(
             return
 
         api_data = await pvpc_data.async_update_all(None, day)
-        assert not api_data["sensors"][KEY_PVPC]
+        assert not api_data.sensors[KEY_PVPC]
         assert not pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, day)
         assert len(caplog.messages) == num_log_msgs
     assert mock_session.call_count == 1
@@ -95,6 +95,7 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
         assert mock_session.call_count == len(sensor_keys)
         check_num_datapoints(api_data, sensor_keys, 24)
+    assert all(api_data.availability.values())
 
     # first call for next-day prices
     assert start == datetime(2021, 10, 30, 18, tzinfo=UTC_TZ)
@@ -112,7 +113,7 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
     for _ in range(21):
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
         assert mock_session.call_count == 2 * len(sensor_keys)
-        assert api_data["available"]
+        assert all(api_data.availability.values())
         # check_num_datapoints(api_data, sensor_keys, 25)
 
     # call for next-day prices (no more available)
@@ -126,14 +127,14 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
 
     # assert mock_session.call_count == 6
     assert pvpc_data.states.get(KEY_PVPC)
-    assert api_data["available"]
+    assert all(api_data.availability.values())
     assert start.astimezone(local_tz) == datetime(2021, 11, 1, tzinfo=local_tz)
     assert not pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, start)
 
     # After known prices are exausted, the state is flagged as unavailable
     with pytest.raises(AssertionError):
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
-    assert not api_data["available"]
+    assert not any(api_data.availability.values())
     start += timedelta(hours=1)
     assert not pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, start)
 

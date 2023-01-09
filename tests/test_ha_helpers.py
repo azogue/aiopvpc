@@ -16,7 +16,7 @@ from aiopvpc.const import (
     UTC_TZ,
 )
 from aiopvpc.ha_helpers import get_enabled_sensor_keys, make_sensor_unique_id
-from aiopvpc.pvpc_data import PVPCData, BadApiTokenAuthError
+from aiopvpc.pvpc_data import BadApiTokenAuthError, PVPCData
 from tests.conftest import check_num_datapoints, MockAsyncSession, run_h_step
 
 
@@ -72,7 +72,7 @@ async def test_disable_sensors():
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
     assert mock_session.call_count == 9
     check_num_datapoints(api_data, sensor_keys, 24)
-    logging.error(api_data["sensors"].keys())
+    logging.error(api_data.sensors.keys())
 
     pvpc_data.update_active_sensors(KEY_INYECTION, enabled=False)
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
