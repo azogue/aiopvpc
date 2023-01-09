@@ -138,13 +138,15 @@ class PVPCData:
                 data, url, sensor_key, self.tariff, tz=self._local_timezone
             )
         elif resp.status == 401 and self._data_source == "esios":
-            _LOGGER.error(
+            _LOGGER.warning(
                 "[%s] Unauthorized error with '%s': %s",
                 sensor_key,
                 self._data_source,
                 url,
             )
-            raise BadApiTokenAuthError(f"Bad response with token '{self._api_token}'")
+            raise BadApiTokenAuthError(
+                f"[{sensor_key}] Unauthorized access with API token '{self._api_token}'"
+            )
         elif resp.status == 403:  # pragma: no cover
             _LOGGER.warning(
                 "[%s] Forbidden error with '%s': %s", sensor_key, self._data_source, url
@@ -153,7 +155,11 @@ class PVPCData:
             self._user_agents.rotate()
         else:
             _LOGGER.error(
-                "Unknown error [%d] with '%s': %s", resp.status, self._data_source, url
+                "[%s] Unknown error [%d] with '%s': %s",
+                sensor_key,
+                resp.status,
+                self._data_source,
+                url,
             )
         return None
 
@@ -171,7 +177,7 @@ class PVPCData:
             async with async_timeout.timeout(self._timeout):
                 return await self._api_get_data(sensor_key, url)
         except (AttributeError, KeyError) as exc:
-            _LOGGER.debug("Bad try on getting prices for %s ---> %s", sensor_key, exc)
+            _LOGGER.debug("[%s] Bad try on getting prices (%s)", sensor_key, exc)
         except asyncio.TimeoutError:
             _LOGGER.warning(
                 "[%s] Timeout error requesting data from '%s'", sensor_key, url
@@ -179,7 +185,6 @@ class PVPCData:
         except aiohttp.ClientError as exc:
             _LOGGER.warning("[%s] Client error in '%s' -> %s", sensor_key, url, exc)
         except BadApiTokenAuthError:
-            _LOGGER.error("[%s] Auth error with token %s", sensor_key, self._api_token)
             raise
         return None
 
@@ -284,7 +289,8 @@ class PVPCData:
         if local_ref_now.hour >= 20 and current_num_prices > 30:
             # already have today+tomorrow prices, avoid requests
             _LOGGER.debug(
-                "Evening download avoided, now with %d prices from %s UTC",
+                "[%s] Evening download avoided, now with %d prices from %s UTC",
+                sensor_key,
                 current_num_prices,
                 list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
             )
@@ -299,7 +305,8 @@ class PVPCData:
         ):
             # already have today prices, avoid request
             _LOGGER.debug(
-                "Download avoided, now with %d prices up to %s UTC",
+                "[%s] Download avoided, now with %d prices up to %s UTC",
+                sensor_key,
                 current_num_prices,
                 list(current_prices)[-1].strftime("%Y-%m-%d %Hh"),
             )
@@ -311,7 +318,8 @@ class PVPCData:
         ):
             # avoid download of today prices
             _LOGGER.debug(
-                "Avoided: %s, with %d prices -> last: %s, download-day: %s",
+                "[%s] Avoided: %s, with %d prices -> last: %s, download-day: %s",
+                sensor_key,
                 local_ref_now,
                 current_num_prices,
                 list(current_prices)[0].astimezone(REFERENCE_TZ).date(),
