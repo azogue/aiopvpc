@@ -16,7 +16,7 @@ from aiopvpc.const import (
     UTC_TZ,
 )
 from aiopvpc.ha_helpers import get_enabled_sensor_keys, make_sensor_unique_id
-from aiopvpc.pvpc_data import PVPCData
+from aiopvpc.pvpc_data import PVPCData, BadApiTokenAuthError
 from tests.conftest import check_num_datapoints, MockAsyncSession, run_h_step
 
 
@@ -102,3 +102,27 @@ async def test_disable_sensors():
     pvpc_data.update_active_sensors(KEY_OMIE, enabled=True)
     await run_h_step(mock_session, pvpc_data, api_data, start, should_fail=True)
     assert mock_session.call_count == 15
+
+
+@pytest.mark.asyncio
+async def test_check_api_token():
+    start = datetime(2023, 1, 6, 19, tzinfo=UTC_TZ)
+    mock_session = MockAsyncSession(status=401)
+    pvpc_data = PVPCData(session=mock_session)
+    token_ok = await pvpc_data.check_api_token(start, "bad_token")
+    assert not token_ok
+    assert mock_session.call_count == 1
+
+    with pytest.raises(BadApiTokenAuthError):
+        await pvpc_data.async_update_all(None, start)
+    assert mock_session.call_count == 2
+
+    mock_session_ok = MockAsyncSession()
+    pvpc_data_ok = PVPCData(
+        session=mock_session_ok,
+        data_source="esios",
+        api_token="good_token",
+    )
+    token_ok = await pvpc_data_ok.check_api_token(start)
+    assert token_ok
+    assert mock_session_ok.call_count == 1

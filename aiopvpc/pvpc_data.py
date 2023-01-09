@@ -183,6 +183,24 @@ class PVPCData:
             raise
         return None
 
+    async def check_api_token(self, now: datetime, api_token: str | None = None) -> bool:
+        """Check if ESIOS API token is valid."""
+        local_ref_now = ensure_utc_time(now).astimezone(REFERENCE_TZ)
+        if api_token is not None:
+            self._api_token = api_token
+        self._data_source = "esios"
+        today, _ = get_daily_urls_to_download(
+            self._data_source,
+            [KEY_PVPC],
+            local_ref_now,
+            local_ref_now,
+        )
+        try:
+            prices = await self._download_daily_data(KEY_PVPC, today[0])
+        except BadApiTokenAuthError:
+            return False
+        return prices is not None
+
     def update_active_sensors(self, data_id: str, enabled: bool):
         """Update enabled API indicators to download."""
         assert data_id in ALL_SENSORS
