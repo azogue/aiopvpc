@@ -3,7 +3,7 @@ import zoneinfo
 from datetime import datetime
 from typing import Any
 
-from .const import KEY_INYECTION
+from .const import KEY_INJECTION
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
@@ -48,7 +48,7 @@ def _make_price_stats_attributes(
     timezone: zoneinfo.ZoneInfo,
 ) -> dict[str, Any]:
     attributes: dict[str, Any] = {}
-    sign_is_best = 1 if sensor_key != KEY_INYECTION else -1
+    sign_is_best = 1 if sensor_key != KEY_INJECTION else -1
     prices_sorted = dict(
         sorted(current_prices.items(), key=lambda x: sign_is_best * x[1])
     )

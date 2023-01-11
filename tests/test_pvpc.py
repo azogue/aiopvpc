@@ -11,7 +11,7 @@ from aiopvpc.const import (
     ALL_SENSORS,
     ATTRIBUTIONS,
     DataSource,
-    KEY_INYECTION,
+    KEY_INJECTION,
     KEY_OMIE,
     KEY_PVPC,
     REFERENCE_TZ,
@@ -70,8 +70,8 @@ async def test_bad_downloads(
     (
         (TZ_TEST, "esios_public", (KEY_PVPC,)),
         (REFERENCE_TZ, "esios_public", (KEY_PVPC,)),
-        (TZ_TEST, "esios", (KEY_PVPC, KEY_INYECTION, KEY_OMIE)),
-        (REFERENCE_TZ, "esios", (KEY_PVPC, KEY_INYECTION, KEY_OMIE)),
+        (TZ_TEST, "esios", (KEY_PVPC, KEY_INJECTION, KEY_OMIE)),
+        (REFERENCE_TZ, "esios", (KEY_PVPC, KEY_INJECTION, KEY_OMIE)),
     ),
 )
 @pytest.mark.asyncio

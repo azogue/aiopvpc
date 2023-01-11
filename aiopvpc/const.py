@@ -49,26 +49,26 @@ ATTRIBUTIONS: dict[DataSource, str] = {
 
 # api.esios.ree.es/indicators
 ESIOS_PVPC = "1001"
-ESIOS_INYECTION = "1739"
+ESIOS_INJECTION = "1739"
 ESIOS_MAG = "1900"  # regargo GAS
 ESIOS_OMIE = "10211"  # precio mayorista
 
 # unique ids for each series
 KEY_PVPC = "PVPC"
-KEY_INYECTION = "INYECTION"
+KEY_INJECTION = "INJECTION"
 KEY_MAG = "MAG"  # regargo GAS
 KEY_OMIE = "OMIE"  # precio mayorista
 
-ALL_SENSORS = (KEY_PVPC, KEY_INYECTION, KEY_MAG, KEY_OMIE)
+ALL_SENSORS = (KEY_PVPC, KEY_INJECTION, KEY_MAG, KEY_OMIE)
 SENSOR_KEY_TO_DATAID = {
     KEY_PVPC: ESIOS_PVPC,
-    KEY_INYECTION: ESIOS_INYECTION,
+    KEY_INJECTION: ESIOS_INJECTION,
     KEY_MAG: ESIOS_MAG,
     KEY_OMIE: ESIOS_OMIE,
 }
 SENSOR_KEY_TO_NAME = {
     KEY_PVPC: "PVPC T. 2.0TD",
-    KEY_INYECTION: "Precio de la energía excedentaria",
+    KEY_INJECTION: "Precio de la energía excedentaria",
     KEY_MAG: "2.0TD Excedente o déficit ajuste liquidación",
     KEY_OMIE: "Precio medio horario final suma",
 }

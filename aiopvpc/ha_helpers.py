@@ -1,7 +1,7 @@
 """Home Assistant helper methods."""
 from aiopvpc.const import (
     ALL_SENSORS,
-    KEY_INYECTION,
+    KEY_INJECTION,
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
@@ -11,8 +11,10 @@ from aiopvpc.const import (
 _ha_uniqueid_to_sensor_key = {
     TARIFFS[0]: KEY_PVPC,
     TARIFFS[1]: KEY_PVPC,
-    f"{TARIFFS[0]}_{KEY_INYECTION}": KEY_INYECTION,
-    f"{TARIFFS[1]}_{KEY_INYECTION}": KEY_INYECTION,
+    f"{TARIFFS[0]}_{KEY_INJECTION}": KEY_INJECTION,
+    f"{TARIFFS[1]}_{KEY_INJECTION}": KEY_INJECTION,
+    f"{TARIFFS[0]}_INYECTION": KEY_INJECTION,
+    f"{TARIFFS[1]}_INYECTION": KEY_INJECTION,
     f"{TARIFFS[0]}_{KEY_MAG}": KEY_MAG,
     f"{TARIFFS[1]}_{KEY_MAG}": KEY_MAG,
     f"{TARIFFS[0]}_{KEY_OMIE}": KEY_OMIE,
