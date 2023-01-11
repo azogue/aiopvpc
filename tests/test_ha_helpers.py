@@ -8,7 +8,7 @@ import pytest
 
 from aiopvpc.const import (
     ALL_SENSORS,
-    KEY_INYECTION,
+    KEY_INJECTION,
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
@@ -74,7 +74,7 @@ async def test_disable_sensors():
     check_num_datapoints(api_data, sensor_keys, 24)
     logging.error(api_data.sensors.keys())
 
-    pvpc_data.update_active_sensors(KEY_INYECTION, enabled=False)
+    pvpc_data.update_active_sensors(KEY_INJECTION, enabled=False)
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
     assert mock_session.call_count == 9
     check_num_datapoints(api_data, sensor_keys, 24)
@@ -89,14 +89,14 @@ async def test_disable_sensors():
     assert mock_session.call_count == 9
     # check_num_datapoints(api_data, sensor_keys, 0)
 
-    pvpc_data.update_active_sensors(KEY_INYECTION, enabled=True)
+    pvpc_data.update_active_sensors(KEY_INJECTION, enabled=True)
     pvpc_data.update_active_sensors(KEY_PVPC, enabled=True)
     start, api_data = await run_h_step(
         mock_session, pvpc_data, api_data, start, should_fail=True
     )
     assert mock_session.call_count == 11
 
-    pvpc_data.update_active_sensors(KEY_INYECTION, enabled=True)
+    pvpc_data.update_active_sensors(KEY_INJECTION, enabled=True)
     pvpc_data.update_active_sensors(KEY_PVPC, enabled=True)
     pvpc_data.update_active_sensors(KEY_MAG, enabled=True)
     pvpc_data.update_active_sensors(KEY_OMIE, enabled=True)

@@ -7,7 +7,7 @@ import pathlib
 import zoneinfo
 from datetime import date, datetime, timedelta
 
-from aiopvpc.const import ESIOS_INYECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC
+from aiopvpc.const import ESIOS_INJECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC
 from aiopvpc.pvpc_data import EsiosApiData, PVPCData
 
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
@@ -21,9 +21,9 @@ _FIXTURE_ESIOS_PVPC_2021_10_30 = "PRICES_ESIOS_1001_2021_10_30.json"
 _FIXTURE_ESIOS_PVPC_2021_10_31 = "PRICES_ESIOS_1001_2021_10_31.json"
 _FIXTURE_ESIOS_PVPC_2021_06_01 = "PRICES_ESIOS_1001_2021_06_01.json"
 _FIXTURE_ESIOS_PVPC_2023_01_06 = "PRICES_ESIOS_1001_2023_01_06.json"
-_FIXTURE_ESIOS_INYECTION_2021_10_30 = "PRICES_ESIOS_1739_2021_10_30.json"
-_FIXTURE_ESIOS_INYECTION_2021_10_31 = "PRICES_ESIOS_1739_2021_10_31.json"
-_FIXTURE_ESIOS_INYECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
+_FIXTURE_ESIOS_INJECTION_2021_10_30 = "PRICES_ESIOS_1739_2021_10_30.json"
+_FIXTURE_ESIOS_INJECTION_2021_10_31 = "PRICES_ESIOS_1739_2021_10_31.json"
+_FIXTURE_ESIOS_INJECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
 _FIXTURE_ESIOS_OMIE_2021_10_30 = "PRICES_ESIOS_10211_2021_10_30.json"
 _FIXTURE_ESIOS_OMIE_2021_10_31 = "PRICES_ESIOS_10211_2021_10_31.json"
 _FIXTURE_ESIOS_OMIE_2023_01_06 = "PRICES_ESIOS_10211_2023_01_06.json"
@@ -72,10 +72,10 @@ class MockAsyncSession:
                 date(2021, 6, 1): load_fixture(_FIXTURE_ESIOS_PVPC_2021_06_01),
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_PVPC_2023_01_06),
             },
-            ESIOS_INYECTION: {
-                date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_INYECTION_2021_10_30),
-                date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_INYECTION_2021_10_31),
-                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_INYECTION_2023_01_06),
+            ESIOS_INJECTION: {
+                date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_INJECTION_2021_10_30),
+                date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_INJECTION_2021_10_31),
+                date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_INJECTION_2023_01_06),
             },
             ESIOS_MAG: {
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_MAG_2023_01_06),
