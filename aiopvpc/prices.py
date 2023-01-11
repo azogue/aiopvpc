@@ -36,7 +36,7 @@ def _make_price_tag_attributes(
         attr_key = f"{prefix}{ts_local.hour:02d}h"
         if attr_key in attributes:  # DST change with duplicated hour :)
             attr_key += "_d"
-        attributes[attr_key] = 1000 * price_h
+        attributes[attr_key] = price_h
     return attributes
 
 
