@@ -1,5 +1,12 @@
 # Changelog
 
+## [v4.0.1](https://github.com/azogue/aiopvpc/tree/v4.0.1) - Minor fixes (2023-01-11)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.1...v4.0.0)
+
+- ✏️ Fix typo on 'injection' keyword (was badly typed as _spanglish_ 'inyection' 😅)
+- 🐛 Fix unit for price sensors attributes (from €/MWh to €/kWh)
+
 ## [v4.0.0](https://github.com/azogue/aiopvpc/tree/v4.0.0) - Implement ESIOS API Token (2023-01-09)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.0...v3.0.0)
