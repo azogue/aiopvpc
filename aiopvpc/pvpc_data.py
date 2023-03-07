@@ -403,7 +403,11 @@ class PVPCData:
         # generate PVPC 2.0TD sensor attributes
         if sensor_key == KEY_PVPC:
             local_time = utc_time.astimezone(self._local_timezone)
-            (current_period, next_period, delta,) = get_current_and_next_tariff_periods(
+            (
+                current_period,
+                next_period,
+                delta,
+            ) = get_current_and_next_tariff_periods(
                 local_time, zone_ceuta_melilla=self.tariff != TARIFFS[0]
             )
             attributes["tariff"] = self.tariff
