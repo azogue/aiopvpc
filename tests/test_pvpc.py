@@ -26,6 +26,7 @@ from tests.conftest import check_num_datapoints, MockAsyncSession, run_h_step, T
     (
         ("esios_public", None, "2032-10-26", 0, 200, None),
         ("esios_public", None, "2032-10-26", 1, 500, None),
+        ("esios", "bad-token", "2032-10-26", 1, 403, None),
         ("esios", "bad-token", "2032-10-26", 1, 401, None),
         ("esios_public", None, "2032-10-26", 1, 200, TimeoutError),
         ("esios_public", None, "2032-10-26", 1, 200, ClientError),
@@ -50,7 +51,7 @@ async def test_bad_downloads(
             data_source=cast(DataSource, data_source),
             api_token=api_token,
         )
-        if status == 401:
+        if status in (401, 403):
             with pytest.raises(BadApiTokenAuthError):
                 await pvpc_data.async_update_all(None, day)
             assert mock_session.call_count == 1

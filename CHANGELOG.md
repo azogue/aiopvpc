@@ -1,5 +1,12 @@
 # Changelog
 
+## [v4.1.0](https://github.com/azogue/aiopvpc/tree/v4.0.1) - Adapt to 403 unauthorized error (2023-03-12)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.1.0...v4.0.1)
+
+- 🐛 Process 403 error from server like '401 unauthorized', raising `BadApiTokenAuthError`
+  to signal HA for reauth-config for both status codes, when API token is enabled.
+
 ## [v4.0.1](https://github.com/azogue/aiopvpc/tree/v4.0.1) - Minor fixes (2023-01-11)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.1...v4.0.0)

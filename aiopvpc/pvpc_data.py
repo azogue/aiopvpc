@@ -137,7 +137,7 @@ class PVPCData:
             return extract_esios_data(
                 data, url, sensor_key, self.tariff, tz=self._local_timezone
             )
-        elif resp.status == 401 and self._data_source == "esios":
+        elif resp.status in (401, 403) and self._data_source == "esios":
             _LOGGER.warning(
                 "[%s] Unauthorized error with '%s': %s",
                 sensor_key,
