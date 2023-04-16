@@ -1,22 +1,22 @@
 # Changelog
 
-## [v4.1.0](https://github.com/azogue/aiopvpc/tree/v4.0.1) - Adapt to 403 unauthorized error (2023-03-12)
+## [v4.1.0](https://github.com/azogue/aiopvpc/tree/v4.1.0) - Adapt to 403 unauthorized error (2023-03-12)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.1.0...v4.0.1)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.1...v4.1.0)
 
 - 🐛 Process 403 error from server like '401 unauthorized', raising `BadApiTokenAuthError`
   to signal HA for reauth-config for both status codes, when API token is enabled.
 
 ## [v4.0.1](https://github.com/azogue/aiopvpc/tree/v4.0.1) - Minor fixes (2023-01-11)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.1...v4.0.0)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.0...v4.0.1)
 
 - ✏️ Fix typo on 'injection' keyword (was badly typed as _spanglish_ 'inyection' 😅)
 - 🐛 Fix unit for price sensors attributes (from €/MWh to €/kWh)
 
 ## [v4.0.0](https://github.com/azogue/aiopvpc/tree/v4.0.0) - Implement ESIOS API Token (2023-01-09)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.0...v3.0.0)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v3.0.0...v4.0.0)
 
 - ✨ Implement **support to access the extended ESIOS API** with a personal token
 (you must request yours by mailing to [consultasios@ree.es](mailto:consultasios@ree.es?subject=Personal%20token%20request)),
@@ -44,7 +44,7 @@ name: "Precio medio horario final suma de componentes"
 
 ## [v3.0.0](https://github.com/azogue/aiopvpc/tree/v3.0.0) - Change Data Source to apidatos.ree.es (2021-12-05)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v3.0.0...v2.3.0)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.3.0...v3.0.0)
 
 🔥 **BREAKING-CHANGE**: this release **removes support for the old PVPC tariffs**
 (prices < 2021-06-01), and the extra methods to use this library as a _dataloader_
@@ -77,7 +77,7 @@ and make `tariff` and `websession` required arguments
 
 ## [v2.3.0](https://github.com/azogue/aiopvpc/tree/v2.3.0) - Decrease API refresh rate and try to avoid banning (2021-12-01)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.3.0...v2.2.4)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.4...v2.3.0)
 
 Quick-Fix Release motivated by the last change in the ESIOS server (on 2021-11-30 😱),
 which is now apparently banning HomeAssistant requests,
@@ -105,7 +105,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.2.4](https://github.com/azogue/aiopvpc/tree/v2.2.4) - Split today / tomorrow price sensor attributes (2021-11-20)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.4...v2.2.2)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.2...v2.2.4)
 
 **Changes:**
 
@@ -113,7 +113,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.2.2](https://github.com/azogue/aiopvpc/tree/v2.2.2) - Migrate CI from travis to gh-actions (2021-11-04)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.2...v2.2.1)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.1...v2.2.2)
 
 **Changes:**
 
@@ -128,7 +128,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.2.1](https://github.com/azogue/aiopvpc/tree/v2.2.1) - Quickfix for 403 status code from ESIOS API (2021-11-03)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.1...v2.2.0)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.0...v2.2.1)
 
 **Changes:**
 
@@ -140,7 +140,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.2.0](https://github.com/azogue/aiopvpc/tree/v2.2.0) - New sensor attributes for new tariff 2.0TD (2021-06-12)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.2.0...v2.1.2)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.2...v2.2.0)
 
 **Changes:**
 
@@ -153,7 +153,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.1.2](https://github.com/azogue/aiopvpc/tree/v2.1.2) - Quick adapt to new tariff 2.0TD (2021-05-31)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.2...v2.1.1)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.1...v2.1.2)
 
 **Changes:**
 
@@ -162,7 +162,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 ## [v2.1.1](https://github.com/azogue/aiopvpc/tree/v2.1.1) - Fix prices badly assigned outside default timezone (2021-05-16)
 
-[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.1.1...v2.0.2)
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v2.0.2...v2.1.1)
 
 **Changes:**
 
