@@ -80,11 +80,11 @@ def _make_price_stats_attributes(
     except ZeroDivisionError:  # pragma: no cover
         pass
     attributes["max_price"] = max_price
-    attributes["max_price_at"] = (
-        next(iter(reversed(prices_sorted))).astimezone(timezone).hour
-    )
+    best_price_at = next(iter(prices_sorted)).astimezone(timezone).hour
+    worst_price_at = next(iter(reversed(prices_sorted))).astimezone(timezone).hour
+    attributes["max_price_at"] = worst_price_at if sign_is_best else best_price_at
     attributes["min_price"] = min_price
-    attributes["min_price_at"] = next(iter(prices_sorted)).astimezone(timezone).hour
+    attributes["min_price_at"] = best_price_at if sign_is_best else worst_price_at
     attributes["next_best_at"] = [
         ts.astimezone(timezone).hour for ts in prices_sorted.keys() if ts >= utc_time
     ]
