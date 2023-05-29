@@ -33,24 +33,26 @@ async def _get_real_data(
 @pytest.mark.real_api_call
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "data_source, timezone",
+    "data_source, timezone, num_sensors",
     (
-        ("esios", REFERENCE_TZ),
-        ("esios", TZ_TEST),
-        ("esios_public", REFERENCE_TZ),
-        ("esios_public", TZ_TEST),
+        ("esios", REFERENCE_TZ, 4),
+        ("esios", TZ_TEST, 4),
+        ("esios_public", REFERENCE_TZ, 1),
+        ("esios_public", TZ_TEST, 1),
     ),
 )
-async def test_real_download_today_async(data_source, timezone):
+async def test_real_download_today_async(data_source, timezone, num_sensors):
     sensor_keys = ALL_SENSORS if data_source == "esios" else (KEY_PVPC,)
     api_data = await _get_real_data(
         timezone, data_source, sensor_keys, datetime.utcnow()
     )
     assert 22 < len(api_data.sensors[KEY_PVPC]) < 49
+    assert len(api_data.sensors) == num_sensors
 
 
 if __name__ == "__main__":
     import asyncio
+    from dataclasses import asdict
     from pprint import pprint
 
     # timestamp = datetime(2021, 10, 30, 21)
@@ -58,4 +60,4 @@ if __name__ == "__main__":
     api_data = asyncio.run(
         _get_real_data(REFERENCE_TZ, "esios", ALL_SENSORS, timestamp)
     )
-    pprint(api_data)
+    pprint(asdict(api_data))
