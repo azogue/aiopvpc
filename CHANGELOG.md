@@ -1,5 +1,15 @@
 # Changelog
 
+## [v4.2.0](https://github.com/azogue/aiopvpc/tree/v4.2.0) - Fix injection price sensor attributes (2023-05-29)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.1.0...v4.2.0)
+
+- 🐛 Fix attributes 'max_price_at' and 'min_price_at' for injection price sensor (were swapped)
+- 📦️ Bump minor version and update deps
+- 📝 Fix usage example in README.md
+- 🎨 pre-commit autoupdate and swap `flake8` for `ruff`
+- 📝 Fix links in CHANGELOG.md
+
 ## [v4.1.0](https://github.com/azogue/aiopvpc/tree/v4.1.0) - Adapt to 403 unauthorized error (2023-03-12)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.0.1...v4.1.0)
@@ -19,14 +29,15 @@
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v3.0.0...v4.0.0)
 
 - ✨ Implement **support to access the extended ESIOS API** with a personal token
-(you must request yours by mailing to [consultasios@ree.es](mailto:consultasios@ree.es?subject=Personal%20token%20request)),
-with initial support for the existent PVPC price sensor (ESIOS indicator code: **1001**), and **3 new ones** 🤩:
-  * **Inyection price** sensor (ESIOS indicator code: **1739**),
-name: "Precio de la energía excedentaria del autoconsumo para el mecanismo de compensación simplificada"
-  * **MAG price** sensor (ESIOS indicator code: **1900**),
-name: "Desglose peaje por defecto 2.0TD excedente o déficit de la liquidación del mecanismo de ajuste de costes de producción"
-  * **OMIE price** sensor (ESIOS indicator code: **10211**),
-name: "Precio medio horario final suma de componentes"
+  (you must request yours by mailing to [consultasios@ree.es](mailto:consultasios@ree.es?subject=Personal%20token%20request)),
+  with initial support for the existent PVPC price sensor (ESIOS indicator code: **1001**), and **3 new ones** 🤩:
+
+  - **Inyection price** sensor (ESIOS indicator code: **1739**),
+    name: "Precio de la energía excedentaria del autoconsumo para el mecanismo de compensación simplificada"
+  - **MAG price** sensor (ESIOS indicator code: **1900**),
+    name: "Desglose peaje por defecto 2.0TD excedente o déficit de la liquidación del mecanismo de ajuste de costes de producción"
+  - **OMIE price** sensor (ESIOS indicator code: **10211**),
+    name: "Precio medio horario final suma de componentes"
 
 - 💥 Remove 'apidatos' support as alternative _data-source_, leaving only public and private paths for https://api.esios.ree.es
 
@@ -56,24 +67,25 @@ with the same information than the current one, available without authentication
 
 **This release implements the new data-source**, but also maintains the _legacy_ one.
 
-* Initial configuration is set with a new `data_source` parameter, **with the new source as default**.
-* If a 403 status-code is received, the **data source is switched** (new to legacy / legacy to new), no retry is done,
+- Initial configuration is set with a new `data_source` parameter, **with the new source as default**.
+- If a 403 status-code is received, the **data source is switched** (new to legacy / legacy to new), no retry is done,
   and the User-Agent loop trick is only used for the legacy data-source.
 
 **Changes:**
 
-* :fire: Remove support for old PVPC tariffs and range download methods,
-and make `tariff` and `websession` required arguments
+- :fire: Remove support for old PVPC tariffs and range download methods,
+  and make `tariff` and `websession` required arguments
 
-* :sparkles: Add alternative data-source from 'apidatos.ree.es'
-  * Implement data parsing from `apidatos.ree.es`, using endpoint at `/es/datos/mercados/precios-mercados-tiempo-real`
-  * Add `data_source` parameter with valid keys 'apidatos' and 'esios_public', setting the new one as default ;-)
-  * Remove retry call if 403 status is received, but maintain the User-Agent loop, and also toggle the data-source for the next call
-  * Move old ATTRIBUTION to `.attribution` property, as function of the data-source
+- :sparkles: Add alternative data-source from 'apidatos.ree.es'
 
-* :truck: Change test patterns to new tariffs by substituting old examples in DST days from 2019 to equivalent days since 2021-06, using the new tariff keys
+  - Implement data parsing from `apidatos.ree.es`, using endpoint at `/es/datos/mercados/precios-mercados-tiempo-real`
+  - Add `data_source` parameter with valid keys 'apidatos' and 'esios_public', setting the new one as default ;-)
+  - Remove retry call if 403 status is received, but maintain the User-Agent loop, and also toggle the data-source for the next call
+  - Move old ATTRIBUTION to `.attribution` property, as function of the data-source
 
-* :truck: Add test patterns from new data-source, and adjust tests
+- :truck: Change test patterns to new tariffs by substituting old examples in DST days from 2019 to equivalent days since 2021-06, using the new tariff keys
+
+- :truck: Add test patterns from new data-source, and adjust tests
 
 ## [v2.3.0](https://github.com/azogue/aiopvpc/tree/v2.3.0) - Decrease API refresh rate and try to avoid banning (2021-12-01)
 
@@ -86,22 +98,22 @@ as the server is returning a 403 status code error for a PUBLIC url 🤷.
 
 **Changes:**
 
-* :zap: **Substantially decrease the number of API requests to ESIOS**,
-avoiding unnecesary calls to refresh data for the same electricity prices.
+- :zap: **Substantially decrease the number of API requests to ESIOS**,
+  avoiding unnecesary calls to refresh data for the same electricity prices.
   Before, when used from the `pvpc_hourly_pricing` HA Core integration,
-the ESIOS API was called 2 times/hour from 0h to 20h, and 4 times/hour in the evening,
-from 20h to 0h, retrieving today + tomorrow prices.
+  the ESIOS API was called 2 times/hour from 0h to 20h, and 4 times/hour in the evening,
+  from 20h to 0h, retrieving today + tomorrow prices.
   This makes a total of ~56 requests/day, which is _not a lot_ 😅,
-but it seems the aggregated total for the HA user base (🔥 >30k requests/day just
-counting users pushing HA analytics) is being some kind of a problem for ESIOS,
-as it looks like they're trying to bane us 🥺😭
+  but it seems the aggregated total for the HA user base (🔥 >30k requests/day just
+  counting users pushing HA analytics) is being some kind of a problem for ESIOS,
+  as it looks like they're trying to bane us 🥺😭
   Now, the API handler avoids calls to retrieve already available prices,
-cutting down the number of requests to just 1-2 requests/day 🤩
+  cutting down the number of requests to just 1-2 requests/day 🤩
 
-* :bug: **Set standard `User-Agent` header info**, to try to avoid server-side banning 🙈,
-and _rotate_ it if banning is detected, using common User-Agent browser identifiers.
+- :bug: **Set standard `User-Agent` header info**, to try to avoid server-side banning 🙈,
+  and _rotate_ it if banning is detected, using common User-Agent browser identifiers.
 
-* :recycle: Minor code refactor to prepare for future library changes, in order to move to authenticated API endpoints in future versions.
+- :recycle: Minor code refactor to prepare for future library changes, in order to move to authenticated API endpoints in future versions.
 
 ## [v2.2.4](https://github.com/azogue/aiopvpc/tree/v2.2.4) - Split today / tomorrow price sensor attributes (2021-11-20)
 
@@ -109,7 +121,7 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 **Changes:**
 
-* Generate different sets of sensor attributes for hourly prices for current day and for the next day (available at evening), so attrs like `price_position` or `price_ratio` don't change for the current day when next-day prices are received.
+- Generate different sets of sensor attributes for hourly prices for current day and for the next day (available at evening), so attrs like `price_position` or `price_ratio` don't change for the current day when next-day prices are received.
 
 ## [v2.2.2](https://github.com/azogue/aiopvpc/tree/v2.2.2) - Migrate CI from travis to gh-actions (2021-11-04)
 
@@ -117,14 +129,14 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 **Changes:**
 
-* :art: Add isort to pre-commit config
-* :green_heart: Add configuration for pre-commit.ci to run linter checks there
-* :green_heart: CI flow with GitHub Actions to
+- :art: Add isort to pre-commit config
+- :green_heart: Add configuration for pre-commit.ci to run linter checks there
+- :green_heart: CI flow with GitHub Actions to
   - install library with `poetry`
   - run tests
   - upload coverage when merging to master
   - publish a new pypi version when merging to master if `pyproject.toml` changes
-* :fire: Remove previus travis CI config
+- :fire: Remove previus travis CI config
 
 ## [v2.2.1](https://github.com/azogue/aiopvpc/tree/v2.2.1) - Quickfix for 403 status code from ESIOS API (2021-11-03)
 
@@ -132,11 +144,11 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 **Changes:**
 
-* Fix Esios request returning a 403 status code since 2021-11-02, by:
+- Fix Esios request returning a 403 status code since 2021-11-02, by:
   - just adding an 'User-Agent' to request headers, if `aiohttp==3.7.4.post0`
   - or upgrading to `aiohttp==3.8.0`, where it is not needed and the original request works like before
-* Add better error logging for this 'forbidden' error if reappears in the future
-* Update deps, requiring holidays>0.11.1
+- Add better error logging for this 'forbidden' error if reappears in the future
+- Update deps, requiring holidays>0.11.1
 
 ## [v2.2.0](https://github.com/azogue/aiopvpc/tree/v2.2.0) - New sensor attributes for new tariff 2.0TD (2021-06-12)
 
@@ -144,12 +156,12 @@ and _rotate_ it if banning is detected, using common User-Agent browser identifi
 
 **Changes:**
 
-* Determine tariff period (P1/P2/P3) for current hour, and calculate the delta hours to the next one, publishing attributes `period`, `next_period`, and `hours_to_next_period`
-* Add `price_ratio`, `max_price`, and `max_price_at` attributes
-* When there are cheaper prices ahead, add attributes `next_better_price`, `hours_to_better_price`, and `num_better_prices_ahead`
-* Add `price_position` attribute (1 for cheaper price, 24 for the most high-priced), as suggested by @r-jordan in #23
-* Add contracted power in kW as new parameters (power for P1/P2 and power for P3) to show the `available_power` for each period
-* Use `holidays` library to retrieve national holidays where to apply the valley period P3 for the full day
+- Determine tariff period (P1/P2/P3) for current hour, and calculate the delta hours to the next one, publishing attributes `period`, `next_period`, and `hours_to_next_period`
+- Add `price_ratio`, `max_price`, and `max_price_at` attributes
+- When there are cheaper prices ahead, add attributes `next_better_price`, `hours_to_better_price`, and `num_better_prices_ahead`
+- Add `price_position` attribute (1 for cheaper price, 24 for the most high-priced), as suggested by @r-jordan in #23
+- Add contracted power in kW as new parameters (power for P1/P2 and power for P3) to show the `available_power` for each period
+- Use `holidays` library to retrieve national holidays where to apply the valley period P3 for the full day
 
 ## [v2.1.2](https://github.com/azogue/aiopvpc/tree/v2.1.2) - Quick adapt to new tariff 2.0TD (2021-05-31)
 
