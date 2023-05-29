@@ -1,5 +1,12 @@
 # Changelog
 
+## [v4.2.1](https://github.com/azogue/aiopvpc/tree/v4.2.1) - Fix injection price sensor attributes (2) (2023-05-29)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.0...v4.2.1)
+
+- 🐛 Fix one-line conditional matching for 'not None' instead of positive value 🙈
+- ✅ tests: Add unit test for price sensor attributes
+
 ## [v4.2.0](https://github.com/azogue/aiopvpc/tree/v4.2.0) - Fix injection price sensor attributes (2023-05-29)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.1.0...v4.2.0)
