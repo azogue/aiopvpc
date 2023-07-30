@@ -1,5 +1,13 @@
 # Changelog
 
+## [v4.2.2](https://github.com/azogue/aiopvpc/tree/v4.2.1) - ♻️ Remove python upper limit (2023-07-30)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.1...v4.2.2)
+
+- ♻️ Remove python upper limit (from @cdce8p in #59)
+- 🎨 pre-commit autoupdate
+- 📦️ Bump minor version and update deps and CHANGELOG.md
+
 ## [v4.2.1](https://github.com/azogue/aiopvpc/tree/v4.2.1) - Fix injection price sensor attributes (2) (2023-05-29)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.0...v4.2.1)
