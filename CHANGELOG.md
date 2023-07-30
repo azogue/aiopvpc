@@ -1,6 +1,6 @@
 # Changelog
 
-## [v4.2.2](https://github.com/azogue/aiopvpc/tree/v4.2.1) - ♻️ Remove python upper limit (2023-07-30)
+## [v4.2.2](https://github.com/azogue/aiopvpc/tree/v4.2.2) - ♻️ Remove python upper limit (2023-07-30)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.1...v4.2.2)
 
