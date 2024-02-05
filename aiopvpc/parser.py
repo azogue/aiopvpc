@@ -4,6 +4,7 @@ Simple aio library to download Spanish electricity hourly prices.
 * URL for JSON daily files
 * Parser for the contents of the JSON files
 """
+
 from datetime import datetime, timedelta
 from itertools import groupby
 from operator import itemgetter

@@ -1,4 +1,5 @@
 """ESIOS API handler for HomeAssistant. Utils."""
+
 from datetime import datetime
 
 from aiopvpc.const import UTC_TZ

@@ -5,6 +5,7 @@ Externalization of download and parsing logic for the `pvpc_hourly_pricing`
 HomeAssistant integration,
 https://www.home-assistant.io/integrations/pvpc_hourly_pricing/
 """
+
 from __future__ import annotations
 
 import asyncio
