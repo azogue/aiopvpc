@@ -1,4 +1,5 @@
 """ESIOS API handler for HomeAssistant. PVPC tariff periods."""
+
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta

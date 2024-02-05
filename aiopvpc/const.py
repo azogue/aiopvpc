@@ -1,4 +1,5 @@
 """Simple aio library to download Spanish electricity hourly prices. Constants."""
+
 import zoneinfo
 from dataclasses import dataclass
 from datetime import date, datetime

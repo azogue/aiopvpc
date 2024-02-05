@@ -1,4 +1,5 @@
 """ESIOS API handler for HomeAssistant. Hourly price attributes."""
+
 import zoneinfo
 from datetime import datetime
 from typing import Any
