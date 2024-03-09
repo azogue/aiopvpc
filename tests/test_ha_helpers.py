@@ -9,12 +9,13 @@ import pytest
 
 from aiopvpc.const import (
     ALL_SENSORS,
+    KEY_ADJUSTMENT,
     KEY_INJECTION,
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
     TARIFFS,
-    UTC_TZ, KEY_ADJUSTMENT,
+    UTC_TZ,
 )
 from aiopvpc.ha_helpers import get_enabled_sensor_keys, make_sensor_unique_id
 from aiopvpc.pvpc_data import BadApiTokenAuthError, PVPCData
