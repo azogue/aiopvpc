@@ -274,7 +274,8 @@ class PVPCData:
             current_data.data_source = self._data_source
             current_data.last_update = utc_now
 
-        self._calculate_indexed(current_data)
+        if current_data.availability[KEY_PVPC] and current_data.availability[KEY_ADJUSTMENT]:
+            self._calculate_indexed(current_data)
 
         for sensor_key in current_data.sensors:
             self.process_state_and_attributes(current_data, sensor_key, now)
