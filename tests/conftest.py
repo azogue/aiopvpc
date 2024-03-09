@@ -8,7 +8,14 @@ import pathlib
 import zoneinfo
 from datetime import date, datetime, timedelta
 
-from aiopvpc.const import ESIOS_INJECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC, ESIOS_MARKET_ADJUSTMENT
+from aiopvpc.const import (
+    ESIOS_INJECTION,
+    ESIOS_MAG,
+    ESIOS_MARKET_ADJUSTMENT,
+    ESIOS_OMIE,
+    ESIOS_PVPC,
+    KEY_PVPC,
+)
 from aiopvpc.pvpc_data import EsiosApiData, PVPCData
 
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
@@ -97,7 +104,7 @@ class MockAsyncSession:
             },
             ESIOS_MARKET_ADJUSTMENT: {
                 date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_ADJUSTMENT_2024_03_09)
-            }
+            },
         }
 
     async def json(self, *_args, **_kwargs):

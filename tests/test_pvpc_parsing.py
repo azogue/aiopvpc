@@ -8,13 +8,13 @@ import pytest
 from aiopvpc.const import (
     ALL_SENSORS,
     DataSource,
+    KEY_ADJUSTMENT,
     KEY_INJECTION,
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
     REFERENCE_TZ,
     SENSOR_KEY_TO_DATAID,
-    KEY_ADJUSTMENT,
 )
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
