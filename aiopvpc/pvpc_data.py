@@ -31,7 +31,7 @@ from aiopvpc.const import (
     SENSOR_KEY_TO_DATAID,
     TARIFFS,
     UTC_TZ,
-    zoneinfo,
+    zoneinfo, KEY_INDEXED, KEY_ADJUSTMENT,
 )
 from aiopvpc.parser import extract_esios_data, get_daily_urls_to_download
 from aiopvpc.prices import make_price_sensor_attributes
@@ -274,9 +274,17 @@ class PVPCData:
             current_data.data_source = self._data_source
             current_data.last_update = utc_now
 
+        self._calculate_indexed(current_data)
+
         for sensor_key in current_data.sensors:
             self.process_state_and_attributes(current_data, sensor_key, now)
         return current_data
+
+    def _calculate_indexed(self, current_data: EsiosApiData):
+        pvpc = current_data.sensors[KEY_PVPC]
+        adjustment = current_data.sensors[KEY_ADJUSTMENT]
+        current_data.sensors[KEY_INDEXED] = {date: pvpc[date] - adjustment[date] for date in pvpc}
+        current_data.availability[KEY_INDEXED] = True
 
     async def _update_prices_series(
         self,

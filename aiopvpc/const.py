@@ -54,6 +54,7 @@ ESIOS_INJECTION = "1739"
 ESIOS_MAG = "1900"  # regargo GAS
 ESIOS_OMIE = "10211"  # precio mayorista
 ESIOS_MARKET_ADJUSTMENT = "2108"  # ajuste mercado Indexada VS PVPC
+ESIOS_INDEXED = "0"  # precio indexado restando PVPC y el ajuste
 
 # unique ids for each series
 KEY_PVPC = "PVPC"
@@ -61,6 +62,7 @@ KEY_INJECTION = "INJECTION"
 KEY_MAG = "MAG"  # regargo GAS
 KEY_OMIE = "OMIE"  # precio mayorista
 KEY_ADJUSTMENT = "ADJUSTMENT"  # ajuste mercado
+KEY_INDEXED = "INDEXED" # precio indexada
 
 ALL_SENSORS = (KEY_PVPC, KEY_INJECTION, KEY_MAG, KEY_OMIE, KEY_ADJUSTMENT)
 SENSOR_KEY_TO_DATAID = {
@@ -68,14 +70,16 @@ SENSOR_KEY_TO_DATAID = {
     KEY_INJECTION: ESIOS_INJECTION,
     KEY_MAG: ESIOS_MAG,
     KEY_OMIE: ESIOS_OMIE,
-    KEY_ADJUSTMENT: ESIOS_MARKET_ADJUSTMENT
+    KEY_ADJUSTMENT: ESIOS_MARKET_ADJUSTMENT,
+    KEY_INDEXED: ESIOS_MARKET_ADJUSTMENT,
 }
 SENSOR_KEY_TO_NAME = {
     KEY_PVPC: "PVPC T. 2.0TD",
     KEY_INJECTION: "Precio de la energía excedentaria",
     KEY_MAG: "2.0TD Excedente o déficit ajuste liquidación",
     KEY_OMIE: "Precio medio horario final suma",
-    KEY_ADJUSTMENT: "Ajuste de mercado a plazo"
+    KEY_ADJUSTMENT: "Ajuste de mercado a plazo",
+    KEY_INDEXED: "Precio tarifa Indexada"
 }
 
 

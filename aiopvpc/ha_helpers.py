@@ -7,7 +7,7 @@ from aiopvpc.const import (
     KEY_OMIE,
     KEY_PVPC,
     KEY_ADJUSTMENT,
-    TARIFFS,
+    TARIFFS, KEY_INDEXED,
 )
 
 _ha_uniqueid_to_sensor_key = {
@@ -23,6 +23,8 @@ _ha_uniqueid_to_sensor_key = {
     f"{TARIFFS[1]}_{KEY_OMIE}": KEY_OMIE,
     f"{TARIFFS[0]}_{KEY_ADJUSTMENT}": KEY_ADJUSTMENT,
     f"{TARIFFS[1]}_{KEY_ADJUSTMENT}": KEY_ADJUSTMENT,
+    f"{TARIFFS[0]}_{KEY_INDEXED}": KEY_INDEXED,
+    f"{TARIFFS[1]}_{KEY_INDEXED}": KEY_INDEXED,
 }
 
 
@@ -41,7 +43,7 @@ def get_enabled_sensor_keys(
 
 def make_sensor_unique_id(config_entry_id: str, sensor_key: str) -> str:
     """(HA) Generate unique_id for each sensor kind and config entry."""
-    assert sensor_key in ALL_SENSORS
+    assert sensor_key in ALL_SENSORS or sensor_key == KEY_INDEXED
     if sensor_key == KEY_PVPC:
         # for old compatibility
         return config_entry_id
