@@ -277,8 +277,8 @@ class PVPCData:
             current_data.last_update = utc_now
 
         if (
-            current_data.availability[KEY_PVPC]
-            and current_data.availability[KEY_ADJUSTMENT]
+            KEY_PVPC in current_data.availability
+            and KEY_ADJUSTMENT in current_data.availability
         ):
             self._calculate_indexed(current_data)
 

@@ -14,6 +14,7 @@ from aiopvpc.const import (
     KEY_PVPC,
     REFERENCE_TZ,
     SENSOR_KEY_TO_DATAID,
+    KEY_ADJUSTMENT,
 )
 from aiopvpc.pvpc_data import PVPCData
 from tests.conftest import MockAsyncSession, TZ_TEST
@@ -82,7 +83,7 @@ async def test_price_extract(
 @pytest.mark.asyncio
 async def test_price_sensor_attributes():
     """Test data parsing of official API files."""
-    day = datetime.fromisoformat("2023-01-06 09:00:00")
+    day = datetime.fromisoformat("2024-03-09 09:00:00")
     mock_session = MockAsyncSession()
 
     pvpc_data = PVPCData(
@@ -96,14 +97,15 @@ async def test_price_sensor_attributes():
     for key in ALL_SENSORS:
         pvpc_data.process_state_and_attributes(api_data, key, day)
     assert len(api_data.sensors[KEY_PVPC]) == 24
-    assert mock_session.call_count == 4
-    assert len(api_data.sensors) == 4
+    assert mock_session.call_count == 5
+    assert len(api_data.sensors) == 6
 
     ref_data = {
-        KEY_PVPC: {"hours_to_better_price": 1, "num_better_prices_ahead": 6},
-        KEY_INJECTION: {"hours_to_better_price": 5, "num_better_prices_ahead": 5},
-        KEY_MAG: {"hours_to_better_price": 1, "num_better_prices_ahead": 7},
-        KEY_OMIE: {"hours_to_better_price": 1, "num_better_prices_ahead": 6},
+        KEY_PVPC: {"hours_to_better_price": 1, "num_better_prices_ahead": 3},
+        KEY_INJECTION: {"hours_to_better_price": 6, "num_better_prices_ahead": 6},
+        KEY_MAG: {"hours_to_better_price": 1, "num_better_prices_ahead": 11},
+        KEY_OMIE: {"hours_to_better_price": 1, "num_better_prices_ahead": 4},
+        KEY_ADJUSTMENT: {"hours_to_better_price": 1, "num_better_prices_ahead": 2},
     }
 
     for key in ALL_SENSORS:

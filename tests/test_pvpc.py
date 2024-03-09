@@ -151,7 +151,7 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
 @pytest.mark.asyncio
 async def test_reduced_api_download_rate(local_tz, data_source, sensor_keys):
     """Test time evolution and number of API calls."""
-    start = datetime(2023, 1, 6, 2, tzinfo=UTC_TZ)
+    start = datetime(2024, 3, 9, 2, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
     pvpc_data = PVPCData(
         session=mock_session,
@@ -171,13 +171,13 @@ async def test_reduced_api_download_rate(local_tz, data_source, sensor_keys):
         check_num_datapoints(api_data, sensor_keys, 24)
 
     # first call for next-day prices
-    assert start == datetime(2023, 1, 6, 19, tzinfo=UTC_TZ)
+    assert start == datetime(2024, 3, 9, 19, tzinfo=UTC_TZ)
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
     assert mock_session.call_count == 2 * len(sensor_keys)
     check_num_datapoints(api_data, sensor_keys, 24)
 
     call_count = mock_session.call_count
-    while start.astimezone(local_tz) <= datetime(2023, 1, 6, 23, tzinfo=local_tz):
+    while start.astimezone(local_tz) <= datetime(2024, 3, 9, 23, tzinfo=local_tz):
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
         call_count += len(sensor_keys)
         assert mock_session.call_count == call_count
