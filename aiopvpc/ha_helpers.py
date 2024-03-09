@@ -6,6 +6,7 @@ from aiopvpc.const import (
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
+    KEY_ADJUSTMENT,
     TARIFFS,
 )
 
@@ -20,6 +21,8 @@ _ha_uniqueid_to_sensor_key = {
     f"{TARIFFS[1]}_{KEY_MAG}": KEY_MAG,
     f"{TARIFFS[0]}_{KEY_OMIE}": KEY_OMIE,
     f"{TARIFFS[1]}_{KEY_OMIE}": KEY_OMIE,
+    f"{TARIFFS[0]}_{KEY_ADJUSTMENT}": KEY_ADJUSTMENT,
+    f"{TARIFFS[1]}_{KEY_ADJUSTMENT}": KEY_ADJUSTMENT,
 }
 
 
