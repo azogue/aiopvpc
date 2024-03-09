@@ -14,7 +14,7 @@ from aiopvpc.const import (
     KEY_OMIE,
     KEY_PVPC,
     TARIFFS,
-    UTC_TZ,
+    UTC_TZ, KEY_ADJUSTMENT,
 )
 from aiopvpc.ha_helpers import get_enabled_sensor_keys, make_sensor_unique_id
 from aiopvpc.pvpc_data import BadApiTokenAuthError, PVPCData
@@ -48,10 +48,10 @@ def test_sensor_unique_ids():
 
 @pytest.mark.asyncio
 async def test_disable_sensors():
-    start = datetime(2023, 1, 6, 19, tzinfo=UTC_TZ)
+    start = datetime(2024, 3, 9, 19, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession()
     sensor_keys = ALL_SENSORS
-    assert len(sensor_keys) == 4
+    assert len(sensor_keys) == 5
     pvpc_data = PVPCData(
         session=mock_session,
         tariff="2.0TD",
@@ -62,32 +62,33 @@ async def test_disable_sensors():
 
     api_data = None
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
-    assert mock_session.call_count == 8
+    assert mock_session.call_count == 10
     check_num_datapoints(api_data, sensor_keys, 24)
 
     pvpc_data.update_active_sensors(KEY_PVPC, enabled=False)
     pvpc_data.update_active_sensors(KEY_OMIE, enabled=False)
     pvpc_data.update_active_sensors(KEY_MAG, enabled=False)
     pvpc_data.update_active_sensors(KEY_MAG, enabled=False)
+    pvpc_data.update_active_sensors(KEY_ADJUSTMENT, enabled=False)
 
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
-    assert mock_session.call_count == 9
+    assert mock_session.call_count == 11
     check_num_datapoints(api_data, sensor_keys, 24)
     logging.error(api_data.sensors.keys())
 
     pvpc_data.update_active_sensors(KEY_INJECTION, enabled=False)
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
-    assert mock_session.call_count == 9
+    assert mock_session.call_count == 11
     check_num_datapoints(api_data, sensor_keys, 24)
 
     start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
-    assert mock_session.call_count == 9
+    assert mock_session.call_count == 11
     check_num_datapoints(api_data, sensor_keys, 24)
 
     start, api_data = await run_h_step(
         mock_session, pvpc_data, api_data, start, should_fail=True
     )
-    assert mock_session.call_count == 9
+    assert mock_session.call_count == 11
     # check_num_datapoints(api_data, sensor_keys, 0)
 
     pvpc_data.update_active_sensors(KEY_INJECTION, enabled=True)
@@ -95,14 +96,14 @@ async def test_disable_sensors():
     start, api_data = await run_h_step(
         mock_session, pvpc_data, api_data, start, should_fail=True
     )
-    assert mock_session.call_count == 11
+    assert mock_session.call_count == 13
 
     pvpc_data.update_active_sensors(KEY_INJECTION, enabled=True)
     pvpc_data.update_active_sensors(KEY_PVPC, enabled=True)
     pvpc_data.update_active_sensors(KEY_MAG, enabled=True)
     pvpc_data.update_active_sensors(KEY_OMIE, enabled=True)
     await run_h_step(mock_session, pvpc_data, api_data, start, should_fail=True)
-    assert mock_session.call_count == 15
+    assert mock_session.call_count == 17
 
 
 @pytest.mark.asyncio

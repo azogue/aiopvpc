@@ -8,7 +8,7 @@ import pathlib
 import zoneinfo
 from datetime import date, datetime, timedelta
 
-from aiopvpc.const import ESIOS_INJECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC
+from aiopvpc.const import ESIOS_INJECTION, ESIOS_MAG, ESIOS_OMIE, ESIOS_PVPC, KEY_PVPC, ESIOS_MARKET_ADJUSTMENT
 from aiopvpc.pvpc_data import EsiosApiData, PVPCData
 
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
@@ -22,13 +22,18 @@ _FIXTURE_ESIOS_PVPC_2021_10_30 = "PRICES_ESIOS_1001_2021_10_30.json"
 _FIXTURE_ESIOS_PVPC_2021_10_31 = "PRICES_ESIOS_1001_2021_10_31.json"
 _FIXTURE_ESIOS_PVPC_2021_06_01 = "PRICES_ESIOS_1001_2021_06_01.json"
 _FIXTURE_ESIOS_PVPC_2023_01_06 = "PRICES_ESIOS_1001_2023_01_06.json"
+_FIXTURE_ESIOS_PVPC_2024_03_09 = "PRICES_ESIOS_1001_2024_03_09.json"
 _FIXTURE_ESIOS_INJECTION_2021_10_30 = "PRICES_ESIOS_1739_2021_10_30.json"
 _FIXTURE_ESIOS_INJECTION_2021_10_31 = "PRICES_ESIOS_1739_2021_10_31.json"
 _FIXTURE_ESIOS_INJECTION_2023_01_06 = "PRICES_ESIOS_1739_2023_01_06.json"
+_FIXTURE_ESIOS_INJECTION_2024_03_09 = "PRICES_ESIOS_1739_2024_03_09.json"
 _FIXTURE_ESIOS_OMIE_2021_10_30 = "PRICES_ESIOS_10211_2021_10_30.json"
 _FIXTURE_ESIOS_OMIE_2021_10_31 = "PRICES_ESIOS_10211_2021_10_31.json"
 _FIXTURE_ESIOS_OMIE_2023_01_06 = "PRICES_ESIOS_10211_2023_01_06.json"
+_FIXTURE_ESIOS_OMIE_2024_03_09 = "PRICES_ESIOS_10211_2024_03_09.json"
 _FIXTURE_ESIOS_MAG_2023_01_06 = "PRICES_ESIOS_1900_2023_01_06.json"
+_FIXTURE_ESIOS_MAG_2024_03_09 = "PRICES_ESIOS_1900_2024_03_09.json"
+_FIXTURE_ESIOS_ADJUSTMENT_2024_03_09 = "PRICES_ESIOS_2108_2024_03_09.json"
 
 _DEFAULT_EMPTY_VALUE = {"message": "No values for specified archive"}
 _DEFAULT_UNAUTH_MSG = "HTTP Token: Access denied (TEST)."
@@ -72,20 +77,27 @@ class MockAsyncSession:
                 date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_PVPC_2021_10_31),
                 date(2021, 6, 1): load_fixture(_FIXTURE_ESIOS_PVPC_2021_06_01),
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_PVPC_2023_01_06),
+                date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_PVPC_2024_03_09),
             },
             ESIOS_INJECTION: {
                 date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_INJECTION_2021_10_30),
                 date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_INJECTION_2021_10_31),
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_INJECTION_2023_01_06),
+                date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_INJECTION_2024_03_09),
             },
             ESIOS_MAG: {
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_MAG_2023_01_06),
+                date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_MAG_2024_03_09),
             },
             ESIOS_OMIE: {
                 date(2021, 10, 30): load_fixture(_FIXTURE_ESIOS_OMIE_2021_10_30),
                 date(2021, 10, 31): load_fixture(_FIXTURE_ESIOS_OMIE_2021_10_31),
                 date(2023, 1, 6): load_fixture(_FIXTURE_ESIOS_OMIE_2023_01_06),
+                date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_OMIE_2024_03_09),
             },
+            ESIOS_MARKET_ADJUSTMENT: {
+                date(2024, 3, 9): load_fixture(_FIXTURE_ESIOS_ADJUSTMENT_2024_03_09)
+            }
         }
 
     async def json(self, *_args, **_kwargs):
