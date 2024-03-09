@@ -62,7 +62,7 @@ KEY_INJECTION = "INJECTION"
 KEY_MAG = "MAG"  # regargo GAS
 KEY_OMIE = "OMIE"  # precio mayorista
 KEY_ADJUSTMENT = "ADJUSTMENT"  # ajuste mercado
-KEY_INDEXED = "INDEXED" # precio indexada
+KEY_INDEXED = "INDEXED"  # precio indexada
 
 ALL_SENSORS = (KEY_PVPC, KEY_INJECTION, KEY_MAG, KEY_OMIE, KEY_ADJUSTMENT)
 SENSOR_KEY_TO_DATAID = {
@@ -79,7 +79,7 @@ SENSOR_KEY_TO_NAME = {
     KEY_MAG: "2.0TD Excedente o déficit ajuste liquidación",
     KEY_OMIE: "Precio medio horario final suma",
     KEY_ADJUSTMENT: "Ajuste de mercado a plazo",
-    KEY_INDEXED: "Precio tarifa Indexada"
+    KEY_INDEXED: "Precio tarifa Indexada",
 }
 
 

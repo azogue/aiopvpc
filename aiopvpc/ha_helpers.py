@@ -2,12 +2,13 @@
 
 from aiopvpc.const import (
     ALL_SENSORS,
+    KEY_ADJUSTMENT,
+    KEY_INDEXED,
     KEY_INJECTION,
     KEY_MAG,
     KEY_OMIE,
     KEY_PVPC,
-    KEY_ADJUSTMENT,
-    TARIFFS, KEY_INDEXED,
+    TARIFFS,
 )
 
 _ha_uniqueid_to_sensor_key = {
