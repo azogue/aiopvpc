@@ -36,8 +36,8 @@ async def _get_real_data(
 @pytest.mark.parametrize(
     "data_source, timezone, num_sensors",
     (
-        ("esios", REFERENCE_TZ, 4),
-        ("esios", TZ_TEST, 4),
+        ("esios", REFERENCE_TZ, 6),
+        ("esios", TZ_TEST, 6),
         ("esios_public", REFERENCE_TZ, 1),
         ("esios_public", TZ_TEST, 1),
     ),
