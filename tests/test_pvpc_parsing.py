@@ -25,8 +25,8 @@ from tests.conftest import MockAsyncSession, TZ_TEST
     (
         ("2021-06-01 09:00:00", "esios", REFERENCE_TZ, 24, 1, 24, True),
         ("2021-06-01 09:00:00", "esios", TZ_TEST, 24, 1, 24, True),
-        ("2023-01-06 09:00:00", "esios", REFERENCE_TZ, 24, 1, 24, True),
-        ("2023-01-06 09:00:00", "esios", TZ_TEST, 24, 1, 24, True),
+        ("2024-03-09 09:00:00", "esios", REFERENCE_TZ, 24, 1, 24, True),
+        ("2024-03-09 09:00:00", "esios", TZ_TEST, 24, 1, 24, True),
         ("2021-10-30 00:00:00+08:00", "esios_public", TZ_TEST, 0, 1, 0, False),
         ("2021-10-30 00:00:00", "esios_public", TZ_TEST, 24, 1, 24, True),
         ("2021-10-31 00:00:00", "esios_public", TZ_TEST, 25, 1, 25, True),
