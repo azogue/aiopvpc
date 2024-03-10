@@ -26,17 +26,16 @@ from aiopvpc.const import (
     DEFAULT_TIMEOUT,
     EsiosApiData,
     EsiosResponse,
-    KEY_ADJUSTMENT,
-    KEY_INDEXED,
     KEY_PVPC,
     REFERENCE_TZ,
+    SENSOR_KEY_TO_API_SERIES,
     SENSOR_KEY_TO_DATAID,
     TARIFFS,
     UTC_TZ,
     zoneinfo,
 )
 from aiopvpc.parser import extract_esios_data, get_daily_urls_to_download
-from aiopvpc.prices import make_price_sensor_attributes
+from aiopvpc.prices import add_composed_price_sensors, make_price_sensor_attributes
 from aiopvpc.pvpc_tariff import get_current_and_next_tariff_periods
 from aiopvpc.utils import ensure_utc_time
 
@@ -241,17 +240,20 @@ class PVPCData:
                 last_update=utc_now,
             )
 
+        api_sensors = {
+            api_sensor_key
+            for sensor_key in self._sensor_keys
+            for api_sensor_key in SENSOR_KEY_TO_API_SERIES[sensor_key]
+        }
         urls_now, urls_next = get_daily_urls_to_download(
             self._data_source,
-            self._sensor_keys,
+            api_sensors,
             local_ref_now,
             next_day,
         )
         updated = False
         tasks = []
-        for url_now, url_next, sensor_key in zip(
-            urls_now, urls_next, self._sensor_keys
-        ):
+        for url_now, url_next, sensor_key in zip(urls_now, urls_next, api_sensors):
             if sensor_key not in current_data.sensors:
                 current_data.sensors[sensor_key] = {}
 
@@ -266,7 +268,7 @@ class PVPCData:
             )
 
         results = await asyncio.gather(*tasks)
-        for new_data, sensor_key in zip(results, self._sensor_keys):
+        for new_data, sensor_key in zip(results, api_sensors):
             if new_data:
                 updated = True
                 current_data.sensors[sensor_key] = new_data
@@ -276,23 +278,10 @@ class PVPCData:
             current_data.data_source = self._data_source
             current_data.last_update = utc_now
 
-        if (
-            KEY_PVPC in current_data.availability
-            and KEY_ADJUSTMENT in current_data.availability
-        ):
-            self._calculate_indexed(current_data)
-
+        add_composed_price_sensors(current_data)
         for sensor_key in current_data.sensors:
             self.process_state_and_attributes(current_data, sensor_key, now)
         return current_data
-
-    def _calculate_indexed(self, current_data: EsiosApiData):
-        pvpc = current_data.sensors[KEY_PVPC]
-        adjustment = current_data.sensors[KEY_ADJUSTMENT]
-        current_data.sensors[KEY_INDEXED] = {
-            date: pvpc[date] - adjustment[date] for date in pvpc
-        }
-        current_data.availability[KEY_INDEXED] = True
 
     async def _update_prices_series(
         self,
@@ -386,7 +375,7 @@ class PVPCData:
         """
         attributes: dict[str, Any] = {
             "sensor_id": sensor_key,
-            "data_id": SENSOR_KEY_TO_DATAID[sensor_key],
+            "data_id": SENSOR_KEY_TO_DATAID.get(sensor_key, "composed"),
         }
         utc_time = ensure_utc_time(utc_now.replace(minute=0, second=0, microsecond=0))
         actual_time = utc_time.astimezone(self._local_timezone)
