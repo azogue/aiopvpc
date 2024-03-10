@@ -28,12 +28,13 @@ jobs:
         run: poetry install --no-interaction
 
       - name: Run tests
-        run: poetry run pytest
+        run: poetry run pytest --cov-report xml:coverage.xml
 
-        # upload coverage only on master branch
-      - name: Upload coverage
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: codecov/codecov-action@v2
+      - name: Get Cover
+        uses: orgoro/coverage@v3.1
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
 
         # publish version only when pyproject.toml is changed in master
       - name: Filter changes in pyproject

@@ -1,7 +1,6 @@
 [![PyPI Version][pypi-image]][pypi-url]
 [![pre-commit.ci Status][pre-commit-ci-image]][pre-commit-ci-url]
 [![Build Status][build-image]][build-url]
-[![Code Coverage][coverage-image]][coverage-url]
 
 <!-- Badges -->
 
@@ -11,8 +10,6 @@
 [pre-commit-ci-url]: https://results.pre-commit.ci/latest/github/azogue/aiopvpc/master
 [build-image]: https://github.com/azogue/aiopvpc/actions/workflows/main.yml/badge.svg
 [build-url]: https://github.com/azogue/aiopvpc/actions/workflows/main.yml
-[coverage-image]: https://codecov.io/gh/azogue/aiopvpc/branch/master/graph/badge.svg
-[coverage-url]: https://codecov.io/gh/azogue/aiopvpc
 
 # aiopvpc
 
