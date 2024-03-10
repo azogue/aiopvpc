@@ -106,7 +106,7 @@ class PVPCData:
         if self._api_token is not None:
             self._data_source = "esios"
         assert (data_source != "esios") or self._api_token is not None, data_source
-        self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda x: random()))
+        self._user_agents = deque(sorted(_STANDARD_USER_AGENTS, key=lambda _: random()))
 
         self._local_timezone = zoneinfo.ZoneInfo(str(local_timezone))
         assert tariff in TARIFFS
@@ -298,7 +298,7 @@ class PVPCData:
                 "[%s] Evening download avoided, now with %d prices from %s UTC",
                 sensor_key,
                 current_num_prices,
-                list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
+                next(iter(current_prices)).strftime("%Y-%m-%d %Hh"),
             )
             return None
         elif (
@@ -319,7 +319,7 @@ class PVPCData:
             return None
 
         if current_num_prices and (
-            list(current_prices)[0].astimezone(REFERENCE_TZ).date()
+            next(iter(current_prices)).astimezone(REFERENCE_TZ).date()
             == local_ref_now.date()
         ):
             # avoid download of today prices
@@ -328,7 +328,7 @@ class PVPCData:
                 sensor_key,
                 local_ref_now,
                 current_num_prices,
-                list(current_prices)[0].astimezone(REFERENCE_TZ).date(),
+                next(iter(current_prices)).astimezone(REFERENCE_TZ).date(),
                 local_ref_now.date(),
             )
         else:
@@ -350,7 +350,7 @@ class PVPCData:
             "[%s] Download done, now with %d prices from %s UTC",
             sensor_key,
             len(current_prices),
-            list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            next(iter(current_prices)).strftime("%Y-%m-%d %Hh"),
         )
 
         return current_prices
