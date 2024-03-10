@@ -120,7 +120,7 @@ async def test_price_sensor_attributes():
         current_price = pvpc_data.states[key]
         sensor_attrs = pvpc_data.sensor_attributes[key]
         assert sensor_attrs["sensor_id"] == key
-        assert sensor_attrs["data_id"] == SENSOR_KEY_TO_DATAID[key]
+        assert sensor_attrs["data_id"] == SENSOR_KEY_TO_DATAID.get(key, "composed")
         assert sensor_attrs["price_12h"] == current_price
         prices_ahead = [sensor_attrs[f"price_{h:02}h"] for h in range(13, 24)]
         assert len(prices_ahead) == 11

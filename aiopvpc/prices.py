@@ -4,7 +4,7 @@ import zoneinfo
 from datetime import datetime
 from typing import Any
 
-from .const import KEY_INJECTION
+from .const import EsiosApiData, KEY_ADJUSTMENT, KEY_INDEXED, KEY_INJECTION, KEY_PVPC
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
@@ -116,3 +116,24 @@ def make_price_sensor_attributes(
         price_attrs = {**price_attrs, **tomorrow_prices}
         price_tags = {**price_tags, **tomorrow_price_tags}
     return {**price_attrs, **price_tags}
+
+
+def add_composed_price_sensors(data: EsiosApiData):
+    """Calculate price sensors derived from multiple data series."""
+    if (
+        data.availability.get(KEY_PVPC, False)
+        and data.availability.get(KEY_ADJUSTMENT, False)
+        and (
+            common_ts_prices := set(data.sensors[KEY_PVPC]).intersection(
+                set(data.sensors[KEY_ADJUSTMENT])
+            )
+        )
+    ):
+        # generate 'indexed tariff' as: PRICE = PVPC - ADJUSTMENT
+        pvpc = data.sensors[KEY_PVPC]
+        adjustment = data.sensors[KEY_ADJUSTMENT]
+        data.sensors[KEY_INDEXED] = {
+            ts_hour: round(pvpc[ts_hour] - adjustment[ts_hour], 5)
+            for ts_hour in common_ts_prices
+        }
+        data.availability[KEY_INDEXED] = True
