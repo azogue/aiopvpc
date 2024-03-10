@@ -1,5 +1,13 @@
 # Changelog
 
+## [v4.3.0](https://github.com/azogue/aiopvpc/tree/v4.3.0) - ✨ Add new _composed_ sensor for Indexed tariff (2024-03-10)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.2...v4.3.0)
+
+- ✨ Add new price sensors: **Market adjustment** (from ESIOS API indicator 2108), and **Indexed tariff** (as _composed_ price sensor calculated as `PVPC - ADJUSTMENT`), from first-time contributor @MiguelAngelLV in #69 🍻, and some adjustments in #70
+- 🎨 pre-commit updates and change to `ruff` + `ruff-format` instead of `black` and `isort`
+- 🚀 Bump minor version and update deps and CHANGELOG.md
+
 ## [v4.2.2](https://github.com/azogue/aiopvpc/tree/v4.2.2) - ♻️ Remove python upper limit (2023-07-30)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.1...v4.2.2)
