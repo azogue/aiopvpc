@@ -1,24 +1,13 @@
-minimum_pre_commit_version: "2.10.0"
+minimum_pre_commit_version: "3.0.4"
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.2.0
+    rev: v0.3.2
     hooks:
       - id: ruff
         args:
           - --fix
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        name: isort (python)
-        args:
-          - --dont-order-by-type
-  - repo: https://github.com/psf/black
-    rev: "24.1.1"
-    hooks:
-      - id: black
-        name: Format code (black)
-  - repo: https://github.com/pre-commit/pre-commit-hooks
+      - id: ruff-format
+  - repo: "https://github.com/pre-commit/pre-commit-hooks"
     rev: "v4.5.0"
     hooks:
       - id: end-of-file-fixer
@@ -31,7 +20,7 @@ repos:
     hooks:
       - id: prettier
   - repo: "https://github.com/pre-commit/mirrors-mypy"
-    rev: "v1.8.0"
+    rev: "v1.9.0"
     hooks:
       - id: "mypy"
         name: "Check type hints (mypy)"
