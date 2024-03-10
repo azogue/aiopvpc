@@ -109,7 +109,7 @@ async def test_disable_sensors():
 
 @pytest.mark.asyncio
 async def test_check_api_token():
-    start = datetime(2023, 1, 6, 19, tzinfo=UTC_TZ)
+    start = datetime(2024, 3, 9, 19, tzinfo=UTC_TZ)
     mock_session = MockAsyncSession(status=401)
     pvpc_data = PVPCData(session=mock_session)
     token_ok = await pvpc_data.check_api_token(start, "bad_token")
