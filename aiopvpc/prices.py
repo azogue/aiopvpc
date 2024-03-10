@@ -1,6 +1,7 @@
 """ESIOS API handler for HomeAssistant. Hourly price attributes."""
 
 import zoneinfo
+from contextlib import suppress
 from datetime import datetime
 from typing import Any
 
@@ -8,7 +9,10 @@ from .const import EsiosApiData, KEY_ADJUSTMENT, KEY_INDEXED, KEY_INJECTION, KEY
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
-    return any(map(lambda x: x[0] > x[1], zip(ts.isocalendar(), ref.isocalendar())))
+    return any(
+        ts_comp > ts_tz_ref
+        for ts_comp, ts_tz_ref in zip(ts.isocalendar(), ref.isocalendar())
+    )
 
 
 def _split_today_tomorrow_prices(
@@ -65,21 +69,18 @@ def _make_price_stats_attributes(
         attributes["hours_to_better_price"] = int(delta_better.total_seconds()) // 3600
         attributes["num_better_prices_ahead"] = len(better_prices_ahead)
 
-    try:
+    with suppress(ValueError):
         attributes["price_position"] = (
             list(prices_sorted.values()).index(current_price) + 1
         )
-    except ValueError:
-        pass
 
     max_price = max(current_prices.values())
     min_price = min(current_prices.values())
-    try:
+    with suppress(ZeroDivisionError):
         attributes["price_ratio"] = round(
             (current_price - min_price) / (max_price - min_price), 2
         )
-    except ZeroDivisionError:  # pragma: no cover
-        pass
+
     attributes["max_price"] = max_price
     first_price_at = next(iter(prices_sorted)).astimezone(timezone).hour
     last_price_at = next(iter(reversed(prices_sorted))).astimezone(timezone).hour
@@ -87,7 +88,7 @@ def _make_price_stats_attributes(
     attributes["min_price"] = min_price
     attributes["min_price_at"] = first_price_at if sign_is_best == 1 else last_price_at
     attributes["next_best_at"] = [
-        ts.astimezone(timezone).hour for ts in prices_sorted.keys() if ts >= utc_time
+        ts.astimezone(timezone).hour for ts in prices_sorted if ts >= utc_time
     ]
     return attributes
 

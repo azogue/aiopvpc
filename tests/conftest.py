@@ -7,6 +7,7 @@ import logging
 import pathlib
 import zoneinfo
 from datetime import date, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from aiopvpc.const import (
     ESIOS_INJECTION,
@@ -16,7 +17,9 @@ from aiopvpc.const import (
     ESIOS_PVPC,
     KEY_PVPC,
 )
-from aiopvpc.pvpc_data import EsiosApiData, PVPCData
+
+if TYPE_CHECKING:
+    from aiopvpc.pvpc_data import EsiosApiData, PVPCData
 
 TEST_EXAMPLES_PATH = pathlib.Path(__file__).parent / "api_examples"
 TZ_TEST = zoneinfo.ZoneInfo("Atlantic/Canary")
@@ -147,7 +150,7 @@ async def run_h_step(
             "[Calls=%d]-> start=%s --> %s -> %s (%d prices)",
             mock_session.call_count,
             start,
-            list(current_prices)[0].strftime("%Y-%m-%d %Hh"),
+            next(iter(current_prices)).strftime("%Y-%m-%d %Hh"),
             list(current_prices)[-1].strftime("%Y-%m-%d %Hh"),
             len(current_prices),
         )
