@@ -1,5 +1,13 @@
 # Changelog
 
+## [v4.3.1](https://github.com/azogue/aiopvpc/tree/v4.3.1) - 🐛 Fix unsorted prices in composed sensor 'INDEXED' (2024-03-25)
+
+[Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.3.0...v4.3.1)
+
+- 🐛 Fix unsorted prices in composed sensor 'INDEXED' (#72)
+- 👷 ci: Split actions for tests on PRs and publish package on main
+- 👷 Remove codecov integration and produce reports instead (#71)
+
 ## [v4.3.0](https://github.com/azogue/aiopvpc/tree/v4.3.0) - ✨ Add new _composed_ sensor for Indexed tariff (2024-03-10)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.2.2...v4.3.0)
