@@ -135,6 +135,6 @@ def add_composed_price_sensors(data: EsiosApiData):
         adjustment = data.sensors[KEY_ADJUSTMENT]
         data.sensors[KEY_INDEXED] = {
             ts_hour: round(pvpc[ts_hour] - adjustment[ts_hour], 5)
-            for ts_hour in common_ts_prices
+            for ts_hour in sorted(common_ts_prices)
         }
         data.availability[KEY_INDEXED] = True
