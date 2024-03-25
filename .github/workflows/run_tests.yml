@@ -1,12 +1,10 @@
-name: CI
+name: Tests on PRs
 
 on:
   pull_request:
-  push:
-    branches: [master]
 
 jobs:
-  test-and-publish-flow:
+  test-flow:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -37,20 +35,3 @@ jobs:
         with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-
-        # publish version only when pyproject.toml is changed in master
-      - name: Filter changes in pyproject
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            root:
-              - 'pyproject.toml'
-
-      - if: ${{ (github.ref == 'refs/heads/master') && (steps.changes.outputs.root == 'true')}}
-        name: Build
-        run: poetry build
-
-      - if: ${{ (github.ref == 'refs/heads/master') && (steps.changes.outputs.root == 'true')}}
-        name: Publish release distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
