@@ -75,6 +75,19 @@ _NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD = {
         date(2025, 12, 8): "(lunes), La Inmaculada Concepción",
         date(2025, 12, 25): "(jueves), Navidad",
     },
+    2026: {
+        date(2026, 1, 1): "(jueves), Año nuevo",
+        date(2026, 1, 6): "(martes), Epifanía del Señor",
+        # date(2026, 4, 17): "(jueves), Jueves Santo",
+        date(2026, 4, 3): "(viernes), Viernes Santo",
+        date(2026, 5, 1): "(jueves), Día del Trabajador",
+        # date(2026, 8, 15): "(sábado), Asunción de la Virgen",
+        date(2026, 10, 12): "(lunes), Día de la Hispanidad",
+        date(2026, 11, 2): "(lunes), Todos los Santos",
+        # date(2026, 12, 6): "(sábado), Día de la Constitución Española",
+        date(2026, 12, 8): "(martes), La Inmaculada Concepción",
+        date(2026, 12, 25): "(viernes), Navidad",
+    },
 }
 
 
