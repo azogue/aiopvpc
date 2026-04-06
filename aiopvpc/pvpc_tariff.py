@@ -75,13 +75,40 @@ _NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD = {
         date(2025, 12, 8): "(lunes), La Inmaculada Concepción",
         date(2025, 12, 25): "(jueves), Navidad",
     },
+    2026: {
+        date(2026, 1, 1): "(jueves), Año nuevo",
+        date(2026, 1, 6): "(martes), Epifanía del Señor",
+        # date(2026, 4, 2): "(jueves), Jueves Santo",
+        date(2026, 4, 3): "(viernes), Viernes Santo",
+        date(2026, 5, 1): "(viernes), Día del Trabajador",
+        # date(2026, 8, 15): "(sábado), Asunción de la Virgen",
+        date(2026, 10, 12): "(lunes), Día de la Hispanidad",
+        # date(2026, 11, 1): "(domingo), Todos los Santos",
+        # date(2026, 12, 6): "(domingo), Día de la Constitución Española",
+        date(2026, 12, 8): "(martes), La Inmaculada Concepción",
+        date(2026, 12, 25): "(viernes), Navidad",
+    },
+    2027: {
+        date(2027, 1, 1): "(viernes), Año nuevo",
+        date(2027, 1, 6): "(miércoles), Epifanía del Señor",
+        # date(2027, 3, 25): "(jueves), Jueves Santo",
+        date(2027, 3, 26): "(viernes), Viernes Santo",
+        # date(2027, 5, 1): "(sábado), Día del Trabajador",
+        # date(2027, 8, 15): "(domingo), Asunción de la Virgen",
+        date(2027, 10, 12): "(martes), Día de la Hispanidad",
+        date(2027, 11, 1): "(lunes), Todos los Santos",
+        date(2027, 12, 6): "(lunes), Día de la Constitución Española",
+        date(2027, 12, 8): "(miércoles), La Inmaculada Concepción",
+        # date(2027, 12, 25): "(sábado), Navidad",
+    },
 }
 
 
 def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:
     """Return period key (P1/P2/P3) for current hour."""
     day = local_ts.date()
-    national_holiday = day in _NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD[day.year]
+    year_holidays = _NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD.get(day.year, {})
+    national_holiday = day in year_holidays
     if national_holiday or day.isoweekday() >= 6 or local_ts.hour < 8:
         return "P3"
     if zone_ceuta_melilla and local_ts.hour in _HOURS_P2_CYM:
