@@ -75,7 +75,7 @@ def extract_prices_from_esios_token(
     ts_update = datetime.now(timezone.utc).replace(microsecond=0)
 
     def _parse_dt(ts: str) -> datetime:
-        return datetime.fromisoformat(ts).astimezone(UTC_TZ) + offset_timezone
+        return datetime.fromisoformat(ts).astimezone(UTC_TZ)
 
     def _value_unit_conversion(value: float) -> float:
         # from €/MWh to €/kWh
