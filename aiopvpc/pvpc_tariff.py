@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date, datetime, timedelta
 
 import holidays
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class _LazyHolidayDict:
@@ -17,6 +20,12 @@ class _LazyHolidayDict:
     - 'Observed' (trasladados) excluded: a working Monday should NOT become
       P3 just because the original holiday fell on a Sunday.
       The PVPC tariff uses the canonical holiday date, not the substitution.
+
+    The cache is pre-warmed at module import time for the current year to
+    force ``importlib.import_module('holidays.countries.spain')`` to happen
+    synchronously.  Otherwise the holidays library's internal lazy import
+    fires inside ``asyncio`` event loop and Home Assistant flags it as a
+    blocking call.
     """
 
     def __init__(self) -> None:
@@ -48,9 +57,29 @@ def _holiday_errors() -> tuple[type[BaseException], ...]:
     return ValueError, NotImplementedError, ImportError
 
 
+def _prewarm_holidays_cache(
+    cache: _LazyHolidayDict,
+) -> _LazyHolidayDict:
+    """Force holidays library imports at module-load time (sync).
+
+    The ``holidays`` library lazily imports country modules via
+    ``importlib.import_module`` on first use.  That is a blocking I/O call
+    which Home Assistant detects and reports when it happens inside the
+    asyncio event loop.  By accessing the cache for the **current** year at
+    import time we ensure the import resolves synchronously before any async
+    operation runs.
+    """
+    try:
+        cache[date.today().year]  # noqa: B018  (intentional side-effect)
+        _LOGGER.debug("Holidays cache pre-warmed for %d", date.today().year)
+    except Exception:  # pragma: no cover
+        _LOGGER.warning("Could not pre-warm holiday cache", exc_info=True)
+    return cache
+
+
 _HOURS_P2 = (8, 9, 14, 15, 16, 17, 22, 23)
 _HOURS_P2_CYM = (8, 9, 10, 15, 16, 17, 18, 23)
-_NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD = _LazyHolidayDict()
+_NATIONAL_EXTRA_HOLIDAYS_FOR_P3_PERIOD = _prewarm_holidays_cache(_LazyHolidayDict())
 
 
 def _tariff_period_key(local_ts: datetime, zone_ceuta_melilla: bool) -> str:

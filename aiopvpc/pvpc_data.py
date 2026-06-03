@@ -41,8 +41,9 @@ from aiopvpc.utils import ensure_utc_time
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO REMOVE THIS USER-AGENT LOGIC
-# 🙈😱 Use randomized standard User-Agent info to avoid server banning 😖🤷
+# Rotating User-Agent pool to avoid rate-limiting / 403 blocks from ESIOS API.
+# Each PVPCData instance shuffles its own deque so concurrent HA instances
+# don't all present the same fingerprint.
 _STANDARD_USER_AGENTS = [
     ("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3"),
     (

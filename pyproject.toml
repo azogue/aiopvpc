@@ -53,7 +53,7 @@ repository = "https://github.com/azogue/aiopvpc"
 
 [tool.poetry.dependencies]
 python = ">=3.10"
-holidays =">=0.90"
+holidays =">=0.93"
 aiohttp = ">=3.7.4.post0"
 async_timeout = ">=3.0.1"
 
