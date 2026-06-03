@@ -70,7 +70,7 @@ def _prewarm_holidays_cache(
     operation runs.
     """
     try:
-        cache[date.today().year]  # noqa: B018  (intentional side-effect)
+        cache[date.today().year]  # (intentional side-effect)
         _LOGGER.debug("Holidays cache pre-warmed for %d", date.today().year)
     except Exception:  # pragma: no cover
         _LOGGER.warning("Could not pre-warm holiday cache", exc_info=True)
