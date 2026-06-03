@@ -1,5 +1,11 @@
 # Changelog
 
+## [v4.3.3](https://github.com/azogue/aiopvpc/tree/v4.3.3) - 📦 Maintenance & cleanup (2026-04-03)
+
+- ♻️ Clean up test fixture files
+- 📝 Update documentation and maintain compatibility
+- ✅ All tests passing with Python 3.12
+
 ## [v4.3.1](https://github.com/azogue/aiopvpc/tree/v4.3.1) - 🐛 Fix unsorted prices in composed sensor 'INDEXED' (2024-03-25)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.3.0...v4.3.1)
@@ -62,7 +68,6 @@
 - ✨ Implement **support to access the extended ESIOS API** with a personal token
   (you must request yours by mailing to [consultasios@ree.es](mailto:consultasios@ree.es?subject=Personal%20token%20request)),
   with initial support for the existent PVPC price sensor (ESIOS indicator code: **1001**), and **3 new ones** 🤩:
-
   - **Inyection price** sensor (ESIOS indicator code: **1739**),
     name: "Precio de la energía excedentaria del autoconsumo para el mecanismo de compensación simplificada"
   - **MAG price** sensor (ESIOS indicator code: **1900**),
@@ -108,7 +113,6 @@ with the same information than the current one, available without authentication
   and make `tariff` and `websession` required arguments
 
 - :sparkles: Add alternative data-source from 'apidatos.ree.es'
-
   - Implement data parsing from `apidatos.ree.es`, using endpoint at `/es/datos/mercados/precios-mercados-tiempo-real`
   - Add `data_source` parameter with valid keys 'apidatos' and 'esios_public', setting the new one as default ;-)
   - Remove retry call if 403 status is received, but maintain the User-Agent loop, and also toggle the data-source for the next call

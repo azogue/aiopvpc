@@ -32,3 +32,13 @@ def test_number_of_national_holidays(year, days_weekend_p3, extra_days_p3):
         day += timedelta(days=1)
     assert weekend_days_p3 == days_weekend_p3
     assert holidays_p3 == extra_days_p3
+
+
+@pytest.mark.parametrize("hour", range(24))
+def test_may_day_is_p3_all_day(hour):
+    """May 1 is a national holiday and must use valley period all day."""
+    day = datetime(2026, 5, 1, hour, tzinfo=REFERENCE_TZ)
+
+    period, _, _ = get_current_and_next_tariff_periods(day, False)
+
+    assert period == "P3"
