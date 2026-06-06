@@ -67,6 +67,16 @@ async def test_price_extract(
     api_data = await pvpc_data.async_update_all(None, day)
     pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, day)
     assert len(api_data.sensors[KEY_PVPC]) == n_prices
+
+    if source == "esios" and timezone == TZ_TEST and day.date() == datetime(2024, 3, 9).date():
+        local_dates = [
+            dt.astimezone(timezone).date()
+            for dt in api_data.sensors[KEY_PVPC]
+        ]
+        
+        assert local_dates.count(datetime(2024, 3, 8).date()) == 1
+        assert local_dates.count(datetime(2024, 3, 9).date()) == 23
+    
     assert mock_session.call_count == n_calls
     assert len(api_data.sensors) == 1
 
@@ -77,7 +87,7 @@ async def test_price_extract(
     assert has_prices == available_8h
     if has_prices:
         last_dt, last_p = list(api_data.sensors[KEY_PVPC].items())[-1]
-        assert last_dt.astimezone(timezone).hour == 23
+        assert last_dt.astimezone(REFERENCE_TZ if source == "esios" else timezone).hour == 23
 
 
 @pytest.mark.asyncio
