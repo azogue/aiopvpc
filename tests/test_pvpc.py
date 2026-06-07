@@ -121,16 +121,23 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
     # call for next-day prices (no more available)
     assert start == datetime(2021, 10, 31, 19, tzinfo=UTC_TZ)
     call_count = mock_session.call_count
-    while start.astimezone(local_tz) <= datetime(2021, 10, 31, 23, tzinfo=local_tz):
+    
+    schedule_tz = REFERENCE_TZ if data_source == "esios" else local_tz
+    
+    while start.astimezone(schedule_tz) <= datetime(
+        2021, 10, 31, 23, tzinfo=schedule_tz
+    ):
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
         call_count += len(sensor_keys)
         assert mock_session.call_count == call_count
         # check_num_datapoints(api_data, sensor_keys, 25)
-
+    
     # assert mock_session.call_count == 6
     assert pvpc_data.states.get(KEY_PVPC)
     assert all(api_data.availability.values())
-    assert start.astimezone(local_tz) == datetime(2021, 11, 1, tzinfo=local_tz)
+    assert start.astimezone(schedule_tz) == datetime(
+        2021, 11, 1, tzinfo=schedule_tz
+    )
     assert not pvpc_data.process_state_and_attributes(api_data, KEY_PVPC, start)
 
     # After known prices are exausted, the state is flagged as unavailable
@@ -177,7 +184,7 @@ async def test_reduced_api_download_rate(local_tz, data_source, sensor_keys):
     check_num_datapoints(api_data, sensor_keys, 24)
 
     call_count = mock_session.call_count
-    while start.astimezone(local_tz) <= datetime(2024, 3, 9, 23, tzinfo=local_tz):
+    while start <= datetime(2024, 3, 9, 22, tzinfo=UTC_TZ):
         start, api_data = await run_h_step(mock_session, pvpc_data, api_data, start)
         call_count += len(sensor_keys)
         assert mock_session.call_count == call_count

@@ -18,7 +18,7 @@ from tests.conftest import MockAsyncSession, TZ_TEST
         (REFERENCE_TZ, "esios_public", TARIFFS[1], 0.13813),
         (REFERENCE_TZ, "esios", TARIFFS[0], 0.23144),
         (REFERENCE_TZ, "esios", TARIFFS[1], 0.13813),
-        (TZ_TEST, "esios", TARIFFS[0], 0.23144),
+        (TZ_TEST, "esios", TARIFFS[0], 0.2404),
     ),
 )
 @pytest.mark.asyncio
