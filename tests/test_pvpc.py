@@ -49,7 +49,7 @@ async def test_bad_downloads(
     with caplog.at_level(logging.INFO):
         pvpc_data = PVPCData(
             session=mock_session,
-            data_source=cast(DataSource, data_source),
+            data_source=cast("DataSource", data_source),
             api_token=api_token,
         )
         if status in (401, 403):
@@ -85,7 +85,7 @@ async def test_reduced_api_download_rate_dst_change(local_tz, data_source, senso
         session=mock_session,
         tariff="2.0TD",
         local_timezone=local_tz,
-        data_source=cast(DataSource, data_source),
+        data_source=cast("DataSource", data_source),
         api_token="test-token" if data_source == "esios" else None,
         sensor_keys=sensor_keys,
     )
@@ -157,7 +157,7 @@ async def test_reduced_api_download_rate(local_tz, data_source, sensor_keys):
         session=mock_session,
         tariff="2.0TD",
         local_timezone=local_tz,
-        data_source=cast(DataSource, data_source),
+        data_source=cast("DataSource", data_source),
         api_token="test-token" if data_source == "esios" else None,
         sensor_keys=sensor_keys,
     )

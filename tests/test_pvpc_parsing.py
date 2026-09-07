@@ -60,7 +60,7 @@ async def test_price_extract(
         session=mock_session,
         tariff="2.0TD",
         local_timezone=timezone,
-        data_source=cast(DataSource, source),
+        data_source=cast("DataSource", source),
         api_token="test-token" if source == "esios" else None,
     )
 
@@ -127,9 +127,9 @@ async def test_price_sensor_attributes():
         assert sensor_attrs["price_23h"] == last_p
         assert sensor_attrs["min_price"] == min(api_data.sensors[key].values())
         assert sensor_attrs["max_price"] == max(api_data.sensors[key].values())
-        key_min_at = f'price_{sensor_attrs["min_price_at"]:02d}h'
+        key_min_at = f"price_{sensor_attrs['min_price_at']:02d}h"
         assert sensor_attrs[key_min_at] == min(api_data.sensors[key].values())
-        key_max_at = f'price_{sensor_attrs["max_price_at"]:02d}h'
+        key_max_at = f"price_{sensor_attrs['max_price_at']:02d}h"
         assert sensor_attrs[key_max_at] == max(api_data.sensors[key].values())
         assert (
             sensor_attrs["hours_to_better_price"]
@@ -139,7 +139,7 @@ async def test_price_sensor_attributes():
             sensor_attrs["num_better_prices_ahead"]
             == ref_data[key]["num_better_prices_ahead"]
         )
-        key_next = f'price_{12 + sensor_attrs["hours_to_better_price"]}h'
+        key_next = f"price_{12 + sensor_attrs['hours_to_better_price']}h"
         if key == KEY_INJECTION:
             assert sensor_attrs[key_next] > current_price
             num_better = sum(1 for p in prices_ahead if p > current_price)

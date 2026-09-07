@@ -44,10 +44,7 @@ _LOGGER = logging.getLogger(__name__)
 # TODO REMOVE THIS USER-AGENT LOGIC
 # 🙈😱 Use randomized standard User-Agent info to avoid server banning 😖🤷
 _STANDARD_USER_AGENTS = [
-    (
-        "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) "
-        "Gecko/20100101 Firefox/47.3"
-    ),
+    ("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.3"),
     (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) "
         "Gecko/20100101 Firefox/43.4"
