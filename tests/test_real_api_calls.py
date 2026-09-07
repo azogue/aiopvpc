@@ -25,7 +25,7 @@ async def _get_real_data(
             tariff="2.0TD",
             local_timezone=timezone,
             api_token=os.getenv("ESIOS_TOKEN") if data_source == "esios" else None,
-            data_source=cast(DataSource, data_source),
+            data_source=cast("DataSource", data_source),
             sensor_keys=indicators,
         )
         return await pvpc_data.async_update_all(None, ts)

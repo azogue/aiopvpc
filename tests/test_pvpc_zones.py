@@ -30,7 +30,7 @@ async def test_geo_ids(local_tz, source, tariff, expected_18h):
         session=mock_session,
         tariff=tariff,
         local_timezone=local_tz,
-        data_source=cast(DataSource, source),
+        data_source=cast("DataSource", source),
         api_token="test-token" if source == "esios" else None,
     )
     api_data = await pvpc_data.async_update_all(None, start)
