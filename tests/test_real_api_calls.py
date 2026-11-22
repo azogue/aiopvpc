@@ -1,7 +1,7 @@
 """Tests for aiopvpc."""
 
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import cast
 from zoneinfo import ZoneInfo
 
@@ -25,7 +25,7 @@ async def _get_real_data(
             tariff="2.0TD",
             local_timezone=timezone,
             api_token=os.getenv("ESIOS_TOKEN") if data_source == "esios" else None,
-            data_source=cast(DataSource, data_source),
+            data_source=cast("DataSource", data_source),
             sensor_keys=indicators,
         )
         return await pvpc_data.async_update_all(None, ts)
@@ -43,11 +43,13 @@ async def _get_real_data(
     ),
 )
 async def test_real_download_today_async(data_source, timezone, num_sensors):
+    if data_source == "esios" and not os.getenv("ESIOS_TOKEN"):
+        pytest.skip("ESIOS_TOKEN not configured")
     sensor_keys = ALL_SENSORS if data_source == "esios" else (KEY_PVPC,)
     api_data = await _get_real_data(
-        timezone, data_source, sensor_keys, datetime.utcnow()
+        timezone, data_source, sensor_keys, datetime.now(UTC)
     )
-    assert 22 < len(api_data.sensors[KEY_PVPC]) < 49
+    assert 22 < len(api_data.sensors[KEY_PVPC]) <= 196
     assert len(api_data.sensors) == num_sensors
 
 
@@ -56,8 +58,7 @@ if __name__ == "__main__":
     from dataclasses import asdict
     from pprint import pprint
 
-    # timestamp = datetime(2021, 10, 30, 21)
-    timestamp = datetime.utcnow()
+    timestamp = datetime.now(UTC)
     api_data = asyncio.run(
         _get_real_data(REFERENCE_TZ, "esios", ALL_SENSORS, timestamp)
     )

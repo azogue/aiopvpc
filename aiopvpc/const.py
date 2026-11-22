@@ -20,6 +20,7 @@ DEFAULT_POWER_KW = 3.3
 
 # Prices are given in 0 to 24h sets, adjusted to the main timezone in Spain
 REFERENCE_TZ = zoneinfo.ZoneInfo("Europe/Madrid")
+CANARY_TZ = zoneinfo.ZoneInfo("Atlantic/Canary")
 UTC_TZ = zoneinfo.ZoneInfo("UTC")
 
 DEFAULT_TIMEOUT = 10
@@ -35,9 +36,9 @@ GEOZONE_ID2NAME: dict[int, str] = {
     8744: "Ceuta",
     8745: "Melilla",
 }
+GEOZONE_NAME2ID: dict[str, int] = {name: gid for gid, name in GEOZONE_ID2NAME.items()}
 URL_PUBLIC_PVPC_RESOURCE = (
-    "https://api.esios.ree.es/archives/70/download_json"
-    "?locale=es&date={day:%Y-%m-%d}"
+    "https://api.esios.ree.es/archives/70/download_json?locale=es&date={day:%Y-%m-%d}"
 )
 URL_ESIOS_TOKEN_RESOURCE = (
     "https://api.esios.ree.es/indicators/{ind}"
@@ -51,9 +52,12 @@ ATTRIBUTIONS: dict[DataSource, str] = {
 # api.esios.ree.es/indicators
 ESIOS_PVPC = "1001"
 ESIOS_INJECTION = "1739"
-ESIOS_MAG = "1900"  # regargo GAS
+ESIOS_MAG = "1900"  # recargo GAS (legacy/expired since 2024)
 ESIOS_OMIE = "10211"  # precio mayorista
 ESIOS_MARKET_ADJUSTMENT = "2108"  # ajuste mercado Indexada VS PVPC
+ESIOS_MULTI_GEOZONE_INDICATORS = frozenset(
+    {ESIOS_PVPC, ESIOS_MAG, ESIOS_MARKET_ADJUSTMENT}
+)
 
 # unique ids for each series
 KEY_PVPC = "PVPC"

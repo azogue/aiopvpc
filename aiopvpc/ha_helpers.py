@@ -44,7 +44,9 @@ def get_enabled_sensor_keys(
 
 def make_sensor_unique_id(config_entry_id: str, sensor_key: str) -> str:
     """(HA) Generate unique_id for each sensor kind and config entry."""
-    assert sensor_key in ALL_SENSORS or sensor_key == KEY_INDEXED
+    if sensor_key not in ALL_SENSORS and sensor_key != KEY_INDEXED:
+        valid = (*ALL_SENSORS, KEY_INDEXED)
+        raise ValueError(f"Unknown sensor '{sensor_key}'. Expected one of {valid}")
     if sensor_key == KEY_PVPC:
         # for old compatibility
         return config_entry_id

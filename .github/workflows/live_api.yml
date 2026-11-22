@@ -1,0 +1,29 @@
+name: Live ESIOS API Tests
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"
+  workflow_dispatch:
+
+jobs:
+  live-api-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v10.4.0
+        with:
+          enable-cache: true
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run live ESIOS API integration tests
+        env:
+          ESIOS_TOKEN: ${{ secrets.ESIOS_TOKEN }}
+        run: uv run pytest -m real_api_call --no-cov
