@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking Changes
+
+- 💥 Require Python `>=3.11` (dropped EOL Python 3.9 and 3.10) and remove external `async-timeout` dependency in favor of stdlib `asyncio.timeout`
+- 💥 Align P3 national holidays strictly with **CNMC Circular 3/2020 (Art. 7.3)**: 24h P3 valley period applies on weekends and the 9 fixed-date non-substitutable national holidays (Jan 1, Jan 6, May 1, Aug 15, Oct 12, Nov 1, Dec 6, Dec 8, Dec 25), excluding movable Good Friday
+
+### Features & ESIOS API Improvements
+
+- ✨ Replace hardcoded 2021–2025 holiday table in `aiopvpc/pvpc_tariff.py` with non-expiring fixed-date P3 holiday detection (`is_national_p3_holiday`), eliminating `KeyError: 2026` onward
+- ✨ Add optional `geo_zone` parameter on `PVPCData` (backed by `resolve_geo_zone` and exported `GEOZONES`) with fail-fast validation and server-side `geo_ids[]` filtering when explicitly specified (preserving default URL compatibility with Home Assistant Core test mocks)
+- ✨ Prepare for quarter-hourly (15-minute) ESIOS pricing: date-based next-day fetch check at 20:00 `Europe/Madrid`, 15-minute slot snapping in `process_state_and_attributes`, `price_HHhMM` attribute keys, and `minutes_to_better_price`
+- ✨ Add PEP 561 `aiopvpc/py.typed` marker and expose `__version__` from `aiopvpc`
+- ✨ Parse `TAHPCB`/`TAHCYM` (`KEY_ADJUSTMENT`) from 2024+ public `/archives/70` payloads in `extract_prices_from_esios_public`
+- ✨ Use ESIOS API v2 `Accept: application/json; application/vnd.esios-api-v2+json` header on token-authenticated requests
+
+### Fixes & Hardening
+
+- 🐛 Use `async with self._session.get(...) as resp:` in `PVPCData._api_get_data` to prevent `aiohttp` response/connection leaks
+- 🔒 Stop including the secret ESIOS API token in `BadApiTokenAuthError` exception messages
+- 🐛 Fix `_is_tomorrow_price` edge case by comparing `ts.date() > ref.date()` instead of `isocalendar()` components
+- 🛡️ Handle HTTP `429 Too Many Requests` (logging `Retry-After`) and malformed JSON (`ValueError`/`JSONDecodeError`) gracefully
+- 🛡️ Avoid mutating caller dicts in `extract_prices_from_esios_token` and handle unknown ESIOS `geo_id`s safely without `KeyError`
+- ♻️ Replace deprecated `datetime.utcnow()` calls with timezone-aware `datetime.now(UTC)`, remove obsolete 2016–2019 browser `User-Agent` rotation, and replace runtime `assert` argument checks with explicit `ValueError`
+
+### Tooling & CI
+
+- 📦 Migrate packaging and dependency management from Poetry to `uv` + `hatchling` (PEP 621 / PEP 639 / PEP 735)
+- ⬆️ Update all runtime/dev dependencies and `.pre-commit-config.yaml` hooks
+- 🧪 Enforce `filterwarnings = ["error"]` in `pytest` and stricter `mypy` type checking
+- 👷 Run CI matrix across Python 3.11–3.15 with `ruff`, `mypy`, `pytest` (100% branch coverage), `uv build`, scheduled/manual live ESIOS API workflow, and release-triggered PyPI OIDC Trusted Publishing with PEP 740 attestations
+
 ## [v4.3.1](https://github.com/azogue/aiopvpc/tree/v4.3.1) - 🐛 Fix unsorted prices in composed sensor 'INDEXED' (2024-03-25)
 
 [Full Changelog](https://github.com/azogue/aiopvpc/compare/v4.3.0...v4.3.1)

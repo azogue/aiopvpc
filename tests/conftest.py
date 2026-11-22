@@ -50,9 +50,10 @@ class MockAsyncSession:
 
     status: int = 200
     _counter: int = 0
-    _raw_response = None
+    _raw_response: object = None
+    headers: dict[str, str]
 
-    def __aenter__(self):
+    async def __aenter__(self):
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -65,11 +66,21 @@ class MockAsyncSession:
     async def close(self, *_args):
         pass
 
-    def __init__(self, status=200, exc=None):
+    def __init__(
+        self,
+        status: int = 200,
+        exc: type[Exception] | Exception | None = None,
+        headers: dict[str, str] | None = None,
+        json_exc: type[Exception] | Exception | None = None,
+    ):
         """Set up desired mock response"""
         self._raw_response = _DEFAULT_EMPTY_VALUE
         self.status = status
         self.exc = exc
+        self.headers = headers or {}
+        self.json_exc = json_exc
+        self.last_headers: dict[str, str] = {}
+        self.last_url: str = ""
 
         self.responses_public = {
             date(2022, 3, 27): load_fixture(_FIXTURE_DATA_2022_03_27),
@@ -104,11 +115,15 @@ class MockAsyncSession:
 
     async def json(self, *_args, **_kwargs):
         """Dumb await."""
+        if self.json_exc:
+            raise self.json_exc
         return self._raw_response
 
-    async def get(self, url: str, *_args, **_kwargs):
-        """Dumb await."""
+    def get(self, url: str, *_args, **kwargs):
+        """Return async context manager mimicking aiohttp.ClientSession.get."""
         self._counter += 1
+        self.last_url = url
+        self.last_headers = kwargs.get("headers", {})
         if self.exc:
             raise self.exc
 

@@ -45,6 +45,8 @@ def test_sensor_unique_ids():
     assert not get_enabled_sensor_keys(
         using_private_api=True, disabled_sensor_ids=list(unique_ids)
     )
+    with pytest.raises(ValueError, match="Unknown sensor"):
+        make_sensor_unique_id(config_entry_id=TARIFFS[0], sensor_key="INVALID")
 
 
 @pytest.mark.asyncio

@@ -5,14 +5,18 @@ from contextlib import suppress
 from datetime import datetime
 from typing import Any
 
-from .const import EsiosApiData, KEY_ADJUSTMENT, KEY_INDEXED, KEY_INJECTION, KEY_PVPC
+from .const import (
+    EsiosApiData,
+    KEY_ADJUSTMENT,
+    KEY_INDEXED,
+    KEY_INJECTION,
+    KEY_PVPC,
+    PRICE_PRECISION,
+)
 
 
 def _is_tomorrow_price(ts: datetime, ref: datetime) -> bool:
-    return any(
-        ts_comp > ts_tz_ref
-        for ts_comp, ts_tz_ref in zip(ts.isocalendar(), ref.isocalendar())
-    )
+    return ts.date() > ref.date()
 
 
 def _split_today_tomorrow_prices(
@@ -38,7 +42,12 @@ def _make_price_tag_attributes(
     attributes = {}
     for ts_utc, price_h in prices.items():
         ts_local = ts_utc.astimezone(timezone)
-        attr_key = f"{prefix}{ts_local.hour:02d}h"
+        suffix = (
+            f"{ts_local.hour:02d}h"
+            if ts_local.minute == 0
+            else f"{ts_local.hour:02d}h{ts_local.minute:02d}"
+        )
+        attr_key = f"{prefix}{suffix}"
         if attr_key in attributes:  # DST change with duplicated hour :)
             attr_key += "_d"
         attributes[attr_key] = price_h
@@ -67,6 +76,10 @@ def _make_price_stats_attributes(
         delta_better = next_better_ts - utc_time
         attributes["next_better_price"] = next_better_price
         attributes["hours_to_better_price"] = int(delta_better.total_seconds()) // 3600
+        if any(ts.minute != 0 for ts in current_prices):
+            attributes["minutes_to_better_price"] = (
+                int(delta_better.total_seconds()) // 60
+            )
         attributes["num_better_prices_ahead"] = len(better_prices_ahead)
 
     with suppress(ValueError):
@@ -134,7 +147,7 @@ def add_composed_price_sensors(data: EsiosApiData):
         pvpc = data.sensors[KEY_PVPC]
         adjustment = data.sensors[KEY_ADJUSTMENT]
         data.sensors[KEY_INDEXED] = {
-            ts_hour: round(pvpc[ts_hour] - adjustment[ts_hour], 5)
+            ts_hour: round(pvpc[ts_hour] - adjustment[ts_hour], PRICE_PRECISION)
             for ts_hour in sorted(common_ts_prices)
         }
         data.availability[KEY_INDEXED] = True
